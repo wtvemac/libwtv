@@ -1,0 +1,64 @@
+/**
+ * @file gfxUnit.h
+ * @ingroup hardware
+ * @brief WebTV's graphics engine unit interface
+ */
+
+#include <stdint.h>
+
+#define GFX_CNTL                  0xa4006004
+
+#define GFX_OOT_YCOUNT            0xa4006010
+
+#define GFX_CELRECORD_BASE        0xa4006014
+#define GFX_CELRECORD_BASE_MASTER 0xa400601c
+#define GFX_OOT_CELRECORD_BASE    0xa4006030
+#define GFX_OOT_CELRECORD_OFFSET  0xa4006038
+
+#define GFX_YMAP_BASE             0xa4006018
+#define GFX_YMAP_BASE_MASTER      0xa4006020
+#define GFX_OOT_YMAP_BASE         0xa4006034
+#define GFX_OOT_YMAP_COUNT        0xa400603c
+
+#define GFX_DEFAULT_COLOR         0xa4006024
+
+#define GFX_YCOUNTER_INIT         0xa4006028
+
+#define GFX_PAUSE_CYCLECOUNT      0xa400602c
+#define GFX_TERM_CYCLECOUNT       0xa4006040
+
+#define GFX_HCOUNTER_INIT         0xa4006044
+
+#define GFX_BLANK_LINES           0xa4006048
+#define GFX_ACTIVE_LINES          0xa400604c
+
+#define GFX_INT_EN_SET            0xa4006060
+#define GFX_INT_EN_CLEAR          0xa4006064
+
+#define GFX_INT_STAT_SET          0xa4006068
+#define GFX_INT_STAT_CLEAR        0xa400606c
+
+#define GFX_WB_CONFIG             0xa4006090
+#define GFX_WB_START              0xa4006080
+#define GFX_WB_LSIZE              0xa4006084
+#define GFX_WB_STRIDE             0xa400608c
+
+/*
+a4006000: 00000000 00000000 00000000 00000000 ................
+a4006010: 00000000 00000000 00000000 00000000 ................
+a4006020: 00000000 00000000 00000000 00000000 ................
+a4006030: 00000000 00000000 00000000 00000000 ................
+a4006040: 00000000 00000000 00000000 00000000 ................
+a4006050: 00000000 00000000 00000000 00000000 ................
+a4006060: 00000000 00000000 00000000 00000000 ................
+a4006070: 00000000 00000000 00000000 00000000 ................
+a4006080: 00000000 00000000 00000000 00000000 ................
+a4006090: 00000000 00000000 00000000 00000000 ................
+a40060a0: 00000000 00000000 00000000 00000000 ................
+a40060b0: 00000000 00000000 00000000 00000000 ................
+a40060c0: 00000000 00000000 00000000 00000000 ................
+a40060d0: 00000000 00000000 00000000 00000000 ................
+a40060e0: 00000000 00000000 00000000 00000000 ................
+a40060f0: 00000000 00000000 00000000 00000000 ................
+
+*/

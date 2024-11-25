@@ -1,0 +1,99 @@
+[H[2J[3J'wtv.mk' -> '/opt/libwtv/include/wtv.mk'
+    [CXX-mipsel-4650] /mnt/webtv-disk-tests/libwtv/src/exception.cpp
+    [CXX-mipsel-4650] /mnt/webtv-disk-tests/libwtv/src/interrupt.cpp
+    [AS -mipsel-4650] /mnt/webtv-disk-tests/libwtv/src/exception-handler.S
+    [AS -mipsel-4650] /mnt/webtv-disk-tests/libwtv/src/crt0.S
+    [CXX-mipsel-4650] /mnt/webtv-disk-tests/libwtv/src/globals.cpp
+    [CXX-mipsel-4650] /mnt/webtv-disk-tests/libwtv/src/memory.cpp
+    [CXX-mipsel-4650] /mnt/webtv-disk-tests/libwtv/src/leds.cpp
+    [CXX-mipsel-4650] /mnt/webtv-disk-tests/libwtv/src/serial.cpp
+    [CXX-mipsel-4650] /mnt/webtv-disk-tests/libwtv/src/display.cpp
+    [CXX-mipsel-4650] /mnt/webtv-disk-tests/libwtv/src/graphics.cpp
+    [CXX-mipsel-4650] /mnt/webtv-disk-tests/libwtv/src/audio.cpp
+    [CXX-mipsel-4650] /mnt/webtv-disk-tests/libwtv/src/iic.cpp
+    [CXX-mipsel-4650] /mnt/webtv-disk-tests/libwtv/src/kbinput.cpp
+    [CC -mipsel-4650] /mnt/webtv-disk-tests/libwtv/src/libc/string.c
+    [CC -mipsel-4650] /mnt/webtv-disk-tests/libwtv/src/libc/printf.c
+    [CXX-mipsel-4650] /mnt/webtv-disk-tests/libwtv/src/libc.cpp
+    [AR -mipsel-4650] libwtv-mipsel-4650.a /mnt/webtv-disk-tests/libwtv/build/mipsel-4650
+'libwtv-mipsel-4650.a' -> '/opt/libwtv/lib/libwtv-mipsel-4650.a'
+'wtv.ld' -> '/opt/libwtv/lib/wtv.ld'
+'include/audio.h' -> '/opt/libwtv/include/audio.h'
+'include/diskfs.h' -> '/opt/libwtv/include/diskfs.h'
+'include/display.h' -> '/opt/libwtv/include/display.h'
+'include/font.h' -> '/opt/libwtv/include/font.h'
+'include/globals.h' -> '/opt/libwtv/include/globals.h'
+'include/graphics.h' -> '/opt/libwtv/include/graphics.h'
+'include/hwregs.h' -> '/opt/libwtv/include/hwregs.h'
+'include/interrupt.h' -> '/opt/libwtv/include/interrupt.h'
+'include/exception.h' -> '/opt/libwtv/include/exception.h'
+'include/ide.h' -> '/opt/libwtv/include/ide.h'
+'include/iic.h' -> '/opt/libwtv/include/iic.h'
+'include/kbinput.h' -> '/opt/libwtv/include/kbinput.h'
+'include/leds.h' -> '/opt/libwtv/include/leds.h'
+'include/libwtv.h' -> '/opt/libwtv/include/libwtv.h'
+'include/libc.h' -> '/opt/libwtv/include/libc.h'
+'include/memory.h' -> '/opt/libwtv/include/memory.h'
+'include/modem.h' -> '/opt/libwtv/include/modem.h'
+'include/network.h' -> '/opt/libwtv/include/network.h'
+'include/nvram.h' -> '/opt/libwtv/include/nvram.h'
+'include/cop0.h' -> '/opt/libwtv/include/cop0.h'
+'include/cop1.h' -> '/opt/libwtv/include/cop1.h'
+'include/romfs.h' -> '/opt/libwtv/include/romfs.h'
+'include/serial.h' -> '/opt/libwtv/include/serial.h'
+'include/ssid.h' -> '/opt/libwtv/include/ssid.h'
+'include/surface.h' -> '/opt/libwtv/include/surface.h'
+'include/hwregs/audUnit.h' -> '/opt/libwtv/include/hwregs/audUnit.h'
+'include/hwregs/busUnit.h' -> '/opt/libwtv/include/hwregs/busUnit.h'
+'include/hwregs/devUnit.h' -> '/opt/libwtv/include/hwregs/devUnit.h'
+'include/hwregs/divUnit.h' -> '/opt/libwtv/include/hwregs/divUnit.h'
+'include/hwregs/dveUnit.h' -> '/opt/libwtv/include/hwregs/dveUnit.h'
+'include/hwregs/gfxUnit.h' -> '/opt/libwtv/include/hwregs/gfxUnit.h'
+'include/hwregs/memUnit.h' -> '/opt/libwtv/include/hwregs/memUnit.h'
+'include/hwregs/modUnit.h' -> '/opt/libwtv/include/hwregs/modUnit.h'
+'include/hwregs/pixelUnits.h' -> '/opt/libwtv/include/hwregs/pixelUnits.h'
+'include/hwregs/rioUnit.h' -> '/opt/libwtv/include/hwregs/rioUnit.h'
+'include/hwregs/sucUnit.h' -> '/opt/libwtv/include/hwregs/sucUnit.h'
+'include/libc/printf.h' -> '/opt/libwtv/include/libc/printf.h'
+'include/libc/__strerror.h' -> '/opt/libwtv/include/libc/__strerror.h'
+'include/libc/string.h' -> '/opt/libwtv/include/libc/string.h'
+    [CXX-mipsel-5000] /mnt/webtv-disk-tests/libwtv/src/exception.cpp
+    [CXX-mipsel-5000] /mnt/webtv-disk-tests/libwtv/src/interrupt.cpp
+    [AS -mipsel-5000] /mnt/webtv-disk-tests/libwtv/src/exception-handler.S
+    [CXX-mipsel-5000] /mnt/webtv-disk-tests/libwtv/src/globals.cpp
+    [AS -mipsel-5000] /mnt/webtv-disk-tests/libwtv/src/crt0.S
+    [CXX-mipsel-5000] /mnt/webtv-disk-tests/libwtv/src/memory.cpp
+    [CXX-mipsel-5000] /mnt/webtv-disk-tests/libwtv/src/serial.cpp
+    [CXX-mipsel-5000] /mnt/webtv-disk-tests/libwtv/src/leds.cpp
+    [CXX-mipsel-5000] /mnt/webtv-disk-tests/libwtv/src/display.cpp
+    [CXX-mipsel-5000] /mnt/webtv-disk-tests/libwtv/src/graphics.cpp
+    [CXX-mipsel-5000] /mnt/webtv-disk-tests/libwtv/src/audio.cpp
+    [CXX-mipsel-5000] /mnt/webtv-disk-tests/libwtv/src/kbinput.cpp
+    [CC -mipsel-5000] /mnt/webtv-disk-tests/libwtv/src/libc/string.c
+    [CXX-mipsel-5000] /mnt/webtv-disk-tests/libwtv/src/iic.cpp
+    [CC -mipsel-5000] /mnt/webtv-disk-tests/libwtv/src/libc/printf.c
+    [CXX-mipsel-5000] /mnt/webtv-disk-tests/libwtv/src/libc.cpp
+    [AR -mipsel-5000] libwtv-mipsel-5000.a /mnt/webtv-disk-tests/libwtv/build/mipsel-5000
+'libwtv-mipsel-5000.a' -> '/opt/libwtv/lib/libwtv-mipsel-5000.a'
+
+libwtv built successfully!
+    [CXX-mips-4650] poopies.cpp
+    [WTV-mips-4650] poopies.wtv.o
+total 588
+-rw-rw-r-- 1 emac emac   4902 Sep  3 23:21 test.txt
+drwxrwxr-x 2 emac emac   4096 Sep  3 23:21 build
+drwxrwxr-x 3 emac emac   4096 Sep  3 23:21 .
+-rwxr-xr-x 1 emac emac   1467 Sep  3 22:53 do-build.sh
+-rw-rw-r-- 1 emac emac   1860 Sep  3 11:35 poopies.cpp
+-rw-rw-r-- 1 emac emac      0 Sep  3 09:56 a.out
+-rw-rw-r-- 1 emac emac    352 Sep  3 08:47 Makefile
+-rw-rw-r-- 1 emac emac  15926 Aug 31 18:03 poopies.map
+-rwxr-xr-x 1 emac emac   1839 Aug 29 03:08 do-poop.sh
+-rwxrwxr-x 1 emac emac 548820 Aug 24 19:43 poopies-did.elf
+drwxrwxr-x 3 emac emac   4096 Aug 23 12:02 ..
+total 16
+drwxrwxr-x 2 emac emac 4096 Sep  3 23:21 .
+-rw-rw-r-- 1 emac emac 3948 Sep  3 23:21 poopies.o
+-rw-rw-r-- 1 emac emac 1207 Sep  3 23:21 poopies.d
+drwxrwxr-x 3 emac emac 4096 Sep  3 23:21 ..
+No .o file built... STOP

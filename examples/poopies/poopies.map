@@ -1,0 +1,417 @@
+Archive member included to satisfy reference by file (symbol)
+
+/opt/libwtv//lib/libwtv.a(crt0.o)
+                              (_start)
+
+Discarded input sections
+
+ .text          0x00000000        0x0 /opt/libwtv//lib/libwtv.a(crt0.o)
+ .data          0x00000000        0x0 /opt/libwtv//lib/libwtv.a(crt0.o)
+ .bss           0x00000000        0x0 /opt/libwtv//lib/libwtv.a(crt0.o)
+ .reginfo       0x00000000       0x18 /opt/libwtv//lib/libwtv.a(crt0.o)
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+memory0          0x80000000         0x04000000
+control          0xa4000000         0x00800000
+expand0          0x84800000         0x00800000
+expand1          0x85000000         0x00800000
+expand2          0x85800000         0x00800000
+expand3          0x86000000         0x00800000
+expand4          0x86800000         0x00800000
+expand5          0x87000000         0x00800000
+expand6          0x87800000         0x00800000
+rombnk0          0x9f000000         0x00400000
+diagspc          0x9f400000         0x00400000
+rombnk1          0x9f800000         0x00800000
+*default*        0x00000000         0xffffffff
+
+Linker script and memory map
+
+LOAD /opt/libwtv//lib/libwtv.a
+LOAD /opt/libwtv//lib/libwtv.a
+LOAD /usr/mips-linux-gnu/lib/libm.so
+                0x00000001                        big = 0x1
+                0x00000002                        little = 0x2
+                0x00000001                        solo = 0x1
+                0x00000002                        spot = 0x2
+                0x00000001                        rom = 0x1
+                0x00000005                        flash = 0x5
+                0x00000002                        idedisk = 0x2
+                0x00000006                        flashdisk = 0x6
+                0x00000002                        __build_storage_type = BUILD_STORAGE_TYPE
+                0x00000200                        __build_size_align_by = ((__build_storage_type == rom) || (__build_storage_type == flash))?0x200000:0x200
+                0x80440000                        __build_base = BUILD_BASE_ADDRESS
+                0x00000200                        __build_size = (((__build_end - __build_base) + (__build_size_align_by - 0x1)) & ~ ((__build_size_align_by - 0x1)))
+                0x00000080                        __build_dword_size = (__build_size >> 0x2)
+                0x00000100                        __code_size = (__code_end - __code_start)
+                0x00000040                        __code_dword_size = (__code_size >> 0x2)
+                0x80001000                        __data_start = DATAS_BASE_ADDRESS
+                0x00000020                        __data_size = (__data_end - __data_start)
+                0x00000008                        __data_dword_size = (__data_size >> 0x2)
+                0x00000000                        __bss_size = (__bss_end - __bss_start)
+                0x00000000                        __bss_dword_size = (__bss_size >> 0x2)
+                0x80000000                        __build_region_start = (__build_base > ORIGIN (rombnk1))?ORIGIN (rombnk1):(__build_base > ORIGIN (rombnk0))?ORIGIN (rombnk0):(__build_base > ORIGIN (memory0))?ORIGIN (memory0):0x0
+                0x04000000                        __build_region_length = (__build_base > ORIGIN (rombnk1))?LENGTH (rombnk1):(__build_base > ORIGIN (rombnk0))?LENGTH (rombnk0):(__build_base > ORIGIN (memory0))?LENGTH (memory0):0x0
+                0x80000000                        __data_region_start = (__data_start > ORIGIN (rombnk1))?ORIGIN (rombnk1):(__data_start > ORIGIN (rombnk0))?ORIGIN (rombnk0):(__data_start > ORIGIN (memory0))?ORIGIN (memory0):0x0
+                0x04000000                        __data_region_length = (__data_start > ORIGIN (rombnk1))?LENGTH (rombnk1):(__data_start > ORIGIN (rombnk0))?LENGTH (rombnk0):(__data_start > ORIGIN (memory0))?LENGTH (memory0):0x0
+                0x80800000                        __build_region_end = (__build_base + (BUILD_REGION_LENGTH > 0x0)?BUILD_REGION_LENGTH:__build_region_length)
+                0x80800000                        __build_region_end = (__build_region_end <= (__build_region_start + __build_region_length))?__build_region_end:(__build_region_start + __build_region_length)
+                0x00000001                        ASSERT ((__build_end < __build_region_end), Build image is too large. Try to simplify your code or reduce the amount of space needed for initialized static variables.)
+                0x80440000                        __data_region_end = (__data_start + (DATAS_REGION_LENGTH > 0x0)?DATAS_REGION_LENGTH:__data_region_length)
+                0x80440000                        __data_region_end = (__data_region_end <= (__data_region_start + __data_region_length))?__data_region_end:(__data_region_start + __data_region_length)
+                0x00000001                        ASSERT ((__bss_end < __data_region_end), Combined data sections are too large. Try to reduce space needed for variables.)
+                [!provide]                        PROVIDE (__executable_start = __code_start)
+                0x80440000                        __code_start = __build_base
+                0x80440000                        . = __code_start
+
+.code           0x80440000      0x100
+ *(.text.startup .text.startup.*)
+ .text.startup.crt0
+                0x80440000       0xfc /opt/libwtv//lib/libwtv.a(crt0.o)
+                0x80440000                _start
+                0x80440100                        . = ALIGN (0x10)
+ *fill*         0x804400fc        0x4 
+ *(SORT_NONE(.init))
+                0x80440100                        _ftext = .
+                [!provide]                        PROVIDE (ftext = .)
+                [!provide]                        PROVIDE (__ftext = .)
+ *(.text.unlikely .text.*_unlikely .text.unlikely.*)
+ *(.text.exit .text.exit.*)
+ *(.text.hot .text.hot.*)
+ *(SORT_BY_NAME(.text.sorted.*))
+ *(.text .stub .text.* .gnu.linkonce.t.*)
+ *(.gnu.warning)
+ *(.mips16.fn.*)
+ *(.mips16.call.*)
+                0x80440100                        . = ALIGN (0x10)
+                [!provide]                        PROVIDE (_etext = .)
+                [!provide]                        PROVIDE (etext = .)
+                [!provide]                        PROVIDE (__etext = .)
+ *(.rodata .rodata.* .gnu.linkonce.r.*)
+ *(.rodata1)
+                0x80440100                        . = ALIGN (0x10)
+                0x80440100                        PROVIDE (__code_end = .)
+                0x80440100                        PROVIDE (__data_stored_start = .)
+
+.plt            0x80440100        0x0
+ .plt           0x80440100        0x0 /opt/libwtv//lib/libwtv.a(crt0.o)
+                0x80001000                        . = __data_start
+
+.data           0x80001000       0x20
+                [!provide]                        PROVIDE (__preinit_array_start = .)
+ *(.preinit_array)
+                [!provide]                        PROVIDE (__preinit_array_end = .)
+                [!provide]                        PROVIDE (__init_array_start = .)
+ *(SORT_BY_INIT_PRIORITY(.init_array.*) SORT_BY_INIT_PRIORITY(.ctors.*))
+ *(.init_array EXCLUDE_FILE(*crtend?.o *crtend.o *crtbegin?.o *crtbegin.o) .ctors)
+                [!provide]                        PROVIDE (__init_array_end = .)
+                [!provide]                        PROVIDE (__fini_array_start = .)
+ *(SORT_BY_INIT_PRIORITY(.fini_array.*) SORT_BY_INIT_PRIORITY(.dtors.*))
+ *(.fini_array EXCLUDE_FILE(*crtend?.o *crtend.o *crtbegin?.o *crtbegin.o) .dtors)
+                [!provide]                        PROVIDE (__fini_array_end = .)
+                0x80001000                        __CTOR_LIST__ = .
+                0x80001000        0x4 LONG 0x0 (((__CTOR_END__ - __CTOR_LIST__) / 0x4) - 0x2)
+ *crtbegin.o(.ctors)
+ *crtbegin?.o(.ctors)
+ *(EXCLUDE_FILE(*crtend?.o *crtend.o) .ctors)
+ *(SORT_BY_NAME(.ctors.*))
+ *(.ctors)
+                0x80001004        0x4 LONG 0x0
+                0x80001008                        __CTOR_END__ = .
+                0x80001008                        __DTOR_LIST__ = .
+                0x80001008        0x4 LONG 0x0 (((__DTOR_END__ - __DTOR_LIST__) / 0x4) - 0x2)
+ *crtbegin.o(.dtors)
+ *crtbegin?.o(.dtors)
+ *(EXCLUDE_FILE(*crtend?.o *crtend.o) .dtors)
+ *(SORT_BY_NAME(.dtors.*))
+ *(.dtors)
+                0x8000100c        0x4 LONG 0x0
+                0x80001010                        __DTOR_END__ = .
+                0x80001010                        _fdata = .
+                [!provide]                        PROVIDE (fdata = .)
+                [!provide]                        PROVIDE (__fdata = .)
+ *(.data .data.* .gnu.linkonce.d.*)
+ .data.rel.ro   0x80001010        0x0 /opt/libwtv//lib/libwtv.a(crt0.o)
+ *(.data1)
+                [!provide]                        PROVIDE (__tdata_start = .)
+ *(.tdata .tdata.* .gnu.linkonce.td.*)
+                0x80009010                        _gp = (ALIGN (0x10) + 0x8000)
+ *(.sdata .sdata.* .gnu.linkonce.s.*)
+ *(.lit8 .lit4)
+ *(.got.plt .got)
+ .got           0x80001010        0x8 /opt/libwtv//lib/libwtv.a(crt0.o)
+                0x80001010                _GLOBAL_OFFSET_TABLE_
+ .got.plt       0x80001018        0x0 /opt/libwtv//lib/libwtv.a(crt0.o)
+ *(.rld_map)
+ .rld_map       0x80001018        0x4 /opt/libwtv//lib/libwtv.a(crt0.o)
+                0x80001018                __RLD_MAP
+                0x8000101c                        _edata = .
+                [!provide]                        PROVIDE (__edata = .)
+                [!provide]                        PROVIDE (edata = .)
+                0x80001020                        . = ALIGN (0x10)
+ *fill*         0x8000101c        0x4 
+                0x80001020                        PROVIDE (__data_end = .)
+                0x80440120                        PROVIDE (__data_stored_end = (__data_stored_start + (__data_end - __data_start)))
+                0x80440120                        PROVIDE (__build_end = __data_stored_end)
+
+.bss            0x80001020        0x0
+                0x80001020                        PROVIDE (__bss_start = .)
+                0x80001020                        _fbss = .
+                [!provide]                        PROVIDE (fbss = .)
+                [!provide]                        PROVIDE (__fbss = .)
+ *(.sbss .sbss.* .gnu.linkonce.sb.*)
+ *(.scommon .scommon.*)
+ *(.sbss2 .sbss2.* .gnu.linkonce.sb2.*)
+ *(.dynsbss)
+ *(.dynbss)
+ .dynbss        0x80001020        0x0 /opt/libwtv//lib/libwtv.a(crt0.o)
+ *(.bss .bss.* .gnu.linkonce.b.*)
+ *(COMMON)
+ *(.tbss .tbss.* .gnu.linkonce.tb.*)
+ *(.tcommon)
+                [!provide]                        PROVIDE (_ebss = .)
+                [!provide]                        PROVIDE (ebss = .)
+                [!provide]                        PROVIDE (__ebss = .)
+                0x80001020                        PROVIDE (__bss_end = .)
+
+.note.gnu.build-id
+ *(.note.gnu.build-id)
+
+.note.GNU-stack
+ *(.note.GNU-stack)
+
+.gcc_compiled_long32
+ *(.gcc_compiled_long32)
+
+.gcc_compiled_long64
+ *(.gcc_compiled_long64)
+
+.gnu.build.attributes
+ *(.gnu.build.attributes .gnu.build.attributes.*)
+
+.gnu.version    0x80001020        0x0
+ *(.gnu.version)
+ .gnu.version   0x80001020        0x0 /opt/libwtv//lib/libwtv.a(crt0.o)
+
+.gnu.version_d  0x80001020        0x0
+ *(.gnu.version_d)
+ .gnu.version_d
+                0x80001020        0x0 /opt/libwtv//lib/libwtv.a(crt0.o)
+
+.gnu.version_r  0x80001020        0x0
+ *(.gnu.version_r)
+ .gnu.version_r
+                0x80001020        0x0 /opt/libwtv//lib/libwtv.a(crt0.o)
+
+.gnu.hash
+ *(.gnu.hash)
+
+.MIPS.abiflags  0x80001020       0x18
+ *(.MIPS.abiflags)
+ .MIPS.abiflags
+                0x80001020       0x18 /opt/libwtv//lib/libwtv.a(crt0.o)
+
+.MIPS.xhash
+ *(.MIPS.xhash)
+
+.MIPS.stubs     0x80001038        0x0
+ *(.MIPS.stubs)
+ .MIPS.stubs    0x80001038        0x0 /opt/libwtv//lib/libwtv.a(crt0.o)
+
+.hash           0x80001038       0x18
+ *(.hash)
+ .hash          0x80001038       0x18 /opt/libwtv//lib/libwtv.a(crt0.o)
+
+.reginfo
+ *(.reginfo)
+
+.dynamic        0x80001050      0x110
+ *(.dynamic .dynsym .dynstr)
+ .dynsym        0x80001050       0x30 /opt/libwtv//lib/libwtv.a(crt0.o)
+ .dynstr        0x80001080       0x26 /opt/libwtv//lib/libwtv.a(crt0.o)
+ *fill*         0x800010a6        0x2 
+ .dynamic       0x800010a8       0xb8 /opt/libwtv//lib/libwtv.a(crt0.o)
+                0x800010a8                _DYNAMIC
+
+.rel.dyn        0x80001160        0x0
+ *(.rel.dyn)
+ .rel.dyn       0x80001160        0x0 /opt/libwtv//lib/libwtv.a(crt0.o)
+ .rel.plt       0x80001160        0x0 /opt/libwtv//lib/libwtv.a(crt0.o)
+ .rel.bss       0x80001160        0x0 /opt/libwtv//lib/libwtv.a(crt0.o)
+ .rel.data.rel.ro
+                0x80001160        0x0 /opt/libwtv//lib/libwtv.a(crt0.o)
+
+.interp         0x80001160       0x13
+ *(.interp)
+ .interp        0x80001160       0x13 /opt/libwtv//lib/libwtv.a(crt0.o)
+
+.gnu_debuglink
+ *(.gnu_debuglink)
+
+.gnu.lto
+ *(.gnu.lto_*)
+
+.comment
+ *(.comment)
+
+.pdr            0x00000000        0x0
+ .pdr           0x00000000        0x0 /opt/libwtv//lib/libwtv.a(crt0.o)
+
+.stab
+ *(.stab)
+
+.stabstr
+ *(.stabstr)
+
+.stab.excl
+ *(.stab.excl)
+
+.stab.exclstr
+ *(.stab.exclstr)
+
+.stab.index
+ *(.stab.index)
+
+.stab.indexstr
+ *(.stab.indexstr)
+
+.debug
+ *(.debug)
+
+.line
+ *(.line)
+
+.debug_srcinfo
+ *(.debug_srcinfo)
+
+.debug_sfnames
+ *(.debug_sfnames)
+
+.debug_aranges  0x00000000       0x20
+ *(.debug_aranges)
+ .debug_aranges
+                0x00000000       0x20 /opt/libwtv//lib/libwtv.a(crt0.o)
+
+.debug_pubnames
+ *(.debug_pubnames)
+
+.debug_info     0x00000020       0x25
+ *(.debug_info .gnu.linkonce.wi.*)
+ .debug_info    0x00000020       0x25 /opt/libwtv//lib/libwtv.a(crt0.o)
+
+.debug_abbrev   0x00000045       0x14
+ *(.debug_abbrev)
+ .debug_abbrev  0x00000045       0x14 /opt/libwtv//lib/libwtv.a(crt0.o)
+
+.debug_line     0x00000059       0x6f
+ *(.debug_line .debug_line.* .debug_line_end)
+ .debug_line    0x00000059       0x6f /opt/libwtv//lib/libwtv.a(crt0.o)
+
+.debug_frame
+ *(.debug_frame)
+
+.debug_str      0x000000c8       0x28
+ *(.debug_str)
+ .debug_str     0x000000c8       0x28 /opt/libwtv//lib/libwtv.a(crt0.o)
+
+.debug_loc
+ *(.debug_loc)
+
+.debug_macinfo
+ *(.debug_macinfo)
+
+.debug_weaknames
+ *(.debug_weaknames)
+
+.debug_funcnames
+ *(.debug_funcnames)
+
+.debug_typenames
+ *(.debug_typenames)
+
+.debug_varnames
+ *(.debug_varnames)
+
+.debug_pubtypes
+ *(.debug_pubtypes)
+
+.debug_ranges
+ *(.debug_ranges)
+
+.debug_addr
+ *(.debug_addr)
+
+.debug_line_str
+                0x000000f0       0x19
+ *(.debug_line_str)
+ .debug_line_str
+                0x000000f0       0x19 /opt/libwtv//lib/libwtv.a(crt0.o)
+
+.debug_loclists
+ *(.debug_loclists)
+
+.debug_macro
+ *(.debug_macro)
+
+.debug_names
+ *(.debug_names)
+
+.debug_rnglists
+ *(.debug_rnglists)
+
+.debug_str_offsets
+ *(.debug_str_offsets)
+
+.debug_sup
+ *(.debug_sup)
+
+.gnu.attributes
+                0x00000109       0x10
+ *(.gnu.attributes)
+ .gnu.attributes
+                0x00000109       0x10 /opt/libwtv//lib/libwtv.a(crt0.o)
+
+.gptab.sdata
+ *(.gptab.data)
+ *(.gptab.sdata)
+
+.gptab.sbss
+ *(.gptab.bss)
+ *(.gptab.sbss)
+
+.mdebug.abi32
+ *(.mdebug.abi32)
+
+.mdebug.abiN32
+ *(.mdebug.abiN32)
+
+.mdebug.abi64
+ *(.mdebug.abi64)
+
+.mdebug.abiO64
+ *(.mdebug.abiO64)
+
+.mdebug.eabi32
+ *(.mdebug.eabi32)
+
+.mdebug.eabi64
+ *(.mdebug.eabi64)
+
+.symtab
+ *(.symtab)
+
+.strtab
+ *(.strtab)
+
+.shstrtab
+ *(.shstrtab)
+                0x00000001                        BOX_SYSTEM_ASIC = solo
+                0x00000001                        BUILD_ENDIANNESS = big
+                0x00000002                        BUILD_STORAGE_TYPE = idedisk
+                0x80440000                        BUILD_BASE_ADDRESS = 0x80440000
+                0x003c0000                        BUILD_REGION_LENGTH = 0x3c0000
+                0x80001000                        DATAS_BASE_ADDRESS = 0x80001000
+                0x0043f000                        DATAS_REGION_LENGTH = 0x43f000
+OUTPUT(poopies.elf elf32-tradbigmips)
