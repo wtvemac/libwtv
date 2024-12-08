@@ -288,7 +288,7 @@ void* Z_Malloc (int size, int tag, void* user)
 //EMAC:
    if(!result)
    {
-        put_string_serial("CAN'T ALLOCATE ZONE!\x0a\x0d");
+        serial_put_string("CAN'T ALLOCATE ZONE!\x0a\x0d");
    }
 
     return result;
