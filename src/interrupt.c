@@ -495,7 +495,7 @@ void set_VIDEO_VIDUNIT_interrupt(bool active, uint32_t status)
 }
 void __VIDEO_VIDUNIT_handler(uint32_t status) // SPOT
 {
-	serial_put_string("__VIDEO_VIDUNIT_handler\x0a\x0d");
+	//serial_put_string("__VIDEO_VIDUNIT_handler\x0a\x0d");
 	
 	__call_callback(VIDEO_VIDUNIT_callback);
 }
