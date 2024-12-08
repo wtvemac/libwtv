@@ -517,7 +517,7 @@ char* ps2_get_identity()
 		case PS2_IDENTITY_IS_HOST_KEYBOARD:
 			return "Host-connected keyboard or NCD N-97 keyboard";
 			break;
-		case PS2_IDENTITY_IS_122BTN_KEYBOARD:
+		case PS2_IDENTITY_IS_122KEY_KEYBOARD:
 			return "122-key keyboard";
 			break;
 		case PS2_IDENTITY_IS_JAPG_KEYBOARD:
@@ -538,7 +538,7 @@ char* ps2_get_identity()
 		case PS2_IDENTITY_IS_WHEEL_MOUSE:
 			return "Two-button mouse with scroll wheel";
 			break;
-		case PS2_IDENTITY_IS_5BTN_MOUSE:
+		case PS2_IDENTITY_IS_5KEY_MOUSE:
 			return "Five-button mouse";
 			break;
 		default:
