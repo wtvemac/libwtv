@@ -128,12 +128,12 @@ int main(int argc, char **argv)
     printf("Heap init\x0a\x0d");
 	heap_init2();
 
-	set_leds(4);
+	/*set_leds(4);
     
     printf("Console init\x0a\x0d");
     console_init();
     printf("Console console_set_render_mode\x0a\x0d");
-    console_set_render_mode(RENDER_AUTOMATIC);
+    console_set_render_mode(RENDER_AUTOMATIC);*/
 
 	set_leds(7);
 
