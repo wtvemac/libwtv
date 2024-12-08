@@ -1,6 +1,6 @@
 # libwtv
 
-This is a very rough draft of an SDK that allows you to build WebTV approm and bootrom files using modern MIPS GCC tools. This is based on libdragon if you haven't noticed. I want to maintain compatability with libdragon as much as I can so you can easily port some (non-3d) N64 homebrew apps to WebTV. Possibly compile code that will run on both the N64 and WebTV to proove (at least in-part) Steve Perlman's claim that the [WebTV is more powerful than the N64](https://youtu.be/snHsbYfcWD4?t=788).
+This is a very rough draft of an SDK that allows you to build WebTV approm and bootrom files using modern MIPS GCC tools. This is based on [libdragon](https://github.com/DragonMinded/libdragon) if you haven't noticed. I want to maintain compatability with [libdragon](https://github.com/DragonMinded/libdragon) as much as I can so you can easily port some (non-3d) N64 homebrew apps to WebTV. Possibly compile code that will run on both the N64 and WebTV to proove (at least in-part) Steve Perlman's claim that the [WebTV is more powerful than the N64](https://youtu.be/snHsbYfcWD4?t=788).
 
 There's some hardcoded paths and oither thorns that you'd need to deal with. I plan on creating a Docker container so it's easier to setup. This is mostly in experimentation phase at the moment. Here's a list of what's currently included:
 
