@@ -5,7 +5,7 @@ clear; cd /mnt/webtv-disk-tests/libwtv/examples/doom; sudo rm -rf /opt/libwtv; c
 if [ "$1" = "1" ]; then
 		if test -f "/mnt/webtv-disk-tests/libwtv/sections/doom-out.o"; then
 			if test -f "/mnt/webtv-disk-tests/libwtv/examples/doom/build/doom.elf"; then
-				python /mnt/WebTVHacking/Client/Tools/romfs_tools/emac/lzj_release/mame-approm-it.py /mnt/webtv-disk-tests/libwtv/sections/doom-out.o /mnt/WebTVHacking/Client/Tools/mame/nvram/wtv1dev/; cd /mnt/WebTVHacking/Client/Tools/mame/; /mnt/WebTVHacking/Client/Tools/mame/wtvmame -window -verbose -skip_gameinfo -nomouse -debug wtv1dev; cd /mnt/webtv-disk-tests/libwtv/examples/doom/;
+				python /mnt/WebTVHacking/Client/Tools/romfs_tools/emac/lzj_release/mame-approm-it.py /mnt/webtv-disk-tests/libwtv/sections/doom-out.o /mnt/WebTVHacking/Client/Tools/mame/nvram/wtv1sony/; cd /mnt/WebTVHacking/Client/Tools/mame/; /mnt/WebTVHacking/Client/Tools/mame/wtvmame -window -verbose -skip_gameinfo -nomouse -debug wtv1sony; cd /mnt/webtv-disk-tests/libwtv/examples/doom/;
 			else
 				echo "No .elf file built... STOP"
 			fi
