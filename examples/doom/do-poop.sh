@@ -24,8 +24,8 @@ sectionsDIR=../../sections
 #perl -e "print pack('N', 0x$bssSize)" | dd of=$sectionsDIR/out.o bs=1 seek=32 count=4 conv=notrunc
 
 rm $sectionsDIR/out.o
-objcopy --dump-section .code=$sectionsDIR/code.o $outELFFile
-objcopy --dump-section .data=$sectionsDIR/data.o $outELFFile
-cat $sectionsDIR/code.o $sectionsDIR/data.o > $sectionsDIR/out.o
+objcopy --dump-section .code=$sectionsDIR/doom-code.o $outELFFile
+objcopy --dump-section .data=$sectionsDIR/doom-data.o $outELFFile
+cat $sectionsDIR/doom-code.o $sectionsDIR/doom-data.o > $sectionsDIR/doom-out.o
 
-python3 /mnt/WebTVHacking/Client/Tools/romfs_tools/emac/lzj_release/rommy-1.0/rommy.py --fixcs $sectionsDIR/out.o
+python3 /mnt/WebTVHacking/Client/Tools/romfs_tools/emac/lzj_release/rommy-1.0/rommy.py --fixcs $sectionsDIR/doom-out.o
