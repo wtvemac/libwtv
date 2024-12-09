@@ -495,7 +495,8 @@ void D_DoAdvanceDemo(void)
     advancedemo = false;
     usergame = false;               // no save / end game here
     paused = false;
-    gameaction = ga_nothing;
+    //gameaction = ga_nothing; // EMAC: default
+    gameaction = ga_newgame; // EMAC: start on game to test controls.
 
     if (gamemode == retail)
     {
