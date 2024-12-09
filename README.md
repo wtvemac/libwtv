@@ -34,6 +34,10 @@ The examples directory shows a few approms I've been experimenting with.
 
 This is a port of [64doom](https://github.com/jnmartin84/64doom) to the MAME bf0 version of WebTV. Doom runs at a smaller resolution than the WebTV screen and uses a different color space. The screen size will likely remain a defect on bf0 boxes but I plan to fix the colors in software. WNI's Doom on the WebTV Plus and Echostar boxes used the Solo's gfxUnit to create a RGB color table, draw the screen to a rectangle and enlarge it to fit the screen.
 
+https://github.com/user-attachments/assets/f3c6a3d7-4e06-4d4f-9086-40b50b677427
+
+The game is a bit faster than normal due to the timer interval being setup for the N64 CPU. Easy fix that will be applied soon.
+
 ![Example approm on the WebTV Plus](example2.png)
 
 This is an example app that draws to the screen on the WebTV Plus (INT-W200). It shows the SSID, HD locking code stored in IIC NVRAM and some other info. It draws a poopie when you hit a key on the IR keyboard.
