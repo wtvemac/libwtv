@@ -32,7 +32,7 @@ The examples directory shows a few approms I've been experimenting with.
 
 ![Doom running on MAME](example1.png)
 
-This is a port of [64doom](https://github.com/jnmartin84/64doom) to the MAME bf0 version of WebTV. Doom runs at a smaller resolution than the WebTV screen and uses a different color space. The screen size will likely remain a defect on bf0 boxes but I plan to fix the colors in software. Doom on the plus uses the Solo's gfxUnit to create a RGB color table, draw the screen to a rectangle and enlarge it to fit the screen.
+This is a port of [64doom](https://github.com/jnmartin84/64doom) to the MAME bf0 version of WebTV. Doom runs at a smaller resolution than the WebTV screen and uses a different color space. The screen size will likely remain a defect on bf0 boxes but I plan to fix the colors in software. WNI's Doom on the WebTV Plus and Echostar boxes used the Solo's gfxUnit to create a RGB color table, draw the screen to a rectangle and enlarge it to fit the screen.
 
 ![Example approm on the WebTV Plus](example2.png)
 
