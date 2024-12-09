@@ -156,6 +156,7 @@ void V_DrawPatch ( int x, int y, patch_t* patch )
     int          col; 
     column_t*    column; 
     uint16_t*    desttop;
+    uint16_t*    destmax;
     uint16_t*    dest;
     byte*        source; 
     int          w; 
@@ -176,15 +177,16 @@ void V_DrawPatch ( int x, int y, patch_t* patch )
 
     col = 0; 
     desttop = (uint16_t*)((uintptr_t)bufptr + (uintptr_t)((((y)*SCREENWIDTH)+x)*2));
+    destmax = (uint16_t*)((uintptr_t)bufptr + (uintptr_t)((SCREENHEIGHT*SCREENWIDTH)*2));
 
     w = SHORT(patch->width); 
 
-    for ( ; col<w ; x++, col++, desttop++)
+    for ( ; col<w && desttop < destmax; x++, col++, desttop++)
     { 
         column = (column_t *)((byte *)patch + LONG(patch->columnofs[col])); 
 
         // step through the posts in a column 
-        while (column->topdelta != 0xff ) 
+        while (column->topdelta != 0xff) 
         { 
             source = (byte *)column + 3; 
             dest = (uint16_t*)((uintptr_t)desttop + (uintptr_t)(column->topdelta*SCREENWIDTH*2)); 
@@ -195,7 +197,12 @@ void V_DrawPatch ( int x, int y, patch_t* patch )
                 *dest = palarray[*source++];
                 dest += SCREENWIDTH; 
             } 
-            column = (column_t *)(  (byte *)column + column->length + 4 ); 
+            column = (column_t *)(  (byte *)column + column->length + 4 );
+
+            if(dest >= destmax)
+            {
+                break;
+            }
         } 
     }
 }
