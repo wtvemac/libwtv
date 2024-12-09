@@ -338,7 +338,7 @@ void set_TI_interrupt(bool active)
 }
 void __TI_handler()
 {
-	serial_put_string("__TI_handler\x0a\x0d");
+	//serial_put_string("__TI_handler\x0a\x0d");
 
 	__call_callback(TI_callback);
 }
