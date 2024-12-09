@@ -1,0 +1,5 @@
+*.wad
+build/*
+examples/doom/build/*
+examples/timers/build/*
+examples/poopies/build/*
