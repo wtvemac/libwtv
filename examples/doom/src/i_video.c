@@ -189,7 +189,7 @@ void I_InitGraphics(void)
         .pal = false,
         .hstart = -1,
         .vstart = -1,
-	}, FMT_RGBA16, 2, 0x90909090);
+	}, FMT_YUV16, 2, 0x90909090);
     //display_init(RESOLUTION_560x420, 1, 0x80);
 
     I_SetDefaultPalette();
