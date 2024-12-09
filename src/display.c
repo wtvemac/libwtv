@@ -310,7 +310,7 @@ surface_t* display_try_get()
        wait for that buffer to be shown. */
     next = buffer_next(now_showing);
     do {
-        if (((locked_display_mask | waiting_for_show_mask) & (1 << next)) == 0)  {
+        if (((locked_display_mask | waiting_for_show_mask) & (1 << next)) == 0 || true)  {
             retval = &surfaces[next];
             locked_display_mask |= 1 << next;
             break;
