@@ -125,8 +125,7 @@ void I_Init(void)
     timekeeping = 0;
 
     // 70 times per second
-    // 93750000 / 70
-    new_timer(1339286, TF_CONTINUOUS, tickercb);
+    new_timer((TICKS_FROM_US(1000000 / 70) * 2), TF_CONTINUOUS, tickercb);
 
     I_InitGraphics();
 }
