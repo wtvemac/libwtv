@@ -34,24 +34,22 @@ void hid_events_enable_all()
 	hid_events_enable(EVENT_IR | EVENT_PS2);
 }
 
-void enqueue_hid_event(uint16_t source, int16_t data, uint32_t time)
+void enqueue_hid_event(hid_event event_object)
 {
-	if(source != EVENT_NULL)
+	if(event_object.source != EVENT_NULL)
 	{
 		if((hid_event_buffer_head + 1) != hid_event_buffer_tail)
 		{
 			hid_event_buffer_head = (hid_event_buffer_head + 1) & HID_EVENT_BUFFER_INDEX_MASK;
 
-			hid_event_buffer[hid_event_buffer_head].source = source;
-			hid_event_buffer[hid_event_buffer_head].data = data;
-			hid_event_buffer[hid_event_buffer_head].time = time;
+			memcpy(&hid_event_buffer[hid_event_buffer_head], &event_object, sizeof(hid_event));
 		}
 
-		if(source & EVENT_BUTTON)
+		if(event_object.source & EVENT_BUTTON)
 		{
-			uint16_t keycode = GET_KEYCODE(data);
+			uint16_t keycode = GET_KEYCODE(event_object.data);
 
-			if(KY_IS_PRESSED(data))
+			if(KY_IS_PRESSED(event_object.data))
 			{
 				if(current_state.key_down_count < EVENT_MAX_KEY_MEMORY)
 				{
@@ -68,9 +66,7 @@ void enqueue_hid_event(uint16_t source, int16_t data, uint32_t time)
 
 					if(!duplicate_keycode)
 					{
-						current_state.keys_down[current_state.key_down_count].source = source;
-						current_state.keys_down[current_state.key_down_count].data = data;
-						current_state.keys_down[current_state.key_down_count].time = time;
+						memcpy(&current_state.keys_down[current_state.key_down_count], &event_object, sizeof(hid_event));
 
 						current_state.key_down_count++;
 					}
@@ -124,27 +120,37 @@ bool process_hid_buffers()
 
 	if(_enabled_events & EVENT_IR)
 	{
-		uint32_t ir_data = dequeue_ir_buffer();
+		uint32_t data = dequeue_ir_buffer();
 
-		if(ir_data != IR_NOK)
+		if(data != IR_NOK)
 		{
-			enqueue_hid_event(EVENT_IR_KEYBOARD, ir_data, 0);
+			hid_event event_object = {
+				.source = EVENT_IR_KEYBOARD,
+				.data = data,
+				.time = 0
+			};
+
+			enqueue_hid_event(event_object);
 			
 			has_processed_buffers = true;
-			printf("\tir_data=%08x, current_state.key_down_count=%d\n", ir_data, current_state.key_down_count);
 		}
 	}
 
 	if(_enabled_events & EVENT_PS2)
 	{
-		uint32_t ps2_data = dequeue_ps2_buffer();
+		uint32_t data = dequeue_ps2_buffer();
 
-		if(ps2_data != PS2_NOK)
+		if(data != PS2_NOK)
 		{
-			enqueue_hid_event(EVENT_PS2_KEYBOARD, ps2_data, 0);
+			hid_event event_object = {
+				.source = EVENT_PS2_KEYBOARD,
+				.data = data,
+				.time = 0
+			};
+
+			enqueue_hid_event(event_object);
 
 			has_processed_buffers = true;
-			printf("\tps2_data=%08x, current_state.key_down_count=%d\n", ps2_data, current_state.key_down_count);
 		}
 	}
 
