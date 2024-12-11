@@ -44,7 +44,6 @@ libwtv-$(WTVLIB_FILE_SUFFIX).a: \
           $(BUILD_DIR)/hid/ir.o \
           $(BUILD_DIR)/hid/ps2.o \
           $(BUILD_DIR)/hid/event.o \
-          $(BUILD_DIR)/hid/event/keyboard.o \
           $(BUILD_DIR)/storage/nvram.o \
           $(BUILD_DIR)/storage/atapwd.o \
           $(BUILD_DIR)/libc/o1heap.o \

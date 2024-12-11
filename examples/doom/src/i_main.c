@@ -144,6 +144,8 @@ int main(int argc, char **argv)
     //EMAC:  }
     //EMAC: controller_init();
 
+    hid_events_enable_all();
+
     // center joystick...
     //EMAC:controller_scan();
     //EMAC:struct controller_data keys_pressed = get_keys_down();

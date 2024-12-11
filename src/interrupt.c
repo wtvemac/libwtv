@@ -981,7 +981,7 @@ void set_DEV_PS2_interrupt(bool active)
 }
 void __DEV_PS2_handler() // Spot only
 {
-	serial_put_string("__DEV_PS2_handler\x0a\x0d");
+	//serial_put_string("__DEV_PS2_handler\x0a\x0d");
 
 	__call_callback(DEV_PS2_callback);
 }

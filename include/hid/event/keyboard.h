@@ -2,6 +2,9 @@
 #ifndef __LIBWTV_HID_EVENT_KEYBOARD_H
 #define __LIBWTV_HID_EVENT_KEYBOARD_H
 
+#include "hid/ps2.h"
+#include "hid/ir.h"
+
 #include <stdint.h>
 
 #ifdef __cplusplus

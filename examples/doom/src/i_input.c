@@ -80,6 +80,97 @@ void I_GetEvent(void)
     //EMAC:pressed_key(&keys_pressed);//,0);
     //EMAC:held_key(&keys_held);//,0);
     //EMAC:released_key(&keys_released);//,0);
+
+
+    process_hid_buffers();
+    hid_event cool = dequeue_hid_event();
+
+    if(cool.source != EVENT_NULL) {
+        event_t doom_input_event;
+
+        if(cool.data == 0x12) {
+            doom_input_event.data1 = KEY_UPARROW;
+            doom_input_event.type = ev_keydown;
+            D_PostEvent(&doom_input_event);
+        } else if(cool.data == -0x12) {
+            printf("UP\n");
+            doom_input_event.data1 = KEY_UPARROW;
+            doom_input_event.type = ev_keyup;
+            D_PostEvent(&doom_input_event);
+        //
+        } else if (cool.data == 0x14) {
+            doom_input_event.data1 = KEY_DOWNARROW;
+            doom_input_event.type = ev_keydown;
+            D_PostEvent(&doom_input_event);
+        } else if (cool.data == -0x14) {
+            printf("UP\n");
+            doom_input_event.data1 = KEY_DOWNARROW;
+            doom_input_event.type = ev_keyup;
+            D_PostEvent(&doom_input_event);
+        //
+        } else if (cool.data == 0x11) {
+            doom_input_event.data1 = KEY_LEFTARROW;
+            doom_input_event.type = ev_keydown;
+            D_PostEvent(&doom_input_event);
+        } else if (cool.data == -0x11) {
+            printf("UP\n");
+            doom_input_event.data1 = KEY_LEFTARROW;
+            doom_input_event.type = ev_keyup;
+            D_PostEvent(&doom_input_event);
+        //
+        } else if (cool.data == 0x13) {
+            doom_input_event.data1 = KEY_RIGHTARROW;
+            doom_input_event.type = ev_keydown;
+            D_PostEvent(&doom_input_event);
+        } else if (cool.data == -0x13) {
+            printf("UP\n");
+            doom_input_event.data1 = KEY_RIGHTARROW;
+            doom_input_event.type = ev_keyup;
+            D_PostEvent(&doom_input_event);
+        //
+        } else if (cool.data == 0x1b) {
+            doom_input_event.data1 = KEY_ESCAPE;
+            doom_input_event.type = ev_keydown;
+            D_PostEvent(&doom_input_event);
+        } else if (cool.data == -0x1b) {
+            printf("UP\n");
+            doom_input_event.data1 = KEY_ESCAPE;
+            doom_input_event.type = ev_keyup;
+            D_PostEvent(&doom_input_event);
+        //
+        } else if (cool.data == 0x0d) {
+            doom_input_event.data1 = KEY_ENTER;
+            doom_input_event.type = ev_keydown;
+            D_PostEvent(&doom_input_event);
+        } else if (cool.data == -0x0d) {
+            printf("UP\n");
+            doom_input_event.data1 = KEY_ENTER;
+            doom_input_event.type = ev_keyup;
+            D_PostEvent(&doom_input_event);
+        //
+        } else if (cool.data == 0x09) {
+            doom_input_event.data1 = KEY_TAB;
+            doom_input_event.type = ev_keydown;
+            D_PostEvent(&doom_input_event);
+        } else if (cool.data == -0x09) {
+            printf("UP\n");
+            doom_input_event.data1 = KEY_TAB;
+            doom_input_event.type = ev_keyup;
+            D_PostEvent(&doom_input_event);
+        //
+        } else if (cool.data == 0x2003) {
+            doom_input_event.data1 = KEY_RCTRL;
+            doom_input_event.type = ev_keydown;
+            D_PostEvent(&doom_input_event);
+        } else if (cool.data == -0x2003) {
+            printf("UP\n");
+            doom_input_event.data1 = KEY_RCTRL;
+            doom_input_event.type = ev_keyup;
+            D_PostEvent(&doom_input_event);
+        }
+
+        printf("cool.data=%08x\n", cool.data);
+    }
 }
 
 

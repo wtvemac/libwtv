@@ -11,7 +11,6 @@
 #define PS2_LOCAL_BUFFER_SIZE                    16 // needs to be a multiple of 2.
 #define PS2_LOCAL_BUFFER_INDEX_MASK              (PS2_LOCAL_BUFFER_SIZE - 1)
 
-#define PS2_NOK                                  0xff
 #define PS2_ACK                                  0xfa
 #define PS2_PASSED                               0xaa
 #define PS2_FAILED1                              0xfc

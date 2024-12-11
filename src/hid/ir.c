@@ -94,10 +94,6 @@ ir_bit_time_limit_t seijinkb_bit_time_limits[] = {
 #define IR_SEIJINKB_DATA_MASK                       0x200508
 #define IS_SEIJINKB_DATA_GOOD(result_data)          ((result_data & IR_SEIJINKB_DATA_MASK) == IR_SEIJINKB_DATA_MASK)
 
-
-
-#define IR_NOK                                      0xffff
-
 static bool     ir_initilized       = false;
 static uint16_t ir_buffer[IR_BUFFER_SIZE];
 static uint8_t  ir_buffer_head = 0;
@@ -131,8 +127,6 @@ uint32_t dequeue_ir_buffer()
 			}
 			
 			ir_working_result_bit_count += bit_count;
-
-			printf("%04x: ir_data=%08x, ir_working_result_data=%08x, bit_value=%02x, bit_count=%02x, ir_working_result_bit_count=%02x\x0a\x0d", IR_TRANSITION_CURRENT_TIME(ir_data), ir_data, ir_working_result_data, bit_value, bit_count, ir_working_result_bit_count);
 
 			if(ir_working_result_bit_count >= IR_SEIJINKB_DATA_BITS)
 			{

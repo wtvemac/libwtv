@@ -8,6 +8,8 @@
 extern "C" {
 #endif
 
+#define IR_NOK 0xffff
+
 bool ir_init();
 bool ir_close();
 uint32_t dequeue_ir_buffer();

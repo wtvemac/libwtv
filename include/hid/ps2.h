@@ -8,6 +8,8 @@
 extern "C" {
 #endif
 
+#define PS2_NOK               0xff
+
 // Kana mode, compose
 #define PS2_LED_BIT7          0x10
 #define PS2_LED_BIT6          0x10
