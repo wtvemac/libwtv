@@ -1,5 +1,5 @@
 #clear; cd /mnt/webtv-disk-tests/libwtv/examples/doom; sudo rm -rf /opt/libwtv; cd ../../; make clobber; LIBWTV_INSTALL_DIR=/opt/libwtv WTV_INSTALL_DIR=/opt/libwtv ./build.sh; cd examples/doom; rm ../../sections/out.o; make clean; make; ls -lat .; ls -lat build
-clear; cd /mnt/webtv-disk-tests/libwtv/examples/doom; sudo rm -rf /opt/libwtv; cd ../../; LIBWTV_INSTALL_DIR=/opt/libwtv WTV_INSTALL_DIR=/opt/libwtv ./build.sh; cd examples/doom; rm ../../sections/out.o; make
+clear; cd /mnt/webtv-disk-tests/libwtv/examples/doom; sudo rm -rf /opt/libwtv; cd ../../; LIBWTV_INSTALL_DIR=/opt/libwtv WTV_INSTALL_DIR=/opt/libwtv ./build.sh; cd examples/doom; rm ../../sections/doom-out.o; make
 
 
 if [ "$1" = "1" ]; then
