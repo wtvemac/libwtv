@@ -38,19 +38,109 @@ void enqueue_hid_event(hid_event event_object)
 {
 	if(event_object.source != EVENT_NULL)
 	{
-		if((hid_event_buffer_head + 1) != hid_event_buffer_tail)
-		{
-			hid_event_buffer_head = (hid_event_buffer_head + 1) & HID_EVENT_BUFFER_INDEX_MASK;
-
-			memcpy(&hid_event_buffer[hid_event_buffer_head], &event_object, sizeof(hid_event));
-		}
-
 		if(event_object.source & EVENT_BUTTON)
 		{
 			uint16_t keycode = GET_KEYCODE(event_object.data);
+			bool is_pressed = KY_IS_PRESSED(event_object.data);
+			bool is_modifier = false;
+			uint32_t changed_modifiers = 0x00;
 
-			if(KY_IS_PRESSED(event_object.data))
+			switch(keycode)
 			{
+				case KY_METAL:
+					is_modifier = true;
+					changed_modifiers |= KYMOD_METAL;
+					break;
+				case KY_METAR:
+					is_modifier = true;
+					changed_modifiers |= KYMOD_METAR;
+					break;
+				case KY_CTRLL:
+					is_modifier = true;
+					changed_modifiers |= KYMOD_CTRLL;
+					break;
+				case KY_CTRLR:
+					is_modifier = true;
+					changed_modifiers |= KYMOD_CTRLR;
+					break;
+				case KY_SHIFTL:
+					is_modifier = true;
+					changed_modifiers |= KYMOD_SHIFTL;
+					break;
+				case KY_SHIFTR:
+					is_modifier = true;
+					changed_modifiers |= KYMOD_SHIFTR;
+					break;
+				case KY_ALTL:
+					is_modifier = true;
+					changed_modifiers |= KYMOD_ALTL;
+					break;
+				case KY_ALTR:
+					is_modifier = true;
+					changed_modifiers |= KYMOD_ALTR;
+					break;
+				case KY_ALTGR:
+					is_modifier = true;
+					changed_modifiers |= KYMOD_ALTGR;
+					break;
+				case KY_CMD:
+					is_modifier = true;
+					changed_modifiers |= KYMOD_METAL;
+					break;
+				case KY_FN:
+					is_modifier = true;
+					changed_modifiers |= KYMOD_FN;
+					break;
+				case KY_CAPS_LOCK:
+					is_modifier = true;
+					if(is_pressed)
+					{
+						if(current_state.modifiers & KYMOD_CAPS_LOCK)
+						{
+							current_state.modifiers ^= KYMOD_CAPS_LOCK;
+						}
+						else
+						{
+							current_state.modifiers |= KYMOD_CAPS_LOCK;
+						}
+					}
+					break;
+				case KY_SCRL_LOCK:
+					is_modifier = true;
+					if(is_pressed)
+					{
+						if(current_state.modifiers & KYMOD_SCRL_LOCK)
+						{
+							current_state.modifiers ^= KYMOD_SCRL_LOCK;
+						}
+						else
+						{
+							current_state.modifiers |= KYMOD_SCRL_LOCK;
+						}
+					}
+					break;
+				case KY_NUMB_LOCK:
+					is_modifier = true;
+					if(is_pressed)
+					{
+						if(current_state.modifiers & KYMOD_NUMB_LOCK)
+						{
+							current_state.modifiers ^= KYMOD_NUMB_LOCK;
+						}
+						else
+						{
+							current_state.modifiers |= KYMOD_NUMB_LOCK;
+						}
+					}
+					break;
+			}
+
+			event_object.is_modifier = is_modifier;
+
+			if(is_pressed)
+			{
+				current_state.modifiers |= changed_modifiers;
+				
 				if(current_state.key_down_count < EVENT_MAX_KEY_MEMORY)
 				{
 					bool duplicate_keycode = false;
@@ -72,6 +162,8 @@ void enqueue_hid_event(hid_event event_object)
 					}
 				}
 			} else {
+				current_state.modifiers ^= changed_modifiers;
+
 				uint8_t new_key_down_count = 0;
 
 				for(int i = 0; i < current_state.key_down_count; i++)
@@ -90,6 +182,13 @@ void enqueue_hid_event(hid_event event_object)
 
 				current_state.key_down_count = new_key_down_count;
 			}
+		}
+
+		if((hid_event_buffer_head + 1) != hid_event_buffer_tail)
+		{
+			hid_event_buffer_head = (hid_event_buffer_head + 1) & HID_EVENT_BUFFER_INDEX_MASK;
+
+			memcpy(&hid_event_buffer[hid_event_buffer_head], &event_object, sizeof(hid_event));
 		}
 	}
 }

@@ -25,6 +25,7 @@ extern "C" {
 
 typedef struct {
 	uint16_t source;
+	bool is_modifier;
 	int16_t data;
 	uint32_t time;
 } hid_event;
