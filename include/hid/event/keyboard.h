@@ -225,7 +225,11 @@ extern "C" {
 //////////////////////////
 
 #define KY_PRESSED(keycode)   keycode
-#define KY_RELEASED(keycode) (keycode * -1)
+#define KY_RELEASED(keycode)  (keycode * -1)
+
+#define KY_IS_PRESSED(wtv_keycode)  (wtv_keycode >= 0)
+#define KY_IS_RELEASED(wtv_keycode) (wtv_keycode < 0)
+#define GET_KEYCODE(wtv_keycode)    ((wtv_keycode >= 0) ? (wtv_keycode) : (wtv_keycode * -1))
 
 // https://www.branah.com/chinese
 //#define KY_EMOJI
@@ -267,15 +271,6 @@ extern "C" {
 ///
 /// Negative number for up (break), positive for down (make)
 ///
-
-#define MAX_KY_MEMORY 4
-
-typedef struct __attribute__((packed)) keyboard_event_s
-{
-	uint32_t modifier;
-	int16_t key;
-	int16_t down_keys[MAX_KY_MEMORY];
-} keyboard_event_t;
 
 #ifdef __cplusplus
 }

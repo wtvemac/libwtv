@@ -21,7 +21,7 @@ extern "C" {
 #define EVENT_KEYBOARD        (EVENT_IR_KEYBOARD | EVENT_PS2_KEYBOARD)
 #define EVENT_BUTTON          (EVENT_KEYBOARD | EVENT_IR_REMOTE)
 
-#define EVENT_MAX_STATE_ITEMS 8
+#define EVENT_MAX_KEY_MEMORY 8
 
 typedef struct {
 	uint16_t source;
@@ -31,7 +31,8 @@ typedef struct {
 
 typedef struct {
 	uint32_t modifiers;
-	hid_event state[EVENT_MAX_STATE_ITEMS];
+	uint8_t key_down_count;
+	hid_event keys_down[EVENT_MAX_KEY_MEMORY];
 } hid_current_state;
 
 void hid_events_enable(uint32_t enable_events);
