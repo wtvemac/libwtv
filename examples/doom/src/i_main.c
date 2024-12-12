@@ -142,9 +142,7 @@ int main(int argc, char **argv)
     //EMAC:     printf("Could not initialize filesystem!\x0a\x0d");
     //EMAC:     while(1);
     //EMAC:  }
-    //EMAC: controller_init();
-
-    hid_events_enable_all();
+    controller_init();
 
     // center joystick...
     //EMAC:controller_scan();

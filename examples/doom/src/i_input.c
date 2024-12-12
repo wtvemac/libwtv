@@ -70,106 +70,113 @@ int current_player_for_input = 0;
 //
 void I_GetEvent(void)
 {
-    //EMAC:controller_scan();
+    controller_scan();
 
-    //EMAC:struct controller_data keys_pressed = get_keys_down();
-    //EMAC:struct controller_data keys_held = get_keys_held();
-    //EMAC:struct controller_data keys_released = get_keys_up();
-    // one of these days...
-    //EMAC:current_player_for_input = 0;
-    //EMAC:pressed_key(&keys_pressed);//,0);
-    //EMAC:held_key(&keys_held);//,0);
-    //EMAC:released_key(&keys_released);//,0);
+    hid_event event_object = dequeue_hid_event();
 
-
-    process_hid_buffers();
-    hid_event cool = dequeue_hid_event();
-
-    if(cool.source != EVENT_NULL) {
+    if(event_object.source != EVENT_NULL) {
         event_t doom_input_event;
 
-        if(cool.data == 0x12) {
-            doom_input_event.data1 = KEY_UPARROW;
-            doom_input_event.type = ev_keydown;
-            D_PostEvent(&doom_input_event);
-        } else if(cool.data == -0x12) {
-            printf("UP\n");
-            doom_input_event.data1 = KEY_UPARROW;
-            doom_input_event.type = ev_keyup;
-            D_PostEvent(&doom_input_event);
-        //
-        } else if (cool.data == 0x14) {
-            doom_input_event.data1 = KEY_DOWNARROW;
-            doom_input_event.type = ev_keydown;
-            D_PostEvent(&doom_input_event);
-        } else if (cool.data == -0x14) {
-            printf("UP\n");
-            doom_input_event.data1 = KEY_DOWNARROW;
-            doom_input_event.type = ev_keyup;
-            D_PostEvent(&doom_input_event);
-        //
-        } else if (cool.data == 0x11) {
-            doom_input_event.data1 = KEY_LEFTARROW;
-            doom_input_event.type = ev_keydown;
-            D_PostEvent(&doom_input_event);
-        } else if (cool.data == -0x11) {
-            printf("UP\n");
-            doom_input_event.data1 = KEY_LEFTARROW;
-            doom_input_event.type = ev_keyup;
-            D_PostEvent(&doom_input_event);
-        //
-        } else if (cool.data == 0x13) {
-            doom_input_event.data1 = KEY_RIGHTARROW;
-            doom_input_event.type = ev_keydown;
-            D_PostEvent(&doom_input_event);
-        } else if (cool.data == -0x13) {
-            printf("UP\n");
-            doom_input_event.data1 = KEY_RIGHTARROW;
-            doom_input_event.type = ev_keyup;
-            D_PostEvent(&doom_input_event);
-        //
-        } else if (cool.data == 0x1b) {
-            doom_input_event.data1 = KEY_ESCAPE;
-            doom_input_event.type = ev_keydown;
-            D_PostEvent(&doom_input_event);
-        } else if (cool.data == -0x1b) {
-            printf("UP\n");
-            doom_input_event.data1 = KEY_ESCAPE;
-            doom_input_event.type = ev_keyup;
-            D_PostEvent(&doom_input_event);
-        //
-        } else if (cool.data == 0x0d) {
-            doom_input_event.data1 = KEY_ENTER;
-            doom_input_event.type = ev_keydown;
-            D_PostEvent(&doom_input_event);
-        } else if (cool.data == -0x0d) {
-            printf("UP\n");
-            doom_input_event.data1 = KEY_ENTER;
-            doom_input_event.type = ev_keyup;
-            D_PostEvent(&doom_input_event);
-        //
-        } else if (cool.data == 0x09) {
-            doom_input_event.data1 = KEY_TAB;
-            doom_input_event.type = ev_keydown;
-            D_PostEvent(&doom_input_event);
-        } else if (cool.data == -0x09) {
-            printf("UP\n");
-            doom_input_event.data1 = KEY_TAB;
-            doom_input_event.type = ev_keyup;
-            D_PostEvent(&doom_input_event);
-        //
-        } else if (cool.data == 0x2003) {
-            doom_input_event.data1 = KEY_RCTRL;
-            doom_input_event.type = ev_keydown;
-            D_PostEvent(&doom_input_event);
-        } else if (cool.data == -0x2003) {
-            printf("UP\n");
-            doom_input_event.data1 = KEY_RCTRL;
-            doom_input_event.type = ev_keyup;
-            D_PostEvent(&doom_input_event);
+        uint16_t keycode = GET_KEYCODE(event_object.data);
+
+        switch(keycode) {
+            case KY_RIGHT:
+                doom_input_event.data1 = KEY_RIGHTARROW;
+                break;
+            case KY_LEFT:
+                doom_input_event.data1 = KEY_LEFTARROW;
+                break;
+            case KY_UP:
+                doom_input_event.data1 = KEY_UPARROW;
+                break;
+            case KY_DOWN:
+                doom_input_event.data1 = KEY_DOWNARROW;
+                break;
+
+            case KY_ESC:
+                doom_input_event.data1 = KEY_ESCAPE;
+                break;
+            case KY_ENTER:
+                doom_input_event.data1 = KEY_ENTER;
+                break;
+            case KY_TAB:
+                doom_input_event.data1 = KEY_TAB;
+                break;
+            case KY_F1:
+                doom_input_event.data1 = KEY_F1;
+                break;
+            case KY_F2:
+                doom_input_event.data1 = KEY_F2;
+                break;
+            case KY_F3:
+                doom_input_event.data1 = KEY_F3;
+                break;
+            case KY_F4:
+                doom_input_event.data1 = KEY_F4;
+                break;
+            case KY_F5:
+                doom_input_event.data1 = KEY_F5;
+                break;
+            case KY_F6:
+                doom_input_event.data1 = KEY_F6;
+                break;
+            case KY_F7:
+                doom_input_event.data1 = KEY_F7;
+                break;
+            case KY_F8:
+                doom_input_event.data1 = KEY_F8;
+                break;
+            case KY_F9:
+                doom_input_event.data1 = KEY_F9;
+                break;
+            case KY_F10:
+                doom_input_event.data1 = KEY_F10;
+                break;
+            case KY_F11:
+                doom_input_event.data1 = KEY_F11;
+                break;
+            case KY_F12:
+                doom_input_event.data1 = KEY_F12;
+                break;
+
+            case KY_BACKSPACE:
+                doom_input_event.data1 = KEY_BACKSPACE;
+                break;
+            case KY_PAUSE:
+                doom_input_event.data1 = KEY_PAUSE;
+                break;
+
+            case KY_EQUALS:
+                doom_input_event.data1 = KEY_EQUALS;
+                break;
+            case KY_NPADSUB:
+            case KY_MINUS:
+                doom_input_event.data1 = KEY_MINUS;
+                break;
+            case KY_NPADADD:
+                doom_input_event.data1 = KEY_PLUS;
+                break;
+
+            case KY_SHIFTR:
+                doom_input_event.data1 = KEY_RSHIFT;
+                break;
+            case KY_CTRLR:
+                doom_input_event.data1 = KEY_RCTRL;
+                break;
+            case KY_ALTL:
+                doom_input_event.data1 = KEY_LALT;
+                break;
+            case KY_ALTR:
+                doom_input_event.data1 = KEY_RALT;
+                break;
+                
+            case KY_CAPS_LOCK:
+                doom_input_event.data1 = KEY_CAPSLOCK;
+                break;
         }
 
-        printf("cool.data=%08x\n", cool.data);
+        doom_input_event.type = (KY_IS_PRESSED(event_object.data)) ? ev_keydown : ev_keyup;
+        D_PostEvent(&doom_input_event);
     }
 }
 
@@ -182,297 +189,6 @@ void I_StartTic(void)
 {
     I_GetEvent();
 }
-
-
-//EMAC:
-/*
-//
-// held_key
-// this function maps analog stick position into mouse movement event
-//
-void held_key(struct controller_data *h_data) //, int player)
-{
-    struct SI_condat held = h_data->c[0];//player];
-    short mouse_x;
-    short mouse_y;
-
-    last_x = held.x - center_x;
-    last_y = held.y - center_y;
-
-    // x,y in (-32,32),(-32,32) "dead zone" in center 
-    if ( (last_x < -32) || (last_x > 32) || (last_y < -32) || (last_y > 32) )
-    {
-        mouse_x = last_x << 1;
-        mouse_y = last_y << 1;
-
-        if (mouse_x || mouse_y)
-        {
-            event_t ev;
-
-            ev.type = ev_mouse;
-            ev.data1 = 0;
-            ev.data2 = mouse_x;
-            ev.data3 = mouse_y;
-
-            D_PostEvent(&ev);
-        }
-    }
-}
-*/
-
-//EMAC
-/*
-//
-// pressed_key
-// handle pressed buttons that are mapped to keyboard event operations such as
-// moving, shooting, opening doors, toggling run mode
-// also handles out-of-band input operations like toggling GOD MODE, idclev
-//
-void pressed_key(struct controller_data *p_data) //, int player)
-{
-    event_t doom_input_event;
-    struct SI_condat pressed = p_data->c[0];//player];
-
-#if 1
-    // CHEAT WARP TO NEXT LEVEL
-    if (pressed.L && pressed.Z && !pressed.R)
-    {
-        if ( (lz_count > 0) && (lz_count % 4 == 0) )
-        {
-            n64_do_cheat(13); // IDCLEV
-        }
-
-        lz_count += 1;
-    }
-
-    // TOGGLE GOD MODE
-    if (pressed.L && pressed.R && !pressed.Z)
-    {
-        if (!GODDED)
-        {
-            n64_do_cheat(1);  // IDDQD
-            n64_do_cheat(3);  // IDKFA
-            n64_do_cheat(10); // IDBEHOLDA
-            n64_do_cheat(5);  // IDDT
-        }
-
-        GODDED ^= 1;
-    }
-#endif
-
-    // RUN ON/OFF
-    if (pressed.Z)
-    {
-        shift ^= 1;
-        shift_times = 0;
-    }
-
-    if (shift)
-    {
-        doom_input_event.data1 = KEY_RSHIFT;
-        doom_input_event.type = ev_keydown;
-        D_PostEvent(&doom_input_event);
-        shift_times++;
-    }
-    else if (shift_times == 0)
-    {
-        doom_input_event.data1 = KEY_RSHIFT;
-        doom_input_event.type = ev_keyup;
-        D_PostEvent(&doom_input_event);
-        shift_times++;
-    }
-
-    if (pressed.A)
-    {
-        doom_input_event.data1 = KEY_RCTRL;
-        doom_input_event.type = ev_keydown;
-        D_PostEvent(&doom_input_event);
-    }
-    if (pressed.B)
-    {
-        doom_input_event.data1 = ' ';
-        doom_input_event.type = ev_keydown;
-        D_PostEvent(&doom_input_event);
-    }
-    if (pressed.L && !pressed.R && !pressed.Z)
-    {
-        doom_input_event.data1 = ',';
-        doom_input_event.type = ev_keydown;
-        D_PostEvent(&doom_input_event);
-    }
-    if (pressed.R && !pressed.L && !pressed.Z)
-    {
-        doom_input_event.data1 = '.';
-        doom_input_event.type = ev_keydown;
-        D_PostEvent(&doom_input_event);
-    }
-    if (pressed.C_up)
-    {
-        doom_input_event.data1 = KEY_TAB;
-        doom_input_event.type = ev_keydown;
-        D_PostEvent(&doom_input_event);
-    }
-    if (pressed.C_down)
-    {
-        doom_input_event.data1 = KEY_ENTER;
-        doom_input_event.type = ev_keydown;
-        D_PostEvent(&doom_input_event);
-    }
-    if (pressed.C_left && !pressed.C_right)
-    {
-        pad_weapon -= 1;
-
-        if (pad_weapon < 0)
-        {
-            pad_weapon = 7;
-        }
-
-        doom_input_event.data1 = weapons[pad_weapon];
-        doom_input_event.type = ev_keydown;
-        D_PostEvent(&doom_input_event);
-    }
-    if (pressed.C_right && !pressed.C_left)
-    {
-        pad_weapon += 1;
-
-        if (pad_weapon > 7)
-        {
-            pad_weapon = 0;
-        }
-
-        doom_input_event.data1 = weapons[pad_weapon];
-        doom_input_event.type = ev_keydown;
-        D_PostEvent(&doom_input_event);
-    }
-    if (pressed.up)
-    {
-        doom_input_event.data1 = KEY_UPARROW;
-        doom_input_event.type = ev_keydown;
-        D_PostEvent(&doom_input_event);
-    }
-    if (pressed.down)
-    {
-        doom_input_event.data1 = KEY_DOWNARROW;
-        doom_input_event.type = ev_keydown;
-        D_PostEvent(&doom_input_event);
-    }
-    if (pressed.left)
-    {
-        doom_input_event.data1 = KEY_LEFTARROW;
-        doom_input_event.type = ev_keydown;
-        D_PostEvent(&doom_input_event);
-    }
-    if (pressed.right)
-    {
-        doom_input_event.data1 = KEY_RIGHTARROW;
-        doom_input_event.type = ev_keydown;
-        D_PostEvent(&doom_input_event);
-    }
-    if (pressed.start)
-    {
-        doom_input_event.data1 = KEY_ESCAPE;
-        doom_input_event.type = ev_keydown;
-        D_PostEvent(&doom_input_event);
-    }
-}
-*/
-
-//EMAC:
-/*
-//
-// released_key
-// handle released buttons that are mapped to keyboard event operations such as
-// moving, shooting, opening doors, etc
-//
-void released_key(struct controller_data *r_data) //, int player)
-{
-    event_t doom_input_event;
-
-    struct SI_condat released = r_data->c[0];//player];
-
-    last_x = released.x - center_x;
-    last_y = released.y - center_y;
-
-    if (released.A)
-    {
-        doom_input_event.data1 = KEY_RCTRL;
-        doom_input_event.type = ev_keyup;
-        D_PostEvent(&doom_input_event);
-    }
-    if (released.B)
-    {
-        doom_input_event.data1 = ' ';
-        doom_input_event.type = ev_keyup;
-        D_PostEvent(&doom_input_event);
-    }
-    if (released.L)
-    {
-        doom_input_event.data1 = ',';
-        doom_input_event.type = ev_keyup;
-        D_PostEvent(&doom_input_event);
-    }
-    if (released.R)
-    {
-        doom_input_event.data1 = '.';
-        doom_input_event.type = ev_keyup;
-        D_PostEvent(&doom_input_event);
-    }
-    if (released.C_up)
-    {
-        doom_input_event.data1 = KEY_TAB;
-        doom_input_event.type = ev_keyup;
-        D_PostEvent(&doom_input_event);
-    }
-    if (released.C_down)
-    {
-        doom_input_event.data1 = KEY_ENTER;
-        doom_input_event.type = ev_keyup;
-        D_PostEvent(&doom_input_event);
-    }
-    if (released.C_left && !released.C_right)
-    {
-        doom_input_event.data1 = weapons[pad_weapon];
-        doom_input_event.type = ev_keyup;
-        D_PostEvent(&doom_input_event);
-    }
-    if (released.C_right && !released.C_left)
-    {
-        doom_input_event.data1 = weapons[pad_weapon];
-        doom_input_event.type = ev_keyup;
-        D_PostEvent(&doom_input_event);
-    }
-    if (released.up)
-    {
-        doom_input_event.data1 = KEY_UPARROW;
-        doom_input_event.type = ev_keyup;
-        D_PostEvent(&doom_input_event);
-    }
-    if (released.down)
-    {
-        doom_input_event.data1 = KEY_DOWNARROW;
-        doom_input_event.type = ev_keyup;
-        D_PostEvent(&doom_input_event);
-    }
-    if (released.left)
-    {
-        doom_input_event.data1 = KEY_LEFTARROW;
-        doom_input_event.type = ev_keyup;
-        D_PostEvent(&doom_input_event);
-    }
-    if (released.right)
-    {
-        doom_input_event.data1 = KEY_RIGHTARROW;
-        doom_input_event.type = ev_keyup;
-        D_PostEvent(&doom_input_event);
-    }
-    if (released.start)
-    {
-        doom_input_event.data1 = KEY_ESCAPE;
-        doom_input_event.type = ev_keyup;
-        D_PostEvent(&doom_input_event);
-    }
-}
-*/
 
 static char __attribute__((aligned(8))) clevstr[9];
 
