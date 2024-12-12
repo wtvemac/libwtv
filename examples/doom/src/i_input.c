@@ -79,6 +79,8 @@ void I_GetEvent(void)
 
         uint16_t keycode = GET_KEYCODE(event_object.data);
 
+        doom_input_event.data1 = 0x00;
+
         switch(keycode) {
             case KY_RIGHT:
                 doom_input_event.data1 = KEY_RIGHTARROW;
@@ -175,8 +177,10 @@ void I_GetEvent(void)
                 break;
         }
 
-        doom_input_event.type = (KY_IS_PRESSED(event_object.data)) ? ev_keydown : ev_keyup;
-        D_PostEvent(&doom_input_event);
+        if(doom_input_event.data1 != 0x00) {
+            doom_input_event.type = (KY_IS_PRESSED(event_object.data)) ? ev_keydown : ev_keyup;
+            D_PostEvent(&doom_input_event);
+        }
     }
 }
 
