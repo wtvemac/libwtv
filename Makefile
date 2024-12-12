@@ -39,7 +39,7 @@ libwtv-$(WTVLIB_FILE_SUFFIX).a: \
           $(BUILD_DIR)/graphics.o \
           $(BUILD_DIR)/audio.o \
           $(BUILD_DIR)/ssid.o \
-          $(BUILD_DIR)/kbinput.o \
+          $(BUILD_DIR)/hid.o \
           $(BUILD_DIR)/iic.o \
           $(BUILD_DIR)/hid/ir.o \
           $(BUILD_DIR)/hid/ps2.o \

@@ -32,12 +32,13 @@ typedef struct {
 
 typedef struct {
 	uint32_t modifiers;
-	uint8_t key_down_count;
-	hid_event keys_down[EVENT_MAX_KEY_MEMORY];
-} hid_current_state;
+	uint8_t keys_pressed_count;
+	hid_event keys_pressed[EVENT_MAX_KEY_MEMORY];
+} hid_state;
 
 void hid_events_enable(uint32_t enable_events);
 void hid_events_enable_all();
+hid_state hid_current_state();
 hid_event dequeue_hid_event();
 bool process_hid_buffers();
 

@@ -1,5 +1,6 @@
 #include "hid/event.h"
 #include "libc.h"
+#include "interrupt.h"
 
 #define HID_EVENT_BUFFER_SIZE       16 // needs to be a multiple of 2.
 #define HID_EVENT_BUFFER_INDEX_MASK (HID_EVENT_BUFFER_SIZE - 1)
@@ -10,7 +11,7 @@ static hid_event         hid_event_buffer[HID_EVENT_BUFFER_SIZE];
 static uint8_t           hid_event_buffer_head = 0;
 static uint8_t           hid_event_buffer_tail = 0;
 
-static hid_current_state current_state;
+static hid_state current_state;
 
 void hid_events_enable(uint32_t enable_events)
 {
@@ -32,6 +33,11 @@ void hid_events_enable(uint32_t enable_events)
 void hid_events_enable_all()
 {
 	hid_events_enable(EVENT_IR | EVENT_PS2);
+}
+
+hid_state hid_current_state()
+{
+	return current_state;
 }
 
 void enqueue_hid_event(hid_event event_object)
@@ -141,13 +147,13 @@ void enqueue_hid_event(hid_event event_object)
 			{
 				current_state.modifiers |= changed_modifiers;
 				
-				if(current_state.key_down_count < EVENT_MAX_KEY_MEMORY)
+				if(current_state.keys_pressed_count < EVENT_MAX_KEY_MEMORY)
 				{
 					bool duplicate_keycode = false;
 
-					for(int i = 0; i < current_state.key_down_count; i++)
+					for(int i = 0; i < current_state.keys_pressed_count; i++)
 					{
-						if(current_state.keys_down[i].data == keycode)
+						if(current_state.keys_pressed[i].data == keycode)
 						{
 							duplicate_keycode = true;
 							break;
@@ -156,31 +162,29 @@ void enqueue_hid_event(hid_event event_object)
 
 					if(!duplicate_keycode)
 					{
-						memcpy(&current_state.keys_down[current_state.key_down_count], &event_object, sizeof(hid_event));
+						memcpy(&current_state.keys_pressed[current_state.keys_pressed_count], &event_object, sizeof(hid_event));
 
-						current_state.key_down_count++;
+						current_state.keys_pressed_count++;
 					}
 				}
 			} else {
 				current_state.modifiers ^= changed_modifiers;
 
-				uint8_t new_key_down_count = 0;
+				uint8_t new_keys_pressed_count = 0;
 
-				for(int i = 0; i < current_state.key_down_count; i++)
+				for(int i = 0; i < current_state.keys_pressed_count; i++)
 				{
-					if(current_state.keys_down[i].data == keycode)
+					if(current_state.keys_pressed[i].data == keycode)
 					{
 						continue;
 					}
 
-					current_state.keys_down[new_key_down_count].source = current_state.keys_down[i].source;
-					current_state.keys_down[new_key_down_count].data = current_state.keys_down[i].data;
-					current_state.keys_down[new_key_down_count].time = current_state.keys_down[i].time;
+					current_state.keys_pressed[new_keys_pressed_count] = current_state.keys_pressed[i];
 
-					new_key_down_count++;
+					new_keys_pressed_count++;
 				}
 
-				current_state.key_down_count = new_key_down_count;
+				current_state.keys_pressed_count = new_keys_pressed_count;
 			}
 		}
 
@@ -217,6 +221,8 @@ bool process_hid_buffers()
 {
 	bool has_processed_buffers = false;
 
+    disable_interrupts();
+
 	if(_enabled_events & EVENT_IR)
 	{
 		uint32_t data = dequeue_ir_buffer();
@@ -252,6 +258,8 @@ bool process_hid_buffers()
 			has_processed_buffers = true;
 		}
 	}
+
+    enable_interrupts();
 
 	return has_processed_buffers;
 }

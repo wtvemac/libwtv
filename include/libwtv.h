@@ -10,7 +10,6 @@
 #include "graphics.h"
 #include "iic.h"
 #include "interrupt.h"
-#include "kbinput.h"
 #include "leds.h"
 #include "libc.h"
 #include "memory.h"
