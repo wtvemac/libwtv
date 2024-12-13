@@ -582,6 +582,7 @@ bool is_solo_box();
 bool is_spot_box();
 uint32_t get_chip_id();
 uint32_t get_sysconfig();
+uint32_t gpio_write(uint32_t value, bool clear);
 
 #ifdef __cplusplus
 }

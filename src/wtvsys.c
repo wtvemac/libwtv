@@ -119,6 +119,20 @@ void *malloc_uncached_aligned(int align, size_t size)
     return UncachedAddr(mem);
 }
 
+uint32_t gpio_write(uint32_t value, bool clear)
+{
+	if(clear)
+	{
+		REGISTER_WRITE(DEV_GPIO_OUT_CLEAR, value);
+	}
+	else
+	{
+		REGISTER_WRITE(DEV_GPIO_OUT_SET, value);
+	}
+
+	return REGISTER_READ(DEV_GPIO_OUT_SET);
+}
+
 void free_uncached(void *buf)
 {
     freealign(CachedAddr(buf));

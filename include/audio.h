@@ -8,18 +8,11 @@
 extern "C" {
 #endif
 
-uint32_t WriteOutputsEMAC(uint32_t a, bool b);
-uint32_t SetAudioMuteEMAC(bool a);
-uint32_t SetAudioCodecCS_NEMAC(bool a);
-uint32_t SetAudioCodecCCLKEMAC(bool a);
-uint32_t SetAudioCodecCDATAEMAC(bool a);
-uint32_t WriteCodecControlEMAC(uint32_t a, uint32_t b);
-uint32_t InitAudioCodecEMAC();
+typedef short asamp;
 
-void clear_audio();
-void audio_init();
-void play_poopie();
-void progress_audio();
+#define DEFAULT_AUDIO_CLOCK 44100
+
+void audio_init(int frequency, int numbuffers);
 
 #ifdef __cplusplus
 }
