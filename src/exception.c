@@ -323,7 +323,34 @@ static void __fetch_regs(exception_t* e, int32_t type, reg_block_t *regs)
  */
 void __onCriticalException(reg_block_t* regs)
 {
-	printf("__onCriticalException\x0a\x0d");return;
+	// EMAC TODO: need to continue beyond the while(1) to draw a death screen. Possibly a debug prompt like on WebTV's OS.
+	printf("__onCriticalException\n");
+	printf("Dumppage:\n");
+	printf("\tSR:  0x%08x <----\n", regs->sr);
+	printf("\tCR:  0x%08x <----\n", regs->cr);
+	printf("\tEPC: 0x%08x <----\n", regs->epc);
+	printf("\tHI:  0x%08x\n", regs->hi);
+	printf("\tLO:  0x%08x\n", regs->lo);
+	printf("\tat:  0x%08x\n", regs->gpr[0]);
+	printf("\tv0:  0x%08x\n", regs->gpr[1]);
+	printf("\tv1:  0x%08x\n", regs->gpr[2]);
+	printf("\ta0:  0x%08x\n", regs->gpr[3]);
+	printf("\ta1:  0x%08x\n", regs->gpr[4]);
+	printf("\ta2:  0x%08x\n", regs->gpr[5]);
+	printf("\ta3:  0x%08x\n", regs->gpr[6]);
+	printf("\tt0:  0x%08x\n", regs->gpr[7]);
+	printf("\tt1:  0x%08x\n", regs->gpr[8]);
+	printf("\tt2:  0x%08x\n", regs->gpr[9]);
+	printf("\tt3:  0x%08x\n", regs->gpr[10]);
+	printf("\tt4:  0x%08x\n", regs->gpr[11]);
+	printf("\tt5:  0x%08x\n", regs->gpr[12]);
+	printf("\tt6:  0x%08x\n", regs->gpr[13]);
+	printf("\tt7:  0x%08x\n", regs->gpr[14]);
+	printf("\tt8:  0x%08x\n", regs->gpr[15]);
+	printf("\tt9:  0x%08x\n", regs->gpr[16]);
+	printf("\tra:  0x%08x <----\n", regs->gpr[17]);
+
+	while(1) {}
 
 	exception_t e;
 
