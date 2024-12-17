@@ -26,6 +26,8 @@ libwtv: libwtv-$(WTVLIB_FILE_SUFFIX).a
 
 libwtv-$(WTVLIB_FILE_SUFFIX).a: \
           $(BUILD_DIR)/exception.o $(BUILD_DIR)/interrupt.o $(BUILD_DIR)/exception-handler.o \
+          $(BUILD_DIR)/backtrace.o \
+          $(BUILD_DIR)/debug.o \
           $(BUILD_DIR)/crt0.o \
           $(BUILD_DIR)/wtvsys.o \
           $(BUILD_DIR)/console.o \
@@ -51,7 +53,6 @@ libwtv-$(WTVLIB_FILE_SUFFIX).a: \
           $(BUILD_DIR)/libc/printf.o \
           $(BUILD_DIR)/libc/math.o \
           $(BUILD_DIR)/libc.o
-#          $(BUILD_DIR)/debug.o
 	@echo "    [AR -$(WTVLIB_FILE_SUFFIX)] $@ $(BUILD_DIR)"
 	$(WTV_AR) -rcs -o $@ $^
 
@@ -74,6 +75,8 @@ install: install-mk libwtv
 	install -Cv -m 0644 include/wtvsys.h $(INSTALL_DIR)/include/wtvsys.h
 	install -Cv -m 0644 include/graphics.h $(INSTALL_DIR)/include/graphics.h
 	install -Cv -m 0644 include/interrupt.h $(INSTALL_DIR)/include/interrupt.h
+	install -Cv -m 0644 include/backtrace.h $(INSTALL_DIR)/include/backtrace.h
+	install -Cv -m 0644 include/debug.h $(INSTALL_DIR)/include/debug.h
 	install -Cv -m 0644 include/exception.h $(INSTALL_DIR)/include/exception.h
 	install -Cv -m 0644 include/iic.h $(INSTALL_DIR)/include/iic.h
 	install -Cv -m 0644 include/kbinput.h $(INSTALL_DIR)/include/kbinput.h
@@ -85,7 +88,6 @@ install: install-mk libwtv
 	install -Cv -m 0644 include/libc.h $(INSTALL_DIR)/include/libc.h
 	install -Cv -m 0644 include/memory.h $(INSTALL_DIR)/include/memory.h
 	install -Cv -m 0644 include/sprite.h $(INSTALL_DIR)/include/sprite.h
-#	install -Cv -m 0644 include/debug.h $(INSTALL_DIR)/include/debug.h
 	install -Cv -m 0644 include/cop0.h $(INSTALL_DIR)/include/cop0.h
 	install -Cv -m 0644 include/cop1.h $(INSTALL_DIR)/include/cop1.h
 	install -Cv -m 0644 include/serial.h $(INSTALL_DIR)/include/serial.h

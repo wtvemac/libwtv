@@ -7,9 +7,10 @@
 #include "exception_internal.h"
 #include "console.h"
 #include "wtvsys.h"
-//EMAC:#include "debug.h"
+#include "debug.h"
 #include "regs_internal.h"
 #include "libc.h"
+#include "wtvsys.h"
 #include "serial.h"
 #include <string.h>
 #include <stdbool.h>
@@ -324,35 +325,48 @@ static void __fetch_regs(exception_t* e, int32_t type, reg_block_t *regs)
 void __onCriticalException(reg_block_t* regs)
 {
 	// EMAC TODO: need to continue beyond the while(1) to draw a death screen. Possibly a debug prompt like on WebTV's OS.
-	printf("__onCriticalException\n");
-	printf("Dumppage:\n");
-	printf("\tSR:  0x%08x <----\n", regs->sr);
-	printf("\tCR:  0x%08x <----\n", regs->cr);
-	printf("\tEPC: 0x%08x <----\n", regs->epc);
-	printf("\tHI:  0x%08x\n", regs->hi);
-	printf("\tLO:  0x%08x\n", regs->lo);
-	printf("\tat:  0x%08x\n", regs->gpr[0]);
-	printf("\tv0:  0x%08x\n", regs->gpr[1]);
-	printf("\tv1:  0x%08x\n", regs->gpr[2]);
-	printf("\ta0:  0x%08x\n", regs->gpr[3]);
-	printf("\ta1:  0x%08x\n", regs->gpr[4]);
-	printf("\ta2:  0x%08x\n", regs->gpr[5]);
-	printf("\ta3:  0x%08x\n", regs->gpr[6]);
-	printf("\tt0:  0x%08x\n", regs->gpr[7]);
-	printf("\tt1:  0x%08x\n", regs->gpr[8]);
-	printf("\tt2:  0x%08x\n", regs->gpr[9]);
-	printf("\tt3:  0x%08x\n", regs->gpr[10]);
-	printf("\tt4:  0x%08x\n", regs->gpr[11]);
-	printf("\tt5:  0x%08x\n", regs->gpr[12]);
-	printf("\tt6:  0x%08x\n", regs->gpr[13]);
-	printf("\tt7:  0x%08x\n", regs->gpr[14]);
-	printf("\tt8:  0x%08x\n", regs->gpr[15]);
-	printf("\tt9:  0x%08x\n", regs->gpr[16]);
-	printf("\tra:  0x%08x <----\n", regs->gpr[17]);
-
-	while(1) {}
+	if(is_spot_box())
+	{
+		REGISTER_WRITE(VID_BLNKCOL, 0x2fcffd);
+	}
+	else
+	{
+		REGISTER_WRITE(POT_BLNKCOL, 0x2fcffd);
+	}
 
 	exception_t e;
+	__fetch_regs(&e, EXCEPTION_TYPE_CRITICAL, regs);
+
+	printf("====> WE CRASHED <====\n");
+	printf("ERROR [%08x]: %s\n\n", e.code, e.info);
+	printf("Dumppage:\n");
+	printf("\tSR:  0x%08x <----\n", e.regs->sr);
+	printf("\tCR:  0x%08x <----\n", e.regs->cr);
+	printf("\tEPC: 0x%08x <----\n", e.regs->epc);
+	printf("\tHI:  0x%08x\n", e.regs->hi);
+	printf("\tLO:  0x%08x\n", e.regs->lo);
+	printf("\tat:  0x%08x\n", e.regs->gpr[0]);
+	printf("\tv0:  0x%08x\n", e.regs->gpr[1]);
+	printf("\tv1:  0x%08x\n", e.regs->gpr[2]);
+	printf("\ta0:  0x%08x\n", e.regs->gpr[3]);
+	printf("\ta1:  0x%08x\n", e.regs->gpr[4]);
+	printf("\ta2:  0x%08x\n", e.regs->gpr[5]);
+	printf("\ta3:  0x%08x\n", e.regs->gpr[6]);
+	printf("\tt0:  0x%08x\n", e.regs->gpr[7]);
+	printf("\tt1:  0x%08x\n", e.regs->gpr[8]);
+	printf("\tt2:  0x%08x\n", e.regs->gpr[9]);
+	printf("\tt3:  0x%08x\n", e.regs->gpr[10]);
+	printf("\tt4:  0x%08x\n", e.regs->gpr[11]);
+	printf("\tt5:  0x%08x\n", e.regs->gpr[12]);
+	printf("\tt6:  0x%08x\n", e.regs->gpr[13]);
+	printf("\tt7:  0x%08x\n", e.regs->gpr[14]);
+	printf("\tt8:  0x%08x\n", e.regs->gpr[15]);
+	printf("\tt9:  0x%08x\n", e.regs->gpr[16]);
+	printf("\tra:  0x%08x <----\n", e.regs->gpr[17]);
+	
+	debug_backtrace();
+
+	while(1) {}
 
 	if(!__exception_handler) { return; }
 

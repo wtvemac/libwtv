@@ -114,13 +114,13 @@ extern "C" {
 /** @brief Symbol at the start of code (start of ROM contents after header) */
 extern char __libdragon_text_start[];
 
-/** @brief Symbol at the end of code, data, and sdata (set by the linker) */
+/** @brief Symbol at the end of code, data, and sdata (see wtv.ld) */
 extern char __rom_end[];
 
-/** @brief Symbol at the end of code, data, sdata, and bss (set by the linker) */
+/** @brief Symbol at the end of code, data, sdata, and bss (see wtv.ld) */
 extern char __heap_start[];
 
-/** @brief Symbol at the end of code, data, sdata, and bss (set by the linker) */
+/** @brief Symbol at the end of code, data, sdata, and bss (see wtv.ld) */
 extern char __heap_size[];
 
 /**

@@ -3,29 +3,47 @@
  * @brief Debugging Support
  */
 #ifndef NDEBUG
-#include <fcntl.h>
-#include <assert.h>
-#include <stdarg.h>
-#include <time.h>
+//EMAC:#include <fcntl.h>
+//EMAC:#include <assert.h>
+//EMAC:#include <stdarg.h>
+//EMAC:#include <time.h>
 #include <sys/errno.h>
 #include "console.h"
 #include "debug.h"
-#include "regsinternal.h"
-#include "system.h"
-#include "n64types.h"
+#include "regs_internal.h"
+//EMAC:#include "system.h"
+//EMAC:#include "n64types.h"
 #include "wtvsys.h"
-#include "dma.h"
+//EMAC:#include "dma.h"
 #include "backtrace.h"
-#include "usb.h"
-#include "utils.h"
+//EMAC:#include "usb.h"
+//EMAC:#include "utils.h"
 #include "libc.h"
-#include "libcart/cart.h"
+//EMAC:#include "libcart/cart.h"
 #include "interrupt.h"
 #include "backtrace.h"
 #include "exception_internal.h"
-#include "fatfs/ff.h"
-#include "fatfs/ffconf.h"
-#include "fatfs/diskio.h"
+//EMAC:#include "fatfs/ff.h"
+//EMAC:#include "fatfs/ffconf.h"
+//EMAC:#include "fatfs/diskio.h"
+
+//EMAC:
+#define FRESULT int
+#define DRESULT int
+#define DSTATUS int
+#define BYTE unsigned char
+#define DWORD unsigned int
+#define UINT unsigned int
+#define LBA_t unsigned int
+#define FSIZE_t size_t
+#define dir_t int
+#define DATATYPE_TEXT ""
+#define FF_VOLUMES 0
+#define RES_PARERR 0
+#define RES_ERROR 0
+#define RES_OK 0
+#define STA_NOINIT 0
+#define CTRL_SYNC 0
 
 /**
  * @defgroup debug Debugging Support
@@ -74,7 +92,7 @@ static char sdfs_logic_drive[3] = { 0 };
 static void (*debug_writer[3])(const uint8_t *buf, int size) = { 0 };
 
 /** @brief internal backtrace printing function */
-void __debug_backtrace(FILE *out, bool skip_exception);
+void __debug_backtrace(int *out, bool skip_exception);
 
 /*********************************************************************
  * Log writers
@@ -125,11 +143,12 @@ static void isviewer_write(const uint8_t *data, int len)
 
 static void usblog_write(const uint8_t *data, int len)
 {
-	usb_write(DATATYPE_TEXT, data, len);
+	//EMAC:usb_write(DATATYPE_TEXT, data, len);
 }
 
 static void sdlog_write(const uint8_t *data, int len)
 {
+	/*EMAC:
 	// Avoid reentrant calls. If the SD card code for any reason generates
 	// an exception, the exception handler will try to log more, which would
 	// cause reentrant calls, that might corrupt the filesystem.
@@ -139,6 +158,7 @@ static void sdlog_write(const uint8_t *data, int len)
 	in_write = true;
 	fwrite(data, 1, len, sdlog_file);
 	in_write = false;
+	*/
 }
 
 /*********************************************************************
@@ -146,7 +166,7 @@ static void sdlog_write(const uint8_t *data, int len)
  *********************************************************************/
 /** @cond */
 
-static FATFS sd_fat;
+//EMAC:static FATFS sd_fat;
 #define FAT_VOLUME_SD    0
 
 typedef struct
@@ -159,24 +179,32 @@ typedef struct
 	DRESULT (*disk_ioctl)(BYTE cmd, void* buff);
 } fat_disk_t;
 
-static fat_disk_t fat_disks[FF_VOLUMES] = {0};
+//EMAC:static fat_disk_t fat_disks[FF_VOLUMES] = {0};
 
 DSTATUS disk_initialize(BYTE pdrv)
 {
+	return 0;
+	/*EMAC:
 	if (fat_disks[pdrv].disk_initialize)
 		return fat_disks[pdrv].disk_initialize();
 	return STA_NOINIT;
+	*/
 }
 
 DSTATUS disk_status(BYTE pdrv)
 {
+	return 0;
+	/*EMAC:
 	if (fat_disks[pdrv].disk_status)
 		return fat_disks[pdrv].disk_status();
 	return STA_NOINIT;
+	*/
 }
 
 DRESULT disk_read(BYTE pdrv, BYTE* buff, LBA_t sector, UINT count)
 {
+	return 0;
+	/*EMAC:
 	_Static_assert(FF_MIN_SS == 512, "this function assumes sector size == 512");
 	_Static_assert(FF_MAX_SS == 512, "this function assumes sector size == 512");
 	if (fat_disks[pdrv].disk_read && PhysicalAddr(buff) < 0x00800000)
@@ -184,26 +212,35 @@ DRESULT disk_read(BYTE pdrv, BYTE* buff, LBA_t sector, UINT count)
 	if (fat_disks[pdrv].disk_read_sdram && io_accessible(PhysicalAddr(buff)))
 		return fat_disks[pdrv].disk_read_sdram(buff, sector, count);
 	return RES_PARERR;
+	*/
 }
 
 DRESULT disk_write(BYTE pdrv, const BYTE* buff, LBA_t sector, UINT count)
 {
+	return 0;
+	/*EMAC:
 	_Static_assert(FF_MIN_SS == 512, "this function assumes sector size == 512");
 	_Static_assert(FF_MAX_SS == 512, "this function assumes sector size == 512");
 	if (fat_disks[pdrv].disk_write)
 		return fat_disks[pdrv].disk_write(buff, sector, count);
 	return RES_PARERR;
+	*/
 }
 
 DRESULT disk_ioctl(BYTE pdrv, BYTE cmd, void* buff)
 {
+	return 0;
+	/*EMAC:
 	if (fat_disks[pdrv].disk_ioctl)
 		return fat_disks[pdrv].disk_ioctl(cmd, buff);
 	return RES_PARERR;
+	*/
 }
 
 DWORD get_fattime(void)
 {
+	return 0;
+	/*EMAC:
 	time_t t = time(NULL);
 	if (t == -1) {
 		return (DWORD)(
@@ -221,6 +258,7 @@ DWORD get_fattime(void)
 		tm.tm_min << 5 |
 		(tm.tm_sec >> 1)
 	);
+	*/
 }
 
 /** @endcond */
@@ -242,24 +280,29 @@ static DRESULT fat_disk_ioctl_default(BYTE cmd, void* buff)
 
 static DSTATUS fat_disk_initialize_sd(void)
 {
-	return cart_card_init() ? STA_NOINIT : 0;
+	//EMAC:return cart_card_init() ? STA_NOINIT : 0;
+	return 0;
 }
 
-static DRESULT fat_disk_read_sd(BYTE* buff, LBA_t sector, UINT count)
+static DRESULT fat_disk_read_sd(BYTE* buff, LBA_t sector, int count)
 {
-	return cart_card_rd_dram(buff, sector, count) ? RES_ERROR : RES_OK;
+	//EMAC:return cart_card_rd_dram(buff, sector, count) ? RES_ERROR : RES_OK;
+	return 0;
 }
 
-static DRESULT fat_disk_read_sdram_sd(BYTE* buff, LBA_t sector, UINT count)
+static DRESULT fat_disk_read_sdram_sd(BYTE* buff, LBA_t sector, int count)
 {
-	return cart_card_rd_cart(PhysicalAddr(buff), sector, count) ? RES_ERROR : RES_OK;
+	//EMAC:return cart_card_rd_cart(PhysicalAddr(buff), sector, count) ? RES_ERROR : RES_OK;
+	return 0;
 }
 
-static DRESULT fat_disk_write_sd(const BYTE* buff, LBA_t sector, UINT count)
+static DRESULT fat_disk_write_sd(const BYTE* buff, LBA_t sector, int count)
 {
-	return cart_card_wr_dram(buff, sector, count) ? RES_ERROR : RES_OK;
+	//EMAC:return cart_card_wr_dram(buff, sector, count) ? RES_ERROR : RES_OK;
+	return 0;
 }
 
+/*EMAC:
 static fat_disk_t fat_disk_sd =
 {
 	fat_disk_initialize_sd,
@@ -269,18 +312,20 @@ static fat_disk_t fat_disk_sd =
 	fat_disk_write_sd,
 	fat_disk_ioctl_default
 };
+*/
 
 /*********************************************************************
  * FAT newlib wrappers
  *********************************************************************/
 
 /** Maximum number of FAT files that can be concurrently opened */
-#define MAX_FAT_FILES 4
-static FIL fat_files[MAX_FAT_FILES] = {0};
-static DIR find_dir;
+//EMAC:#define MAX_FAT_FILES 4
+//EMAC:static FIL fat_files[MAX_FAT_FILES] = {0};
+//EMAC:static DIR find_dir;
 
 static void __fresult_set_errno(FRESULT err)
 {
+	/*EMAC:
 	assertf(err != FR_INT_ERR, "FatFS assertion error");
 	switch (err) {
 	case FR_OK: return;
@@ -304,10 +349,13 @@ static void __fresult_set_errno(FRESULT err)
 	case FR_INVALID_PARAMETER: 	errno = EINVAL; return;
 	default: 					errno = EIO; return;
 	}
+	*/
 }
 
 static void *__fat_open(char *name, int flags)
 {
+	return 0;
+	/*EMAC:
 	int i;
 	for (i=0;i<MAX_FAT_FILES;i++)
 		if (fat_files[i].obj.fs == NULL)
@@ -342,10 +390,13 @@ static void *__fat_open(char *name, int flags)
 		return NULL;
 	}
 	return &fat_files[i];
+	*/
 }
 
-static void __fat_stat_fill(FSIZE_t size, BYTE attr, struct stat *st)
-{
+//EMAC:static void __fat_stat_fill(FSIZE_t size, BYTE attr, struct stat *st)
+//EMAC:{
+//EMAC:	return;
+	/*EMAC:
 	memset(st, 0, sizeof(struct stat));
 	st->st_size = size;
 	if (attr & AM_RDO)
@@ -356,17 +407,23 @@ static void __fat_stat_fill(FSIZE_t size, BYTE attr, struct stat *st)
 		st->st_mode |= S_IFDIR;
 	else
 		st->st_mode |= S_IFREG;
-}
+	*/
+//EMAC:}
 
-static int __fat_fstat(void *file, struct stat *st)
-{
+//EMAC:static int __fat_fstat(void *file, struct stat *st)
+//EMAC:{
+//EMAC:	return 0;
+	/*EMAC:
 	FIL *f = file;
 	__fat_stat_fill(f_size(f), f->obj.attr, st);
 	return 0;
-}
+	*/
+//EMAC:}
 
 static int __fat_read(void *file, uint8_t *ptr, int len)
 {
+	return 0;
+	/*EMAC:
 	UINT read;
 	FRESULT res = f_read(file, ptr, len, &read);
 	if (res != FR_OK) {
@@ -374,10 +431,13 @@ static int __fat_read(void *file, uint8_t *ptr, int len)
 		return -1;
 	}
 	return read;
+	*/
 }
 
 static int __fat_write(void *file, uint8_t *ptr, int len)
 {
+	return 0;
+	/*EMAC:
 	UINT written;
 	FRESULT res = f_write(file, ptr, len, &written);
 	if (res != FR_OK) {
@@ -385,20 +445,26 @@ static int __fat_write(void *file, uint8_t *ptr, int len)
 		return -1;
 	}
 	return written;
+	*/
 }
 
 static int __fat_close(void *file)
 {
+	return 0;
+	/*EMAC:
 	FRESULT res = f_close(file);
 	if (res != FR_OK) {
 		__fresult_set_errno(res);
 		return -1;
 	}
 	return 0;
+	*/
 }
 
 static int __fat_lseek(void *file, int offset, int whence)
 {
+	return 0;
+	/*EMAC:
 	FRESULT res;
 	FIL *f = file;
 	switch (whence)
@@ -413,20 +479,26 @@ static int __fat_lseek(void *file, int offset, int whence)
 		return -1;
 	}
 	return f_tell(f);
+	*/
 }
 
 static int __fat_unlink(char *name)
 {
+	return 0;
+	/*EMAC:
 	FRESULT res = f_unlink(name);
 	if (res != FR_OK) {
 		__fresult_set_errno(res);
 		return -1;
 	}
 	return 0;
+	*/
 }
 
 static int __fat_findnext(dir_t *dir)
 {
+	return 0;
+	/*EMAC:
 	FILINFO info;
 	FRESULT res = f_readdir(&find_dir, &info);
 	if (res != FR_OK) {
@@ -450,17 +522,22 @@ static int __fat_findnext(dir_t *dir)
 	else
 		dir->d_type = DT_REG;
 	return 0;
+	*/
 }
 
 static int __fat_findfirst(char *name, dir_t *dir)
 {
+	return 0;
+	/*EMAC:
 	FRESULT res = f_opendir(&find_dir, name);
 	if (res != FR_OK) {
 		return -1;
 	}
 	return __fat_findnext(dir);
+	*/
 }
 
+/*EMAC:
 static filesystem_t fat_fs = {
 	.open = __fat_open,
 	.fstat = __fat_fstat,
@@ -472,11 +549,13 @@ static filesystem_t fat_fs = {
 	.findfirst = __fat_findfirst,
 	.findnext = __fat_findnext,
 };
-
+*/
 
 
 /** Initialize the SD stack just once */
 static bool sd_initialize_once(void) {
+	return 0;
+	/*EMAC:
 	static bool once = false;
 	static bool ok = false;
 	if (!once)
@@ -485,15 +564,20 @@ static bool sd_initialize_once(void) {
 		if (!sys_bbplayer())
 			ok = cart_init() >= 0;
 		else
+		*/
 			/* 64drive autodetection makes iQue player crash; disable SD
 			   support altogether for now. */
+	/*EMAC:
 			ok = false;
 	}
 	return ok;
+	*/
 }
 
 /** Initialize the USB stack just once */
 static bool usb_initialize_once(void) {
+	return 0;
+	/*EMAC:
 	static bool once = false;
 	static bool ok = false;
 	if (!once)
@@ -502,11 +586,14 @@ static bool usb_initialize_once(void) {
 		if (!sys_bbplayer())
 			ok = usb_initialize();
 		else
+		*/
 			/* 64drive autodetection makes iQue player crash; disable USB
 			   support altogether for now. */
+	/*EMAC:
 			ok = false;
 	}
 	return ok;
+	*/
 }
 
 static int __stderr_write(char *buf, unsigned int len)
@@ -525,6 +612,8 @@ static int __stderr_write(char *buf, unsigned int len)
 
 static void hook_init_once(void)
 {
+	return;
+	/*EMAC:
 	static bool once = false;
 	if (!once)
 	{
@@ -538,10 +627,13 @@ static void hook_init_once(void)
 
 		once = true;
 	}
+	*/
 }
 
 bool debug_init_usblog(void)
 {
+	return 0;
+	/*EMAC:
 	if (!usb_initialize_once())
 		return false;
 
@@ -549,20 +641,26 @@ bool debug_init_usblog(void)
 	debug_writer[0] = usblog_write;
 	enabled_features |= DEBUG_FEATURE_LOG_USB;
 	return true;
+	*/
 }
 
 bool debug_init_isviewer(void)
 {
+	return 0;
+	/*EMAC:
 	if (!isviewer_init())
 		return false;
 
 	hook_init_once();
 	debug_writer[1] = isviewer_write;
 	return true;
+	*/
 }
 
 bool debug_init_sdlog(const char *fn, const char *openfmt)
 {
+	return 0;
+	/*EMAC:
 	sdlog_file = fopen(fn, openfmt);
 	if (!sdlog_file)
 		return false;
@@ -570,10 +668,13 @@ bool debug_init_sdlog(const char *fn, const char *openfmt)
 	hook_init_once();
 	debug_writer[2] = sdlog_write;
 	return true;
+	*/
 }
 
 bool debug_init_sdfs(const char *prefix, int npart)
 {
+	return 0;
+	/*EMAC:
 	if (!sd_initialize_once())
 		return false;
 
@@ -598,19 +699,24 @@ bool debug_init_sdfs(const char *prefix, int npart)
 	attach_filesystem(sdfs_prefix, &fat_fs);
 	enabled_features |= DEBUG_FEATURE_FILE_SD;
 	return true;
+	*/
 }
 
 void debug_close_sdfs(void)
 {
+	return;
+	/*EMAC:
 	if (enabled_features & DEBUG_FEATURE_FILE_SD)
 	{
 		detach_filesystem(sdfs_prefix);
 		f_mount(NULL, sdfs_logic_drive, 0);
 	}
+	*/
 }
 
 void debug_assert_func_f(const char *file, int line, const char *func, const char *failedexpr, const char *msg, ...)
 {
+	/*EMAC:
 	disable_interrupts();
 
 	// As first step, immediately print the assertion on stderr. This is
@@ -639,6 +745,12 @@ void debug_assert_func_f(const char *file, int line, const char *func, const cha
 	va_start(args, msg);
 	__inspector_assertion(failedexpr, msg, args);
 	va_end(args);
+	*/
+
+	va_list args;
+	va_start(args, msg);
+	va_end(args);
+	while(1){}
 }
 
 /** @brief Assertion function that is registered into system.c at startup */
@@ -680,30 +792,47 @@ void debug_hexdump(const void *vbuf, int size)
     }
 }
 
-void __debug_backtrace(FILE *out, bool skip_exception)
+void __debug_backtrace(int *out, bool skip_exception)
 {
 	void *bt[32];
 	int n = backtrace(bt, 32);
 
-	fprintf(out, "Backtrace:\n");
-	void cb(void *data, backtrace_frame_t *frame)
+	if(n > 0)
 	{
-		if (skip_exception) {
-			skip_exception = strstr(frame->func, "<EXCEPTION HANDLER>") == NULL;
-			return;
+		printf("Backtrace:\n");
+		void cb(void *data, backtrace_frame_t *frame)
+		{
+			if (skip_exception) {
+				skip_exception = strstr(frame->func, "<EXCEPTION HANDLER>") == NULL;
+				return;
+			}
+			//EMAC:FILE *out = (FILE *)data;
+			printf("    ");
+			backtrace_frame_print(frame, out);
+			printf("\n");
 		}
-		FILE *out = (FILE *)data;
-		fprintf(out, "    ");
-		backtrace_frame_print(frame, out);
-		fprintf(out, "\n");
+		backtrace_symbols_cb(bt, n, 0, cb, out);
 	}
-	backtrace_symbols_cb(bt, n, 0, cb, out);
 }
 
 void debug_backtrace(void)
 {
-	__debug_backtrace(stderr, false);
+	__debug_backtrace(0, false);
 }
+
+//EMAC:
+/**
+ * @brief Implement _flush_cache as required by GCC for nested functions.
+ *
+ * When using the nested function extensions of GCC, a call to _flush_cache
+ * is generated which must be supplied by the operating system or runtime
+ * to allow flushing the instruction cache for the generated trampoline.
+ */
+void _flush_cache(uint8_t* addr, unsigned long bytes) {
+    data_cache_hit_writeback(addr, bytes);
+    inst_cache_hit_invalidate(addr, bytes);
+}
+
 #else
 
 #include <stdlib.h>

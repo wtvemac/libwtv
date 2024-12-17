@@ -5,6 +5,7 @@
 #include "cop0.h"
 #include "cop1.h"
 #include "display.h"
+#include "backtrace.h"
 #include "exception.h"
 #include "font.h"
 #include "graphics.h"

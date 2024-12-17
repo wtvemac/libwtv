@@ -177,7 +177,8 @@ extern "C" {
 	 * only simplifies disabling all debugging features, because it
 	 * is disabled when compiling with NDEBUG.
 	 */
-	#define debugf(msg, ...)           fprintf(stderr, msg, ##__VA_ARGS__)
+	//EMAC:#define debugf(msg, ...)           fprintf(stderr, msg, ##__VA_ARGS__)
+	#define debugf(msg, ...)            printf(msg, ##__VA_ARGS__)
 
 	/** 
 	 * @brief assertf() is like assert() with an attached printf().
