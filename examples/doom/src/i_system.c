@@ -118,7 +118,7 @@ void tickercb(int ovfl) {
 //
 void I_Init(void)
 {
-    //EMAC:I_InitSound();
+    I_InitSound();
     //EMAC:I_InitMusic();
 
     timer_init();
