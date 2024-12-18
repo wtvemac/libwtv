@@ -60,11 +60,16 @@
 extern "C" {
 #endif
 
+#define WSRFC_Y_DARKEST      0x10
+#define WSRFC_Y_LIGHTEST     0xeb
+#define WSRFC_Y_RANGE        (WSRFC_Y_LIGHTEST - WSRFC_Y_DARKEST)
+#define WSRFC_UV_OFFSET      0x80
+
 #define LUMINANCE_CEIL(Y) \
-	((short)Y > (short)Y_LIGHTEST) ? (Y_LIGHTEST) : (Y)
+	((short)Y > (short)WSRFC_Y_LIGHTEST) ? (WSRFC_Y_LIGHTEST) : (Y)
 
 #define LUMINANCE_FLOOR(Y) \
-	((short)Y < (short)Y_DARKEST) ? (Y_DARKEST) : (Y)
+	((short)Y < (short)WSRFC_Y_DARKEST) ? (WSRFC_Y_DARKEST) : (Y)
 
 #define LUMINANCE_CLAMP(Y) \
 	LUMINANCE_CEIL(LUMINANCE_FLOOR(Y))
@@ -76,31 +81,26 @@ extern "C" {
 	(((Y1) << 0x18) | ((Cb) << 0x10) | ((Y2) << 0x08) | (Cr))
 
 #define RGB_TO_PREY(R, G, B) \
-	((((short)0x4d * (short)R) + ((short)0x96 * (short)G) + ((short)0x1d * (short)B) + (short)UV_OFFSET) >> 8)
+	((((short)0x4d * (short)R) + ((short)0x96 * (short)G) + ((short)0x1d * (short)B) + (short)WSRFC_UV_OFFSET) >> 8)
 
 #define RGB_TO_Y(R, G, B) \
-	LUMINANCE_CLAMP((((RGB_TO_PREY(R, G, B) * Y_RANGE) + UV_OFFSET) >> 8) + Y_DARKEST)
+	LUMINANCE_CLAMP((((RGB_TO_PREY(R, G, B) * WSRFC_Y_RANGE) + WSRFC_UV_OFFSET) >> 8) + WSRFC_Y_DARKEST)
 
 #define RGB_TO_CR(R, G, B) \
-	LUMINANCE_CLAMP(((((short)0xb7 * (short)(R - RGB_TO_PREY(R, G, B))) + (short)UV_OFFSET) >> 8) + UV_OFFSET)
+	LUMINANCE_CLAMP(((((short)0xb7 * (short)(R - RGB_TO_PREY(R, G, B))) + (short)WSRFC_UV_OFFSET) >> 8) + WSRFC_UV_OFFSET)
 
 #define RGB_TO_CB(R, G, B) \
-	LUMINANCE_CLAMP(((((short)0x90 * (short)(B - RGB_TO_PREY(R, G, B))) + (short)UV_OFFSET) >> 8) + UV_OFFSET)
+	LUMINANCE_CLAMP(((((short)0x90 * (short)(B - RGB_TO_PREY(R, G, B))) + (short)WSRFC_UV_OFFSET) >> 8) + WSRFC_UV_OFFSET)
 
 #define	RGB_TO_WTVCOLOR(R, G, B) \
 	(uint32_t)((RGB_TO_Y(R, G, B) << 0x10) | (RGB_TO_CR(R, G, B) << 0x08) | (RGB_TO_CB(R, G, B)))
 
-#define Y_DARKEST            0x10
-#define Y_LIGHTEST           0xeb
-#define Y_RANGE              (Y_LIGHTEST - Y_DARKEST)
-#define UV_OFFSET            0x80
-
-#define WHITE_COLOR          RGB_TO_WTVCOLOR(0xff, 0xff, 0xff)
-#define BLACK_COLOR          RGB_TO_WTVCOLOR(0x00, 0x00, 0x00)
-#define WTVBGR_COLOR         RGB_TO_WTVCOLOR(0x22, 0x22, 0x22)
-#define WTVTXT_COLOR         RGB_TO_WTVCOLOR(0x44, 0xcc, 0x55)
-#define WTVHDR_COLOR         RGB_TO_WTVCOLOR(0xe7, 0xce, 0x4a)
-#define WTVLNK_COLOR         RGB_TO_WTVCOLOR(0x18, 0x9c, 0xd6)
+#define WSRFC_WHITE_COLOR    RGB_TO_WTVCOLOR(0xff, 0xff, 0xff)
+#define WSRFC_BLACK_COLOR    RGB_TO_WTVCOLOR(0x00, 0x00, 0x00)
+#define WSRFC_WTVBGR_COLOR   RGB_TO_WTVCOLOR(0x22, 0x22, 0x22)
+#define WSRFC_WTVTXT_COLOR   RGB_TO_WTVCOLOR(0x44, 0xcc, 0x55)
+#define WSRFC_WTVHDR_COLOR   RGB_TO_WTVCOLOR(0xe7, 0xce, 0x4a)
+#define WSRFC_WTVLNK_COLOR   RGB_TO_WTVCOLOR(0x18, 0x9c, 0xd6)
 
 /// @cond
 // Macro to create a texture format, combining the RDP native "fmt/size" tuple.
