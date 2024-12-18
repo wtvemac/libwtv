@@ -2,6 +2,7 @@ all: doom.wtv.o
 .PHONY: all
 
 LIBWTV_INSTALL_DIR ?= /opt/libwtv
+OPTIMIZATION_OPTIONS = -O0
 
 BUILD_DIR = build
 SOURCE_DIR = $(CURDIR)/src
