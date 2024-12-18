@@ -233,7 +233,7 @@ void display_init(resolution_t res, pixel_mode_t format, uint32_t num_buffers, u
         //EMAC:assert(__safe_buffer[i] != NULL);
 
         /* Baseline is blank */
-        memset((uint32_t*)__safe_buffer[i], WSRFC_BLACK_COLOR, surfaces[i].length);
+        surface_blank(&surfaces[i]);
     }
 
     /* Set the first buffer as the displaying buffer */

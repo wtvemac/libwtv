@@ -95,6 +95,9 @@ extern "C" {
 #define	RGB_TO_WTVCOLOR(R, G, B) \
 	(uint32_t)((RGB_TO_Y(R, G, B) << 0x10) | (RGB_TO_CR(R, G, B) << 0x08) | (RGB_TO_CB(R, G, B)))
 
+#define WTVCOLOR_TO_WTV2PIXEL(color) \
+    (((color & 0x00ff0000) << 0x08) | ((color & 0x000000ff) << 0x10) | ((color & 0x00ff0000) >> 0x08) | ((color & 0x0000ff00) >> 0x08))
+
 #define WSRFC_WHITE_COLOR    RGB_TO_WTVCOLOR(0xff, 0xff, 0xff)
 #define WSRFC_BLACK_COLOR    RGB_TO_WTVCOLOR(0x00, 0x00, 0x00)
 #define WSRFC_WTVBGR_COLOR   RGB_TO_WTVCOLOR(0x22, 0x22, 0x22)
@@ -346,7 +349,8 @@ surface_t surface_alloc(pixel_mode_t format, uint16_t width, uint16_t height);
 surface_t surface_make_sub(surface_t *parent, 
     uint16_t x0, uint16_t y0, uint16_t width, uint16_t height);
 
-
+//EMAC:
+void surface_blank(const surface_t *surface);
 //EMAC:
 void surface_rgba16_to_yuv16(void *buffer, uint32_t length);
 //EMAC:

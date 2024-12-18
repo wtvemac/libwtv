@@ -67,6 +67,17 @@ surface_t surface_make_sub(surface_t *parent, uint16_t x0, uint16_t y0, uint16_t
 }
 
 //EMAC:
+void surface_blank(const surface_t *surface)
+{
+    uint32_t color = WTVCOLOR_TO_WTV2PIXEL(WSRFC_BLACK_COLOR);
+
+    for(int j = 0; j < surface->length; j += 4)
+    {
+        *((uint32_t*)(surface->buffer + j)) = color;
+    }
+}
+
+//EMAC:
 void surface_rgba16_to_yuv16(void *buffer, uint32_t length)
 {
     return;
