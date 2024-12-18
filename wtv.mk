@@ -37,6 +37,8 @@ BUILD_TARGET_CONSTANTS += box_storage_flash=5
 BUILD_TARGET_CONSTANTS += box_storage_idedisk=2
 BUILD_TARGET_CONSTANTS += box_storage_flashdisk=6
 
+OPTIMIZATION_OPTIONS   ?= -O3
+
 SOURCE_DIR             ?= .
 BUILD_DIR              ?= .
 
@@ -359,7 +361,7 @@ endif
 
 WTVLIB_FILE_SUFFIX      ?= $(BOX_CPU_ARCHITECTURE)-$(BOX_CPU_SUBARCHITECTURE)
 
-WTV_CCOMPILE_FLAGS       = -march=$(BOX_CPU_SUBARCHITECTURE) -O3 -MMD -I$(INCLUDE_DIR)
+WTV_CCOMPILE_FLAGS       = -march=$(BOX_CPU_SUBARCHITECTURE) $(OPTIMIZATION_OPTIONS) -MMD -I$(INCLUDE_DIR)
 WTV_CCOMPILE_FLAGS      += -mxgot -mno-abicalls -fno-pic -fno-plt
 WTV_CCOMPILE_FLAGS      += -nostdlib -nostdlib++ -nodefaultlibs -nostartfiles -ffreestanding
 WTV_CCOMPILE_FLAGS      += -falign-functions=32   # NOTE: if you change this, also change backtrace() in backtrace.c
