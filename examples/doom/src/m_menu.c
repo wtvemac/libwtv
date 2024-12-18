@@ -354,7 +354,7 @@ menuitem_t OptionsMenu[]=
 {
     {1,"M_ENDGAM",	M_EndGame,'e'},
     {1,"M_MESSG",	M_ChangeMessages,'m'},
-	{1,"X_VIDSET", M_VideoSettings,'v'},
+	//{1,"X_VIDSET", M_VideoSettings,'v'},
 	//{1,"M_DETAIL",	M_ChangeDetail,'g'},
     //{2,"M_SCRNSZ",	M_SizeDisplay,'s'},
     {2,"M_MSENS",	M_ChangeSensitivity,'m'},
