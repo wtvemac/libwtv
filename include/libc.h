@@ -16,7 +16,8 @@ typedef intptr_t ssize_t;
 
 #define calloc(nelem, size) malloc(heap, nelem * size)
 
-//EMAC: refactor
+//EMAC: refactor. This is temporary
+#define core_init_temp heap_init2
 void heap_init2();
 
 void heap_init(void* const base, const size_t size);
