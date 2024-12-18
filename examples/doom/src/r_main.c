@@ -427,8 +427,6 @@ void R_InitTextureMapping (void)
     // centerxfrac * 65536 / roughly 65536
     focallength = centerxfrac; //FixedDiv (centerxfrac, finetangentf(FINEANGLES/4+FIELDOFVIEW/2));
 
-    printf("R_InitTextureMapping1\n");
-
     for (i=0 ; i<FINEANGLES/2 ; i++)
     {
         if (finetangentf(i) > (FRACUNIT*2))
@@ -453,8 +451,6 @@ void R_InitTextureMapping (void)
         viewangletox[i] = t;
     }
 
-    printf("R_InitTextureMapping2\n");
-
     // Scan viewangletox[] to generate xtoviewangle[]:
     //  xtoviewangle will give the smallest view angle
     //  that maps to x.
@@ -468,8 +464,6 @@ void R_InitTextureMapping (void)
         xtoviewangle[x] = (i<<ANGLETOFINESHIFT)-ANG90;
     }
 
-    printf("R_InitTextureMapping3\n");
-
     // Take out the fencepost cases from viewangletox.
     for (i=0 ; i<FINEANGLES/2 ; i++)
     {
@@ -482,8 +476,6 @@ void R_InitTextureMapping (void)
         else if (viewangletox[i] == viewwidth+1)
             viewangletox[i]  = viewwidth;
     }
-
-    printf("R_InitTextureMapping4\n");
 
     clipangle = xtoviewangle[0];
 }
