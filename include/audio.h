@@ -13,6 +13,7 @@ typedef short asamp;
 #define DEFAULT_AUDIO_CLOCK 44100
 
 void audio_init(int frequency, int numbuffers);
+void audio_write_temp(void* buffer, uint32_t length); // This is temporary for testing.
 
 #ifdef __cplusplus
 }

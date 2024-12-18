@@ -300,7 +300,7 @@ void sound_callback(void)
 void I_InitSound (void)
 {
     int i;
-
+    
     audio_init(SAMPLERATE, 0);
     // need to use uncached address of these buffers when rendering audio
     pcmout[0] = (int16_t *)((uintptr_t)pcmout1 | 0xA0000000);
@@ -329,11 +329,11 @@ void I_InitSound (void)
     printf ("I_InitSound: Pre-cached all sound data.\n");
 
     // install sound callback
-    //EMAC:register_AI_handler(sound_callback);
+    register_AUDIO_OUT_handler(sound_callback);
     printf("I_InitSound: Audio Interface callback registered.\n");
-    //EMAC:set_AI_interrupt(1);
+    set_AUDIO_OUT_interrupt(true);
     printf("I_InitSound: Audio Interface interrupt enabled.\n");
-    //EMAC:sound_callback();
+    sound_callback();
 
     // Finished initialization.
     printf("I_InitSound: Sound module ready.\n");
@@ -348,21 +348,25 @@ void I_InitSound (void)
 // ... update sound buffer and audio device at runtime...
 void I_SubmitSound (void)
 {
-    if (!(AI_regs->status & AI_STATUS_FULL))
+    audio_write_temp(pcmbuf, NUM_SAMPLES*2*2);
+    pcmflip ^= 1;
+    pcmbuf = pcmout[pcmflip];
+
+    /*if (!(AI_regs->status & AI_STATUS_FULL))
     {
         AI_regs->address = (void*)pcmbuf;
         AI_regs->length = NUM_SAMPLES*2*2;
         AI_regs->control = 1;
         pcmflip ^= 1;
         pcmbuf = pcmout[pcmflip];
-    }
+    }*/
 }
 
 /**********************************************************************/
 // ... shut down and relase at program termination.
 void I_ShutdownSound (void)
 {
-    //EMAC:set_AI_interrupt(0);
+    set_AUDIO_OUT_interrupt(0);
 }
 
 /**********************************************************************/
@@ -397,7 +401,7 @@ int I_StartSound (
   int priority )
 {
     I_StopSound(cnum);
-    Sfx_Start (S_sfx[id].data, cnum, changepitch ? 2765 + (((pitch<<2) + pitch)<<5) : 11025, vol, sep, lengths[id]);
+    Sfx_Start (S_sfx[id].data, cnum, changepitch ? 2765 + (((pitch<<2) + pitch)<<5) : SAMPLERATE, vol, sep, lengths[id]);
     return cnum;
 }
 
@@ -471,7 +475,7 @@ void I_InitMusic(void)
 /**********************************************************************/
 void I_ShutdownMusic(void)
 {
-    //EMAC:set_AI_interrupt(0);
+    set_AUDIO_OUT_interrupt(0);
 }
 
 /**********************************************************************/

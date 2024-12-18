@@ -102,6 +102,14 @@ static void __audio_callback()
 {
 }
 
+void audio_write_temp(void* buffer, uint32_t length)
+{
+	REGISTER_WRITE(AUD_OUT_NSTART, PhysicalAddr(buffer));
+	REGISTER_WRITE(AUD_OUT_NSIZE, length);
+
+	REGISTER_WRITE(AUD_OUT_DMA_CNTL, AUD_DMA_EN | AUD_NV | AUD_NVF);
+}
+
 void audio_init(int frequency, int numbuffers)
 {
 	if(frequency == 0) 
@@ -168,8 +176,8 @@ void audio_init(int frequency, int numbuffers)
 
 	REGISTER_WRITE(AUD_OUT_DMA_CNTL, AUD_DMA_EN | AUD_NV | AUD_NVF);
 
-	register_AUDIO_OUT_handler(__audio_callback);
-	set_AUDIO_OUT_interrupt(true);
+	//register_AUDIO_OUT_handler(__audio_callback);
+	//set_AUDIO_OUT_interrupt(true);
 
 	// audio in interrupt would start here for solo-based boxes.
 
