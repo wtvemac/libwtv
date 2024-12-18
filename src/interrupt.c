@@ -648,8 +648,7 @@ void set_AUDIO_OUT_interrupt(bool active)
 }
 void __AUDIO_OUT_handler() // SPOT
 {
-	serial_put_string("__AUDIO_OUT_handler\x0a\x0d");
-	//progress_audio();
+	//serial_put_string("__AUDIO_OUT_handler\x0a\x0d");
 	
 	__call_callback(AUDIO_OUT_callback);
 }
