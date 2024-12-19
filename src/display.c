@@ -140,18 +140,18 @@ void display_init(resolution_t res, pixel_mode_t format, uint32_t num_buffers, u
     //EMAC:assertf(res.width <= 800, "invalid width");
     //EMAC:assertf(res.height <= 720, "heights > 720 are buggy on hardware");
 
-    uint32_t hstart = res.hstart;
-    uint32_t vstart = res.vstart;
+    int32_t hstart = res.hstart;
+    int32_t vstart = res.vstart;
     
     if(res.pal)
     {
         if(hstart == -1)
         {
-            hstart = (uint32_t)((MAX_PAL_WIDTH - res.width) / 2);
+            hstart = ((MAX_PAL_WIDTH - res.width) / 2);
         }
         if(vstart == -1)
         {
-            vstart = (uint32_t)((MAX_PAL_HEIGHT - res.height) / 2);
+            vstart = ((MAX_PAL_HEIGHT - res.height) / 2);
             
         }
     }
@@ -159,25 +159,33 @@ void display_init(resolution_t res, pixel_mode_t format, uint32_t num_buffers, u
     {
         if(hstart == -1)
         {
-            hstart = (uint32_t)((MAX_NTSC_WIDTH - res.width) / 2);
+            hstart = ((MAX_NTSC_WIDTH - res.width) / 2);
         }
         if(vstart == -1)
         {
-            vstart = (uint32_t)((MAX_NTSC_HEIGHT - res.height) / 2);
+            vstart = ((MAX_NTSC_HEIGHT - res.height) / 2);
         }
     }
 
     hstart += HSTART_OFFSET;
     vstart += VSTART_OFFSET;
 
-    
+    uint32_t vsize;
+    if(res.interlaced)
+    {
+        vsize = res.height >> 1;
+    }
+    else
+    {
+        vsize = res.height;
+    }
+
     if(is_spot_box())
 	{
 		REGISTER_WRITE(VID_HSIZE, res.width);
 		REGISTER_WRITE(VID_HSTART, hstart);
 
-		//REGISTER_WRITE(VID_VSIZE, res.height);
-		REGISTER_WRITE(VID_VSIZE, res.height >> 1);
+		REGISTER_WRITE(VID_VSIZE, vsize);
 		REGISTER_WRITE(VID_VSTART, vstart);
 
 		REGISTER_WRITE(VID_BLNKCOL, border_color);
@@ -192,8 +200,7 @@ void display_init(resolution_t res, pixel_mode_t format, uint32_t num_buffers, u
 		REGISTER_WRITE(POT_HSIZE, res.width);
 		REGISTER_WRITE(POT_HSTART, hstart);
 
-		REGISTER_WRITE(POT_VSIZE, res.height);
-		//REGISTER_WRITE(POT_VSIZE, res.height >> 1);
+		REGISTER_WRITE(POT_VSIZE, vsize);
 		REGISTER_WRITE(POT_VSTART, vstart);
 
 		REGISTER_WRITE(POT_BLNKCOL, border_color);
@@ -245,6 +252,17 @@ void display_init(resolution_t res, pixel_mode_t format, uint32_t num_buffers, u
     REGISTER_WRITE(VID_NSIZE, surfaces[0].length);
 
     display_enable();
+
+    // Set vsize after we enable the display to fix a bug in MAME
+    if(is_spot_box())
+    {
+        REGISTER_WRITE(VID_VSIZE, vsize);
+    }
+    else
+    {
+        REGISTER_WRITE(POT_VSIZE, vsize);
+    }
+
 
     /* Set which line to call back on in order to flip screens */
     if(is_spot_box())
