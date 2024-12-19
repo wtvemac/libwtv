@@ -156,31 +156,28 @@ void free(void* const pointer)
 
 void* memalign(size_t alignment, const size_t amount)
 {
-	//EMAC:assertf((alignment & 0x1) != 0, "invalid alignment %d: must be multiple of 2", alignment);
+	size_t unaligned_amount = amount + alignment;
+	uint8_t* unaligned_buffer = malloc(unaligned_amount);
 
-	void* out_pointer = NULL;
+	uint8_t unaligned_skew = alignment - (((size_t)unaligned_buffer) % alignment);
 
-	const size_t memalign_amount = (alignment - 1) + sizeof(void*) + amount;
+	uint8_t* pointer = unaligned_buffer + unaligned_skew;
 
-	void* memalign_pointer = malloc(memalign_amount);
+	// Store amount of bytes offset from the original malloced buffer to align this buffer.
+	// This is important so we can free the buffer properly.
+	*(pointer - 1) = unaligned_skew;
 
-	if (memalign_pointer)
-	{
-		out_pointer = (void*)((size_t)(memalign_pointer + sizeof(void*) + alignment) & ~alignment);
-
-		*((size_t*)(out_pointer - sizeof(void*))) = (size_t)memalign_pointer;
-	}
-
-	return out_pointer;
+	return (void*)pointer;
 }
 
 void freealign(void* const pointer)
 {
 	if (pointer)
 	{
-		void *memalign_pointer = (void*)((size_t)pointer - sizeof(void*));
+		// Grab the amoutn of bytes offset to align the this buffer from memalign
+		uint8_t unaligned_skew = *(((uint8_t*)pointer) - 1);
 
-		free(memalign_pointer);
+		free(((uint8_t*)pointer) - unaligned_skew);
 	}
 }
 
