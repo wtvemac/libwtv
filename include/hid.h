@@ -14,6 +14,7 @@ hid_state hid_keys_pressed();
 hid_state hid_keys_held();
 hid_state hid_keys_down();
 hid_state hid_keys_up();
+void hid_close();
 
 // libdragon calls
 
@@ -92,6 +93,7 @@ typedef struct controller_data
 
 #define controller_init hid_init
 #define controller_scan hid_scan
+#define controller_close hid_close
 
 void controller_read(struct controller_data* output);
 struct controller_data get_keys_pressed();

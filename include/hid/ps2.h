@@ -66,6 +66,7 @@ uint8_t ps2_set_leds(uint8_t led_state);
 char* ps2_get_identity();
 bool ps2_is_mouse();
 uint16_t dequeue_ps2_buffer();
+bool ps2_close();
 
 #ifdef __cplusplus
 }

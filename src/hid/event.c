@@ -263,3 +263,23 @@ bool process_hid_buffers()
 
 	return has_processed_buffers;
 }
+
+void hid_events_disable(uint32_t disable_events)
+{
+	if(disable_events & EVENT_IR)
+	{
+		ir_close();
+	}
+
+	if(disable_events & EVENT_PS2)
+	{
+		ps2_close();
+	}
+
+	_enabled_events &= ~disable_events;
+}
+
+void hid_events_disable_all()
+{
+	hid_events_disable(EVENT_IR | EVENT_PS2);
+}

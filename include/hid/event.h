@@ -41,6 +41,8 @@ void hid_events_enable_all();
 hid_state hid_current_state();
 hid_event dequeue_hid_event();
 bool process_hid_buffers();
+void hid_events_disable(uint32_t disable_events);
+void hid_events_disable_all();
 
 #ifdef __cplusplus
 }

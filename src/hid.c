@@ -110,6 +110,11 @@ hid_state hid_keys_up()
 	return ret;
 }
 
+void hid_close()
+{
+	hid_events_disable_all();
+}
+
 struct controller_data __hid_state_to_controller_data(hid_state state)
 {
 	struct controller_data ret;
