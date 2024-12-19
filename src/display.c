@@ -192,8 +192,8 @@ void display_init(resolution_t res, pixel_mode_t format, uint32_t num_buffers, u
 		REGISTER_WRITE(POT_HSIZE, res.width);
 		REGISTER_WRITE(POT_HSTART, hstart);
 
-		//REGISTER_WRITE(POT_VSIZE, res.height);
-		REGISTER_WRITE(POT_VSIZE, res.height >> 1);
+		REGISTER_WRITE(POT_VSIZE, res.height);
+		//REGISTER_WRITE(POT_VSIZE, res.height >> 1);
 		REGISTER_WRITE(POT_VSTART, vstart);
 
 		REGISTER_WRITE(POT_BLNKCOL, border_color);
