@@ -36,7 +36,7 @@ surface_t surface_alloc(pixel_mode_t format, uint16_t width, uint16_t height)
         .height = height,
         .stride = TEX_FORMAT_PIX2BYTES(format, width),
         .length = TEX_FORMAT_PIX2BYTES(format, width) * height,
-        .buffer = malloc_uncached_aligned(64, TEX_FORMAT_PIX2BYTES(format, width) * height),
+        .buffer = malloc_uncached_aligned(32, TEX_FORMAT_PIX2BYTES(format, width) * height),
     };
 }
 
