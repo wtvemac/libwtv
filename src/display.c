@@ -260,6 +260,13 @@ void display_init(resolution_t res, pixel_mode_t format, uint32_t num_buffers, u
     enable_interrupts();
 }
 
+void display_init_direct(resolution_t res, pixel_mode_t format, uint32_t border_color)
+{
+    display_init(res, format, 1, border_color);
+
+    surfaces[0].flags |= SURFACE_FLAGS_DIRECT;
+}
+
 void display_close()
 {
     display_disable();
@@ -318,7 +325,7 @@ surface_t* display_try_get()
        wait for that buffer to be shown. */
     next = buffer_next(now_showing);
     do {
-        if (((locked_display_mask | waiting_for_show_mask) & (1 << next)) == 0 || true)  {
+        if (((locked_display_mask | waiting_for_show_mask) & (1 << next)) == 0 || (surfaces[next].flags & SURFACE_FLAGS_DIRECT))  {
             retval = &surfaces[next];
             locked_display_mask |= 1 << next;
             break;

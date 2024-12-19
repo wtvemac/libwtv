@@ -181,7 +181,7 @@ void I_InitGraphics(void)
 
     printf("EMAC: init screen SCREENWIDTH=%08x, SCREENHEIGHT=%08x\x0a\x0d", SCREENWIDTH, SCREENHEIGHT);
     //EMAC:
-    display_init( (resolution_t)
+    display_init_direct( (resolution_t)
 	{
 		.width = SCREENWIDTH,
 		.height = SCREENHEIGHT,
@@ -189,8 +189,7 @@ void I_InitGraphics(void)
         .pal = false,
         .hstart = -1,
         .vstart = -1,
-	}, FMT_YUV16, 2, 0x90909090);
-    //display_init(RESOLUTION_560x420, 1, 0x80);
+	}, FMT_YUV16, 0x90909090);
 
     I_SetDefaultPalette();
 

@@ -131,6 +131,8 @@ typedef surface_t* display_context_t;
  */
 void display_init(resolution_t res, pixel_mode_t format, uint32_t num_buffers, uint32_t border_color);
 
+void display_init_direct(resolution_t res, pixel_mode_t format, uint32_t border_color);
+
 /**
  * @brief Close the display
  *

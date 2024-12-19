@@ -53,7 +53,6 @@ void draw_fiducials()
 
 	// NOTE: the way colors are defined will change.
 
-
 	int size = 20;
 
 	// Top left
@@ -64,6 +63,8 @@ void draw_fiducials()
 	graphics_draw_box(disp, 0, (disp->height - size), size, size, WTVCOLOR_TO_WTV2PIXEL(WSRFC_WTVHDR_COLOR));
 	// Bottom right
 	graphics_draw_box(disp, (disp->width - size), (disp->height - size), size, size, WTVCOLOR_TO_WTV2PIXEL(WSRFC_WTVLNK_COLOR));
+	
+	display_show(disp);
 }
 
 void draw_poopie(int x, int y)
@@ -94,6 +95,8 @@ void draw_poopie(int x, int y)
 			sy++;
 		}
 	}
+
+	display_show(disp);
 }
 
 void sound_callback()

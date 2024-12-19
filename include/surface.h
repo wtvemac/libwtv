@@ -236,7 +236,7 @@ const char* tex_format_name(pixel_mode_t fmt);
 #define SURFACE_FLAGS_TEXFORMAT    0x001F   ///< Pixel format of the surface
 #define SURFACE_FLAGS_OWNEDBUFFER  0x0020   ///< Set if the buffer must be freed
 #define SURFACE_FLAGS_TEXINDEX     0x0F00   ///< Placeholder for rdpq lookup table
-
+#define SURFACE_FLAGS_DIRECT       0x0080   ///< Don't check if buffer is locked, allow uncontrolled access.
 /**
  * @brief A surface buffer for graphics
  * 
