@@ -100,15 +100,15 @@ static void __display_callback()
 //EMAC:
 void display_disable()
 {
-    REGISTER_XOR_WRITE(VID_DMA_CNTL, VID_DMA_EN | VID_NV | VID_NVF);
+    REGISTER_WRITE(VID_DMA_CNTL, (REGISTER_READ(VID_DMA_CNTL) & ~(VID_DMA_EN | VID_NV | VID_NVF)));
 
 	if(is_spot_box())
 	{
-        REGISTER_XOR_WRITE(VID_FCNTL, VID_OUT_EN);
+        REGISTER_WRITE(VID_FCNTL, (REGISTER_READ(VID_FCNTL) & ~(VID_OUT_EN)));
 	}
 	else
 	{
-        REGISTER_XOR_WRITE(POT_CNTL, POT_OUT_EN);
+        REGISTER_WRITE(POT_CNTL, (REGISTER_READ(POT_CNTL) & ~(POT_OUT_EN)));
 	}
 }
 
