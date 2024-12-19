@@ -183,3 +183,9 @@ void audio_init(int frequency, int numbuffers)
 
 	enable_interrupts();
 }
+
+void audio_close()
+{
+	unregister_AUDIO_OUT_handler(__audio_callback);
+	set_AUDIO_OUT_interrupt(false);
+}
