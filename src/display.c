@@ -247,7 +247,14 @@ void display_init(resolution_t res, pixel_mode_t format, uint32_t num_buffers, u
     display_enable();
 
     /* Set which line to call back on in order to flip screens */
-    register_VIDEO_VIDUNIT_handler(__display_callback);
+    if(is_spot_box())
+	{
+        register_VIDEO_VIDUNIT_handler(__display_callback);
+    }
+    else
+    {
+        register_VIDEO_POTUNIT_handler(__display_callback);
+    }
     set_VIDEO_VIDUNIT_interrupt(1, VID_INT_DMA);
 
     enable_interrupts();
@@ -261,6 +268,7 @@ void display_close()
     disable_interrupts();
 
     set_VIDEO_VIDUNIT_interrupt(0, VID_INT_DMA);
+    unregister_VIDEO_VIDUNIT_handler(__display_callback);
     unregister_VIDEO_POTUNIT_handler(__display_callback);
 
     now_showing = -1;
@@ -283,10 +291,10 @@ void display_close()
         for( int i = 0; i < __buffers; i++ )
         {
             /* Free framebuffer memory */
-            surface_free(&surfaces[i]);
+            //surface_free(&surfaces[i]);
             __safe_buffer[i] = NULL;
         }
-        free(surfaces);
+        //free(surfaces);
         surfaces = NULL;
     }
 
