@@ -79,7 +79,6 @@ install: install-mk libwtv
 	install -Cv -m 0644 include/debug.h $(INSTALL_DIR)/include/debug.h
 	install -Cv -m 0644 include/exception.h $(INSTALL_DIR)/include/exception.h
 	install -Cv -m 0644 include/iic.h $(INSTALL_DIR)/include/iic.h
-	install -Cv -m 0644 include/kbinput.h $(INSTALL_DIR)/include/kbinput.h
 	install -Cv -m 0644 include/ssid.h $(INSTALL_DIR)/include/ssid.h
 	install -Cv -m 0644 include/console.h $(INSTALL_DIR)/include/console.h
 	install -Cv -m 0644 include/timer.h $(INSTALL_DIR)/include/timer.h
