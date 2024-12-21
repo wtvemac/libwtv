@@ -53,6 +53,19 @@ exception_handler:
 	nop
 
 noninterrupt_exception:
+	sw    s0, (STACK_GPR + (R_S0 * 4))(sp) # S0
+	sw    s1, (STACK_GPR + (R_S1 * 4))(sp) # S1
+	sw    s2, (STACK_GPR + (R_S2 * 4))(sp) # S2
+	sw    s3, (STACK_GPR + (R_S3 * 4))(sp) # S3
+	sw    s4, (STACK_GPR + (R_S4 * 4))(sp) # S4
+	sw    s5, (STACK_GPR + (R_S5 * 4))(sp) # S5
+	sw    s6, (STACK_GPR + (R_S6 * 4))(sp) # S6
+	sw    s7, (STACK_GPR + (R_S7 * 4))(sp) # S7
+	sw    k0, (STACK_GPR + (R_K0 * 4))(sp) # K0
+	sw    k1, (STACK_GPR + (R_K1 * 4))(sp) # K1
+	sw    gp, (STACK_GPR + (R_GP * 4))(sp) # GP
+	sw    sp, (STACK_GPR + (R_SP * 4))(sp) # SP
+	sw    fp, (STACK_GPR + (R_FP * 4))(sp) # FP
 	jal   __onCriticalException
 	addiu a0, sp, 32
 	j     return_from_exception

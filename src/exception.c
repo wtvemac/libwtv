@@ -56,7 +56,7 @@ void __exception_dump_header(FILE *out, exception_t* ex) {
 	uint32_t cr = ex->regs->cr;
 	uint32_t fcr31 = ex->regs->fc31;
 
-	//EMAC:fprintf(out, "%s exception at PC:%08x\n", ex->info, (uint32_t)(ex->regs->epc + ((cr & C0_CAUSE_BD) ? 4 : 0)));
+	//EMAC:fprintf(out, "%s exception at PC:%08x\x0a\x0d", ex->info, (uint32_t)(ex->regs->epc + ((cr & C0_CAUSE_BD) ? 4 : 0)));
 	switch (ex->code) {
 		case EXCEPTION_CODE_STORE_ADDRESS_ERROR:
 		case EXCEPTION_CODE_LOAD_I_ADDRESS_ERROR:
@@ -65,7 +65,7 @@ void __exception_dump_header(FILE *out, exception_t* ex) {
 		case EXCEPTION_CODE_I_BUS_ERROR:
 		case EXCEPTION_CODE_D_BUS_ERROR:
 		case EXCEPTION_CODE_TLB_MODIFICATION: {
-			//EMAC:fprintf(out, "Exception address: %08x\n", C0_BADVADDR());
+			//EMAC:fprintf(out, "Exception address: %08x\x0a\x0d", C0_BADVADDR());
 		}
 
 		case EXCEPTION_CODE_FLOATING_POINT: {
@@ -77,16 +77,16 @@ void __exception_dump_header(FILE *out, exception_t* ex) {
 			//EMAC:if (fcr31 & C1_CAUSE_DIV_BY_0) fprintf(out, "%sDIV0", space), space=" ";
 			//EMAC:if (fcr31 & C1_CAUSE_INVALID_OP) fprintf(out, "%sINVALID", space), space=" ";
 			//EMAC:if (fcr31 & C1_CAUSE_NOT_IMPLEMENTED) fprintf(out, "%sNOTIMPL", space), space=" ";
-			//EMAC:fprintf(out, "]\n");
+			//EMAC:fprintf(out, "]\x0a\x0d");
 			break;
 		}
 
 		case EXCEPTION_CODE_COPROCESSOR_UNUSABLE:
-			//EMAC:fprintf(out, "COP: %ld\n", C0_GET_CAUSE_CE(cr));
+			//EMAC:fprintf(out, "COP: %ld\x0a\x0d", C0_GET_CAUSE_CE(cr));
 			break;
 
 		case EXCEPTION_CODE_WATCH:
-			//EMAC:fprintf(out, "Watched address: %08x\n", C0_WATCHLO() & ~3);
+			//EMAC:fprintf(out, "Watched address: %08x\x0a\x0d", C0_WATCHLO() & ~3);
 			break;
 
 		default:
@@ -147,26 +147,26 @@ void __exception_dump_fpr(exception_t* ex, void (*cb)(void *arg, const char *reg
 
 #ifndef NDEBUG
 static void debug_exception(exception_t* ex) {
-	//EMAC:debugf("\n\n******* CPU EXCEPTION *******\n");
+	//EMAC:debugf("\x0a\x0d\x0a\x0d******* CPU EXCEPTION *******\x0a\x0d");
 	//EMAC:__exception_dump_header(stderr, ex);
 
 	if (true) {
 		int idx = 0;
 		void cb(void *arg, const char *regname, char* value) {
-			//EMAC:debugf("%s: %s%s", regname, value, ++idx % 4 ? "   " : "\n");
+			//EMAC:debugf("%s: %s%s", regname, value, ++idx % 4 ? "   " : "\x0a\x0d");
 		}
-		//EMAC:debugf("GPR:\n"); 
+		//EMAC:debugf("GPR:\x0a\x0d"); 
 		__exception_dump_gpr(ex, cb, NULL);
-		//EMAC:debugf("\n\n");
+		//EMAC:debugf("\x0a\x0d\x0a\x0d");
 	}	
 	
 	if (ex->code == EXCEPTION_CODE_FLOATING_POINT) {
 		void cb(void *arg, const char *regname, char* hex, char *singlep) {
-			//EMAC:debugf("%4s: %s (%16s)\n", regname, hex, singlep);
+			//EMAC:debugf("%4s: %s (%16s)\x0a\x0d", regname, hex, singlep);
 		}
-		//EMAC:debugf("FPR:\n"); 
+		//EMAC:debugf("FPR:\x0a\x0d"); 
 		__exception_dump_fpr(ex, cb, NULL);
-		//EMAC:debugf("\n");
+		//EMAC:debugf("\x0a\x0d");
 	}
 }
 #endif
@@ -337,32 +337,45 @@ void __onCriticalException(reg_block_t* regs)
 	exception_t e;
 	__fetch_regs(&e, EXCEPTION_TYPE_CRITICAL, regs);
 
-	printf("====> WE CRASHED <====\n");
-	printf("ERROR [%08x]: %s\n\n", e.code, e.info);
-	printf("Dumppage:\n");
-	printf("\tSR:  0x%08x <----\n", e.regs->sr);
-	printf("\tCR:  0x%08x <----\n", e.regs->cr);
-	printf("\tEPC: 0x%08x <----\n", e.regs->epc);
-	printf("\tHI:  0x%08x\n", e.regs->hi);
-	printf("\tLO:  0x%08x\n", e.regs->lo);
-	printf("\tat:  0x%08x\n", e.regs->gpr[0]);
-	printf("\tv0:  0x%08x\n", e.regs->gpr[1]);
-	printf("\tv1:  0x%08x\n", e.regs->gpr[2]);
-	printf("\ta0:  0x%08x\n", e.regs->gpr[3]);
-	printf("\ta1:  0x%08x\n", e.regs->gpr[4]);
-	printf("\ta2:  0x%08x\n", e.regs->gpr[5]);
-	printf("\ta3:  0x%08x\n", e.regs->gpr[6]);
-	printf("\tt0:  0x%08x\n", e.regs->gpr[7]);
-	printf("\tt1:  0x%08x\n", e.regs->gpr[8]);
-	printf("\tt2:  0x%08x\n", e.regs->gpr[9]);
-	printf("\tt3:  0x%08x\n", e.regs->gpr[10]);
-	printf("\tt4:  0x%08x\n", e.regs->gpr[11]);
-	printf("\tt5:  0x%08x\n", e.regs->gpr[12]);
-	printf("\tt6:  0x%08x\n", e.regs->gpr[13]);
-	printf("\tt7:  0x%08x\n", e.regs->gpr[14]);
-	printf("\tt8:  0x%08x\n", e.regs->gpr[15]);
-	printf("\tt9:  0x%08x\n", e.regs->gpr[16]);
-	printf("\tra:  0x%08x <----\n", e.regs->gpr[17]);
+	printf("====> OH SHIT, I DIED <====\x0a\x0d");
+	printf("ERROR [%08x]: %s\x0a\x0d\x0a\x0d", e.code, e.info);
+	printf("Dumppage:\x0a\x0d");
+	printf("\tSR:  0x%08x <----\x0a\x0d", e.regs->sr);
+	printf("\tCR:  0x%08x <----\x0a\x0d", e.regs->cr);
+	printf("\tEPC: 0x%08x <----\x0a\x0d", e.regs->epc);
+	printf("\tHI:  0x%08x\x0a\x0d", e.regs->hi);
+	printf("\tLO:  0x%08x\x0a\x0d", e.regs->lo);
+	printf("\tat:  0x%08x\x0a\x0d", e.regs->gpr[0]);
+	printf("\tv0:  0x%08x\x0a\x0d", e.regs->gpr[1]);
+	printf("\tv1:  0x%08x\x0a\x0d", e.regs->gpr[2]);
+	printf("\ta0:  0x%08x\x0a\x0d", e.regs->gpr[3]);
+	printf("\ta1:  0x%08x\x0a\x0d", e.regs->gpr[4]);
+	printf("\ta2:  0x%08x\x0a\x0d", e.regs->gpr[5]);
+	printf("\ta3:  0x%08x\x0a\x0d", e.regs->gpr[6]);
+	printf("\tt0:  0x%08x\x0a\x0d", e.regs->gpr[7]);
+	printf("\tt1:  0x%08x\x0a\x0d", e.regs->gpr[8]);
+	printf("\tt2:  0x%08x\x0a\x0d", e.regs->gpr[9]);
+	printf("\tt3:  0x%08x\x0a\x0d", e.regs->gpr[10]);
+	printf("\tt4:  0x%08x\x0a\x0d", e.regs->gpr[11]);
+	printf("\tt5:  0x%08x\x0a\x0d", e.regs->gpr[12]);
+	printf("\tt6:  0x%08x\x0a\x0d", e.regs->gpr[13]);
+	printf("\tt7:  0x%08x\x0a\x0d", e.regs->gpr[14]);
+	printf("\tt8:  0x%08x\x0a\x0d", e.regs->gpr[23]);
+	printf("\tt9:  0x%08x\x0a\x0d", e.regs->gpr[24]);
+	printf("\ts0:  0x%08x\x0a\x0d", e.regs->gpr[15]);
+	printf("\ts1:  0x%08x\x0a\x0d", e.regs->gpr[16]);
+	printf("\ts2:  0x%08x\x0a\x0d", e.regs->gpr[17]);
+	printf("\ts3:  0x%08x\x0a\x0d", e.regs->gpr[18]);
+	printf("\ts4:  0x%08x\x0a\x0d", e.regs->gpr[19]);
+	printf("\ts5:  0x%08x\x0a\x0d", e.regs->gpr[20]);
+	printf("\ts6:  0x%08x\x0a\x0d", e.regs->gpr[21]);
+	printf("\ts7:  0x%08x\x0a\x0d", e.regs->gpr[22]);
+	printf("\tk0:  0x%08x\x0a\x0d", e.regs->gpr[25]);
+	printf("\tk1:  0x%08x\x0a\x0d", e.regs->gpr[26]);
+	printf("\tgp:  0x%08x\x0a\x0d", e.regs->gpr[27]);
+	printf("\tsp:  0x%08x\x0a\x0d", e.regs->gpr[28]);
+	printf("\tfp:  0x%08x\x0a\x0d", e.regs->gpr[29]);
+	printf("\tra:  0x%08x <----\x0a\x0d", e.regs->gpr[30]);
 	
 	debug_backtrace();
 
@@ -376,9 +389,9 @@ void __onCriticalException(reg_block_t* regs)
 
 void register_syscall_handler(syscall_handler_t handler, uint32_t first_code, uint32_t last_code)
 {
-	//EMAC:assertf(first_code <= 0xFFFFF, "The maximum allowed syscall code is 0xFFFFF (requested: %05x)\n", first_code);
-	//EMAC:assertf(last_code <= 0xFFFFF, "The maximum allowed syscall code is 0xFFFFF (requested: %05x)\n", first_code);
-	//EMAC:assertf(first_code <= last_code, "Invalid range for syscall handler (first: %05x, last: %05x)\n", first_code, last_code);
+	//EMAC:assertf(first_code <= 0xFFFFF, "The maximum allowed syscall code is 0xFFFFF (requested: %05x)\x0a\x0d", first_code);
+	//EMAC:assertf(last_code <= 0xFFFFF, "The maximum allowed syscall code is 0xFFFFF (requested: %05x)\x0a\x0d", first_code);
+	//EMAC:assertf(first_code <= last_code, "Invalid range for syscall handler (first: %05x, last: %05x)\x0a\x0d", first_code, last_code);
 
 	for (int i=0;i<MAX_SYSCALL_HANDLERS;i++)
 	{
@@ -395,7 +408,7 @@ void register_syscall_handler(syscall_handler_t handler, uint32_t first_code, ui
 			//	__syscall_handlers[i].handler, __syscall_handlers[i].first_code, __syscall_handlers[i].last_code);
 		}
 	}
-	//EMAC:assertf(0, "Too many syscall handlers\n");
+	//EMAC:assertf(0, "Too many syscall handlers\x0a\x0d");
 }
 
 
