@@ -167,18 +167,7 @@ void display_init(resolution_t res, pixel_mode_t format, uint32_t num_buffers, u
         }
     }
 
-    hstart += HSTART_OFFSET;
-    vstart += VSTART_OFFSET;
-
-    uint32_t vsize;
-    if(res.interlaced)
-    {
-        vsize = res.height >> 1;
-    }
-    else
-    {
-        vsize = res.height;
-    }
+    uint32_t vsize = res.height;
 
     if(is_spot_box())
 	{
@@ -194,6 +183,10 @@ void display_init(resolution_t res, pixel_mode_t format, uint32_t num_buffers, u
         {
             REGISTER_OR_WRITE(VID_FCNTL, VID_INTERLACE);
         }
+        else
+        {
+            REGISTER_AND_WRITE(VID_FCNTL, ~VID_INTERLACE);
+        }
 	}
 	else
 	{
@@ -205,9 +198,17 @@ void display_init(resolution_t res, pixel_mode_t format, uint32_t num_buffers, u
 
 		REGISTER_WRITE(POT_BLNKCOL, border_color);
 
+        REGISTER_OR_WRITE(VID_DMA_CNTL, VID_DVE_PIXAVG);
+
         if(res.interlaced)
         {
+            REGISTER_AND_WRITE(POT_CNTL, ~POT_PROGRESSIVE);
             REGISTER_OR_WRITE(VID_DMA_CNTL, VID_INTERLACE_EN);
+        }
+        else
+        {
+            REGISTER_OR_WRITE(POT_CNTL, POT_PROGRESSIVE);
+            REGISTER_AND_WRITE(VID_DMA_CNTL, ~VID_INTERLACE_EN);
         }
 	}
 
@@ -258,21 +259,8 @@ void display_init(resolution_t res, pixel_mode_t format, uint32_t num_buffers, u
     {
         REGISTER_WRITE(VID_VSIZE, vsize);
     }
-    else
-    {
-        REGISTER_WRITE(POT_VSIZE, vsize);
-    }
 
-
-    /* Set which line to call back on in order to flip screens */
-    if(is_spot_box())
-	{
-        register_VIDEO_VIDUNIT_handler(__display_callback);
-    }
-    else
-    {
-        register_VIDEO_POTUNIT_handler(__display_callback);
-    }
+    register_VIDEO_VIDUNIT_handler(__display_callback);
     set_VIDEO_VIDUNIT_interrupt(1, VID_INT_DMA);
 
     enable_interrupts();
@@ -294,7 +282,6 @@ void display_close()
 
     set_VIDEO_VIDUNIT_interrupt(0, VID_INT_DMA);
     unregister_VIDEO_VIDUNIT_handler(__display_callback);
-    unregister_VIDEO_POTUNIT_handler(__display_callback);
 
     now_showing = -1;
     locked_display_mask = 0;

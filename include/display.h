@@ -41,10 +41,6 @@ extern "C" {
 #define MAX_PAL_WIDTH        768
 #define MAX_PAL_HEIGHT       560
 
-// hstart and vstart correction values so they work correctly on hardware.
-#define HSTART_OFFSET        0x77
-#define VSTART_OFFSET        0x00
-
 ///@cond
 typedef struct surface_s surface_t;
 ///@endcond
@@ -80,23 +76,23 @@ typedef struct {
 #define const static const /* fool doxygen to document these static members */
 ///@endcond
 /** @brief 256x240 mode NTSC */
-const resolution_t RESOLUTION_256x240 = {256, 240,  true, false, 192, 120};
+const resolution_t RESOLUTION_256x240 = {256, 240,  true, false, 311, 155};
 /** @brief 320x240 mode NTSC */
-const resolution_t RESOLUTION_320x240 = {320, 240,  true, false, 160, 120};
+const resolution_t RESOLUTION_320x240 = {320, 240,  true, false, 279, 155};
 /** @brief 512x240 mode NTSC */
-const resolution_t RESOLUTION_512x240 = {512, 240,  true, false,  64, 120};
+const resolution_t RESOLUTION_512x240 = {512, 240,  true, false, 183, 155};
 /** @brief 560x420 mode NTSC */
-const resolution_t RESOLUTION_560x420 = {560, 420,  true, false,  40,  30};
+const resolution_t RESOLUTION_560x420 = {560, 420,  true, false, 159,  65};
 /** @brief 640x240 mode NTSC */
-const resolution_t RESOLUTION_640x240 = {640, 240,  true, false,   0, 120};
+const resolution_t RESOLUTION_640x240 = {640, 240,  true, false, 119, 155};
 /** @brief 512x480 mode NTSC */
-const resolution_t RESOLUTION_512x480 = {512, 480,  true, false,  64,   0};
+const resolution_t RESOLUTION_512x480 = {512, 480,  true, false, 183,  35};
 /** @brief 624x480 mode PAL */
-const resolution_t RESOLUTION_624x480 = {624, 480,  true, true,   72,  40};
+const resolution_t RESOLUTION_624x480 = {624, 480,  true, true,  191,  75};
 /** @brief 640x480 mode NTSC */
-const resolution_t RESOLUTION_640x480 = {640, 480,  true, false,   0,   0};
+const resolution_t RESOLUTION_640x480 = {640, 480,  true, false, 119,  35};
 /** @brief 768x560 mode PAL */
-const resolution_t RESOLUTION_768x560 = {768, 560,  true, true,    0,   0};
+const resolution_t RESOLUTION_768x560 = {768, 560,  true, true,  119,  35};
 #undef const
 
 ///@endcond

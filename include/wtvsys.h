@@ -547,6 +547,10 @@ static inline volatile unsigned long read_count(void) {
     *((volatile uint32_t *)(register_address)) ^= value; \
 })
 
+#define REGISTER_AND_WRITE(register_address, value)({ \
+    *((volatile uint32_t *)(register_address)) &= value; \
+})
+
 #define REGISTER_READ(register_address)({ \
     *((volatile uint32_t *)(register_address)); \
 })
