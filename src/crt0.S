@@ -34,17 +34,16 @@ setup_for_main:
 	nop
 
 after_setup_mmu:
-	la    a0, 0xa4000000
-	lw    t0, 0(a0)
+	la    a1, 0xa4000000
+	lw    t0, 0(a1)
 	and   t0, 0x03000000
 	beq   t0, 0x03000000, setup_solo_stack
 	nop
 setup_spot_stack:
-	/*la    a0, 0x80000280
-	lw    t0, 0x0(a0)*/
-	la    t0, 0x00800000
-	or    t0, 0x80000000
-	move  sp, t0
+	la    a0, 0x80000280
+	lw    a0, 0x0(a0)
+	or    a0, 0x80000000
+	move  sp, a0
 	b     setup_global_pointer
 	nop
 setup_solo_stack:
