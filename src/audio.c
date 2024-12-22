@@ -195,4 +195,26 @@ void audio_close()
 {
 	unregister_AUDIO_OUT_handler(__audio_callback);
 	set_AUDIO_OUT_interrupt(false);
+
+	if(buffers)
+	{
+		for(int i = 0; i < _num_buf; i++)
+		{
+			/* Nuke anything that isn't freed */
+			if(buffers_orig[i])
+			{
+				free_uncached(buffers_orig[i]);
+				buffers_orig[i] = buffers[i] = 0;
+			}
+		}
+
+		/* Nuke array of buffers we init'd earlier */
+		free(buffers);
+		buffers = 0;
+		free(buffers_orig);
+		buffers_orig = 0;
+	}
+
+	_frequency = 0;
+	_buf_size = 0;
 }
