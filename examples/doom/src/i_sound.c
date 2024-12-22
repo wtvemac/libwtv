@@ -284,14 +284,14 @@ void *getsfx (char *sfxname, int *len)
 /////////////////////////////////////////////////////////////////////////////////////////
 
 
-void sound_callback(void)
+audio_callback_data sound_callback()
 {
     memset(pcmbuf, 0, (NUM_SAMPLES << 2));
     // Sound mixing for the buffer is synchronous.
     // Synchronous sound output is explicitly called.
     I_UpdateSound();
     // Update sound output.
-    I_SubmitSound();
+    return I_SubmitSound();
 }
 
 
@@ -301,7 +301,7 @@ void I_InitSound (void)
 {
     int i;
     
-    audio_init(SAMPLERATE, 0);
+    audio_init(SAMPLERATE, -1);
     // need to use uncached address of these buffers when rendering audio
     pcmout[0] = (int16_t *)((uintptr_t)pcmout1 | 0xA0000000);
     pcmout[1] = (int16_t *)((uintptr_t)pcmout2 | 0xA0000000);
@@ -329,11 +329,8 @@ void I_InitSound (void)
     printf ("I_InitSound: Pre-cached all sound data.\n");
 
     // install sound callback
-    register_AUDIO_OUT_handler(sound_callback);
+	audio_set_outx_buffer_callback(sound_callback);
     printf("I_InitSound: Audio Interface callback registered.\n");
-    set_AUDIO_OUT_interrupt(true);
-    printf("I_InitSound: Audio Interface interrupt enabled.\n");
-    sound_callback();
 
     // Finished initialization.
     printf("I_InitSound: Sound module ready.\n");
@@ -346,27 +343,26 @@ void I_InitSound (void)
 #define AI_STATUS_FULL  ( 1 << 31 )
 /**********************************************************************/
 // ... update sound buffer and audio device at runtime...
-void I_SubmitSound (void)
+audio_callback_data I_SubmitSound (void)
 {
-    audio_write_temp(pcmbuf, NUM_SAMPLES*2*2);
-    pcmflip ^= 1;
-    pcmbuf = pcmout[pcmflip];
+	audio_callback_data ret;
 
-    /*if (!(AI_regs->status & AI_STATUS_FULL))
-    {
-        AI_regs->address = (void*)pcmbuf;
-        AI_regs->length = NUM_SAMPLES*2*2;
-        AI_regs->control = 1;
-        pcmflip ^= 1;
-        pcmbuf = pcmout[pcmflip];
-    }*/
+	ret = (audio_callback_data) {
+		.buffer = (asamp*)(pcmbuf),
+		.length = (NUM_SAMPLES*2*2)
+	};
+
+	pcmflip ^= 1;
+	pcmbuf = pcmout[pcmflip];
+
+    return ret;
 }
 
 /**********************************************************************/
 // ... shut down and relase at program termination.
 void I_ShutdownSound (void)
 {
-    set_AUDIO_OUT_interrupt(0);
+    audio_close();
 }
 
 /**********************************************************************/

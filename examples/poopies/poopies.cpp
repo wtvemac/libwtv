@@ -99,25 +99,38 @@ void draw_poopie(int x, int y)
 	display_show(disp);
 }
 
-void sound_callback()
+audio_callback_data sound_callback()
 {
+	audio_callback_data ret;
+
 	if(audio_buffer_index >= 0 && audio_buffer_index < fart_sound_size)
 	{
 		if((audio_buffer_index + audio_buffer_chunk) >= fart_sound_size)
 		{
-			audio_write_temp((void*)(((uint32_t)(&fart_sound)) + audio_buffer_index), (fart_sound_size - audio_buffer_index)); // NOTE: this will change.
+			ret = (audio_callback_data) {
+				.buffer = (asamp*)(((uint32_t)(&fart_sound)) + audio_buffer_index),
+				.length = ((uint32_t)fart_sound_size - audio_buffer_index)
+			};
 			audio_buffer_index = -1;
 		}
 		else
 		{
-			audio_write_temp((void*)(((uint32_t)(&fart_sound)) + audio_buffer_index), audio_buffer_chunk); // NOTE: this will change.
+			ret = (audio_callback_data) {
+				.buffer = (asamp*)(((uint32_t)(&fart_sound)) + audio_buffer_index),
+				.length = audio_buffer_chunk
+			};
 			audio_buffer_index += audio_buffer_chunk;
 		}
 	}
 	else
 	{
-		audio_write_temp((void*)((uint32_t)(&blank_sound)), 2); // NOTE: this will change.
+		ret = (audio_callback_data) {
+			.buffer = (asamp*)((uint32_t)(&blank_sound)),
+			.length = 2
+		};
 	}
+
+	return ret;
 }
 
 int main()
@@ -169,9 +182,8 @@ int main()
 	draw_fiducials();
 
 	printf("Audio init.\x0a\x0d");
-	audio_init(44100, 0); // NOTE: this will change.
-	register_AUDIO_OUT_handler(sound_callback);
-	set_AUDIO_OUT_interrupt(true);
+	audio_init(44100, -1);
+	audio_set_outx_buffer_callback(sound_callback);
 
 	printf("Enabling keyboard (IR and/or PS2)... Press any key to get its key map.\x0a\x0d");
 	controller_init();
