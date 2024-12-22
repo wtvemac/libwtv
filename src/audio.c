@@ -96,6 +96,8 @@ void __audocodec_init()
 
 	__ak4532_register_write(AK5432_AUX_VOL_LCH, AK5432_D2_ATT2 | AK5432_D0_ATT0);
 	__ak4532_register_write(AK5432_AUX_VOL_RCH, AK5432_D2_ATT2 | AK5432_D0_ATT0);
+
+	__ak4532_mute(false);
 }
 
 static void __audio_callback()
