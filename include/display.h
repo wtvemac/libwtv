@@ -77,6 +77,8 @@ typedef struct {
 ///@endcond
 /** @brief 256x240 mode NTSC */
 const resolution_t RESOLUTION_256x240 = {256, 240,  true, false, 311, 155};
+/** @brief 320x200 mode NTSC */
+const resolution_t RESOLUTION_320x200 = {320, 200,  true, false, 279, 175};
 /** @brief 320x240 mode NTSC */
 const resolution_t RESOLUTION_320x240 = {320, 240,  true, false, 279, 155};
 /** @brief 512x240 mode NTSC */

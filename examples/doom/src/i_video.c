@@ -170,26 +170,8 @@ void I_SetDefaultPalette(void)
 
 void I_InitGraphics(void)
 {
-    /*
-    display_init( (resolution_t)
-	{
-		.width = SCREENWIDTH,
-		.height = SCREENHEIGHT,
-		.interlaced = false,
-	}, DEPTH_16_BPP, 2, GAMMA_NONE, ANTIALIAS_RESAMPLE );
-    */
-
     printf("EMAC: init screen SCREENWIDTH=%08x, SCREENHEIGHT=%08x\x0a\x0d", SCREENWIDTH, SCREENHEIGHT);
-    //EMAC:
-    display_init_direct( (resolution_t)
-	{
-		.width = SCREENWIDTH,
-		.height = SCREENHEIGHT,
-		.interlaced = true,
-        .pal = false,
-        .hstart = -1,
-        .vstart = -1,
-	}, FMT_YUV16, 0x90909090);
+    display_init_direct(RESOLUTION_320x200, FMT_YUV16, 0x108080);
 
     I_SetDefaultPalette();
 
