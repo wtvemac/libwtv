@@ -169,7 +169,7 @@ extern uint32_t __code_end[];
 /** @brief Check if addr is a valid PC address */
 static bool is_valid_address(uint32_t addr)
 {
-    return (((addr & 0xf0000000) == 0x80000000 || (addr & 0xf0000000) == 0xc0000000) && ((addr & 3) == 0));
+    return (((addr & 0xf0000000) == 0x80000000 || (addr & 0xf0000000) == 0x90000000 || (addr & 0xf0000000) == 0xc0000000) && ((addr & 3) == 0));
 }
 
 /** 
