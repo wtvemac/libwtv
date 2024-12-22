@@ -81,7 +81,7 @@ void __ak4532_register_write(uint8_t address, uint8_t data)
 	__ak4532_set_cdata(0);
 }
 
-void __audocodec_init()
+void __ak4532_init()
 {
 	REGISTER_WRITE(AUD_FMT_CNTL, AUD_CODEC_AK4532);
 
@@ -98,6 +98,11 @@ void __audocodec_init()
 	__ak4532_register_write(AK5432_AUX_VOL_RCH, AK5432_D2_ATT2 | AK5432_D0_ATT0);
 
 	__ak4532_mute(false);
+}
+
+void __audocodec_init()
+{
+	__ak4532_init();
 }
 
 static void __audio_callback()
