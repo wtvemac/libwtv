@@ -169,10 +169,7 @@ extern uint32_t __code_end[];
 /** @brief Check if addr is a valid PC address */
 static bool is_valid_address(uint32_t addr)
 {
-    // TODO: for now we only handle RAM (cached access). This should be extended to handle
-    // TLB-mapped addresses for instance.
-    // EMAC: also, sometimes we execute code outside this area.
-    return (addr >= (uint32_t)__code_start && addr <= (uint32_t)__code_end);
+    return (((addr & 0xf0000000) == 0x80000000 || (addr & 0xf0000000) == 0xc0000000) && ((addr & 3) == 0));
 }
 
 /** 
@@ -409,7 +406,7 @@ bool __bt_analyze_func(bt_func_t *func, uint32_t *ptr, uint32_t func_start, bool
         // TODO: enhance this check with more valid ranges.
         if (!is_valid_address(addr)) {
             // This address is invalid, probably something is corrupted. Avoid looking further.
-            debugf("backtrace: interrupted because of invalid return address 0x%08x\n", addr);
+            debugf("backtrace: interrupted because of invalid return address 0x%08x\x0a\x0d", addr);
             return false;
         }
         uint32_t op = *(uint32_t*)addr;
@@ -422,12 +419,12 @@ bool __bt_analyze_func(bt_func_t *func, uint32_t *ptr, uint32_t func_start, bool
             if (op & 0x8000)
                 func->stack_size = -(int16_t)(op & 0xFFFF);
         } else if (MIPS_OP_SW_RA_SP(op)) {
-            func->ra_offset = (int16_t)(op & 0xFFFF) + 4; // +4 = load low 32 bit of RA
+            func->ra_offset = (int16_t)(op & 0xFFFF);
             // If we found a stack size, it might be a red herring (an alloca); we need one
             // happening "just before" sd ra,xx(sp)
             func->stack_size = 0;
         } else if (MIPS_OP_SW_FP_SP(op)) {
-            func->fp_offset = (int16_t)(op & 0xFFFF) + 4; // +4 = load low 32 bit of FP
+            func->fp_offset = (int16_t)(op & 0xFFFF);
         } else if (MIPS_OP_LUI_GP(op)) {
             // Loading gp is commonly done in _start, so it's useless to go back more
             return false;

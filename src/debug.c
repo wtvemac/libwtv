@@ -799,7 +799,7 @@ void __debug_backtrace(int *out, bool skip_exception)
 
 	if(n > 0)
 	{
-		printf("Backtrace:\n");
+		printf("Backtrace:\x0a\x0d");
 		void cb(void *data, backtrace_frame_t *frame)
 		{
 			if (skip_exception) {
@@ -809,7 +809,7 @@ void __debug_backtrace(int *out, bool skip_exception)
 			//EMAC:FILE *out = (FILE *)data;
 			printf("    ");
 			backtrace_frame_print(frame, out);
-			printf("\n");
+			printf("\x0a\x0d");
 		}
 		backtrace_symbols_cb(bt, n, 0, cb, out);
 	}
