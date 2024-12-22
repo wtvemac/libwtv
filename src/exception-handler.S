@@ -376,8 +376,13 @@ dispatch_bus_subinterrupt_with_status:
 
 solo_non_wtv_interrupt:
 spot_non_wtv_interrupt:
+	and   t0, saved_cause, 0x1800000 /* DW or IW exceptions are ignored right now */
+	bnez  t0, interrupt_return
+	nop
+unknown_interrupt:
 	break 0x71
 	nop
+interrupt_return:	
 	j     return_from_exception
 	nop
 
