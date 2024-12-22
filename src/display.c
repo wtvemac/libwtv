@@ -257,7 +257,7 @@ void display_init(resolution_t res, pixel_mode_t format, uint32_t num_buffers, u
     // Set vsize after we enable the display to fix a bug in MAME
     if(is_spot_box())
     {
-        REGISTER_WRITE(VID_VSIZE, vsize);
+        REGISTER_WRITE(VID_VSIZE, vsize >> 1);
     }
 
     register_VIDEO_VIDUNIT_handler(__display_callback);
