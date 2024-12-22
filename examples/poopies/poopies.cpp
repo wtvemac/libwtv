@@ -123,7 +123,7 @@ void sound_callback()
 int main()
 {
 	set_leds(2); // NOTE: this will change
-	
+
 	core_init_temp(); // NOTE: this will change
 
 	if(is_solo_box())
@@ -182,7 +182,7 @@ int main()
 	{
 		controller_scan();
 
-		hid_event event_object = dequeue_hid_event();
+		hid_event event_object = dequeue_hid_event(); // NOTE: this currently doesn't debounce.
 
 		if(event_object.source != EVENT_NULL)
 		{
@@ -275,9 +275,14 @@ int main()
 						break;
 
 					case KY_F7:
+					{
 						printf("Very square...\x0a\x0d");
-						graphics_draw_box(display_get(), 100, 100, 100, 100, WTVCOLOR_TO_WTV2PIXEL(WSRFC_WHITE_COLOR));
+
+						const display_context_t disp = display_get();
+						graphics_draw_box(disp, 100, 100, 100, 100, WTVCOLOR_TO_WTV2PIXEL(WSRFC_WHITE_COLOR));
+						display_show(disp);
 						break;
+					}
 
 					default:
 						audio_buffer_index = 0;
