@@ -293,8 +293,8 @@ solo_video_gfxunit_interrupt:
 	la    a0, 0x00000010
 	la    a1, 0xa4000180
 	la    a2, __VIDEO_GFXUNIT_handler
-	lw    s3, 0xa4006068
-	la    s4, 0xa400606c
+	lw    t3, 0xa4006068
+	la    t4, 0xa400606c
 	j     dispatch_bus_subinterrupt_with_status
 	nop
 
@@ -302,8 +302,8 @@ solo_video_potunit_interrupt:
 	la    a0, 0x00000008
 	la    a1, 0xa4000180
 	la    a2, __VIDEO_POTUNIT_handler
-	lw    s3, 0xa40090a0
-	la    s4, 0xa40090a8
+	lw    t3, 0xa40090a0
+	la    t4, 0xa40090a8
 	j     dispatch_bus_subinterrupt_with_status
 	nop
 
@@ -311,8 +311,8 @@ solo_video_vidunit_interrupt:
 	la    a0, 0x00000004
 	la    a1, 0xa4000180
 	la    a2, __VIDEO_VIDUNIT_handler
-	lw    s3, 0xa4003038
-	la    s4, 0xa4003138
+	lw    t3, 0xa4003038
+	la    t4, 0xa4003138
 	j     dispatch_bus_subinterrupt_with_status
 	nop
 
@@ -368,9 +368,9 @@ dispatch_bus_subinterrupt:
 
 dispatch_bus_subinterrupt_with_status:
 	sw    a0, 0x0(a1)
+	sw    t3, 0x0(t4)
 	jal   a2
-	move  a0, s3
-	sw    s3, 0x0(s4)
+	move  a0, t3
 	j     return_from_exception
 	nop
 
