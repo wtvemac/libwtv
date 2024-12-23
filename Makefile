@@ -12,6 +12,7 @@ WTVLIB_FILE_SUFFIX       = $(BOX_CPU_ARCHITECTURE)-$(BOX_CPU_SUBARCHITECTURE)
 TARGET_BOX              ?= all
 
 include wtv.mk
+include external/Makefile
 
 libwtv: CC=$(WTV_CC)
 libwtv: CXX=$(WTV_CXX)
@@ -24,35 +25,46 @@ libwtv: ASFLAGS=$(WTV_ASFLAGS) $(LIBWTV_COMPILE_FLAGS)
 libwtv: LDFLAGS=$(WTV_LDFLAGS)
 libwtv: libwtv-$(WTVLIB_FILE_SUFFIX).a
 
-libwtv-$(WTVLIB_FILE_SUFFIX).a: \
-          $(BUILD_DIR)/exception.o $(BUILD_DIR)/interrupt.o $(BUILD_DIR)/exception-handler.o \
-          $(BUILD_DIR)/backtrace.o \
-          $(BUILD_DIR)/debug.o \
-          $(BUILD_DIR)/crt0.o \
-          $(BUILD_DIR)/wtvsys.o \
-          $(BUILD_DIR)/console.o \
-          $(BUILD_DIR)/memory.o \
-          $(BUILD_DIR)/leds.o \
-          $(BUILD_DIR)/timer.o \
-          $(BUILD_DIR)/serial.o \
-          $(BUILD_DIR)/surface.o \
-          $(BUILD_DIR)/sprite.o \
-          $(BUILD_DIR)/display.o \
-          $(BUILD_DIR)/graphics.o \
-          $(BUILD_DIR)/audio.o \
-          $(BUILD_DIR)/ssid.o \
-          $(BUILD_DIR)/hid.o \
-          $(BUILD_DIR)/iic.o \
-          $(BUILD_DIR)/hid/ir.o \
-          $(BUILD_DIR)/hid/ps2.o \
-          $(BUILD_DIR)/hid/event.o \
-          $(BUILD_DIR)/storage/nvram.o \
-          $(BUILD_DIR)/storage/atapwd.o \
-          $(BUILD_DIR)/libc/o1heap.o \
-          $(BUILD_DIR)/libc/string.o \
-          $(BUILD_DIR)/libc/printf.o \
-          $(BUILD_DIR)/libc/math.o \
-          $(BUILD_DIR)/libc.o
+LIBWTV_SRCS = \
+	exception.c \
+	interrupt.c \
+	exception-handler.c \
+	backtrace.c \
+	debug.c \
+	crt0.c \
+	wtvsys.c \
+	console.c \
+	memory.c \
+	leds.c \
+	timer.c \
+	serial.c \
+	surface.c \
+	sprite.c \
+	display.c \
+	graphics.c \
+	audio.c \
+	ssid.c \
+	hid.c \
+	iic.c \
+	hid/ir.c \
+	hid/ps2.c \
+	hid/event.c \
+	storage/nvram.c \
+	storage/atapwd.c \
+	libc/o1heap.c \
+	libc/string.c \
+	libc/printf.c \
+	libc/math.c \
+	libc.c
+
+LIBWTV_OBJS := $(addprefix $(BUILD_DIR)/,$(addsuffix .o,$(basename ${LIBWTV_SRCS})))
+
+ifneq ($(MAKE_MINIBAE),$(filter $(MAKE_MINIBAE),  0))
+	include $(MAKE_MINIBAE)
+	LIBWTV_OBJS += libMiniBAE.a
+endif
+
+libwtv-$(WTVLIB_FILE_SUFFIX).a: $(LIBWTV_OBJS)
 	@echo "    [AR -$(WTVLIB_FILE_SUFFIX)] $@ $(BUILD_DIR)"
 	$(WTV_AR) -rcs -o $@ $^
 
