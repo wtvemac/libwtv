@@ -402,7 +402,7 @@ endif
 %.wtv.o: CFLAGS=$(WTV_CFLAGS) $(WTVO_COMPILE_FLAGS)
 %.wtv.o: CXXFLAGS=$(WTV_CXXFLAGS) $(WTVO_COMPILE_FLAGS)
 %.wtv.o: ASFLAGS=$(WTV_ASFLAGS) $(WTVO_COMPILE_FLAGS)
-%.wtv.o: LDFLAGS=$(WTV_LDFLAGS) -lwtv-$(WTVLIB_FILE_SUFFIX) -Twtv.ld $(patsubst %,--defsym=%,$(strip $(BUILD_TARGET_CONSTANTS)))
+%.wtv.o: LDFLAGS=$(WTV_LDFLAGS) -lwtv-$(WTVLIB_FILE_SUFFIX) -lminibae-$(WTVLIB_FILE_SUFFIX) -Twtv.ld $(patsubst %,--defsym=%,$(strip $(BUILD_TARGET_CONSTANTS)))
 %.wtv.o: $(BUILD_DIR)/%.elf
 	@echo "    [WTV-$(WTVLIB_FILE_SUFFIX)] $@"
 	set -e; \
