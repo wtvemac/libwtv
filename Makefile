@@ -12,7 +12,6 @@ WTVLIB_FILE_SUFFIX       = $(BOX_CPU_ARCHITECTURE)-$(BOX_CPU_SUBARCHITECTURE)
 TARGET_BOX              ?= all
 
 include wtv.mk
-include external/Makefile
 
 libwtv: CC=$(WTV_CC)
 libwtv: CXX=$(WTV_CXX)
@@ -58,11 +57,10 @@ LIBWTV_SRCS = \
 	libc.c
 
 LIBWTV_OBJS := $(addprefix $(BUILD_DIR)/,$(addsuffix .o,$(basename ${LIBWTV_SRCS})))
+INSTALL_OBJS := install-mk libwtv
+CLEAN_OBJS := 
 
-ifneq ($(MAKE_MINIBAE),$(filter $(MAKE_MINIBAE),  0))
-	include $(MAKE_MINIBAE)
-	LIBWTV_OBJS += libMiniBAE.a
-endif
+include external/Makefile
 
 libwtv-$(WTVLIB_FILE_SUFFIX).a: $(LIBWTV_OBJS)
 	@echo "    [AR -$(WTVLIB_FILE_SUFFIX)] $@ $(BUILD_DIR)"
@@ -76,7 +74,7 @@ $(INSTALL_DIR)/include/wtv.mk: wtv.mk
 	mkdir -p $(INSTALL_DIR)/include
 	install -cv -m 0644 wtv.mk $(INSTALL_DIR)/include/wtv.mk
 
-install: install-mk libwtv
+install: $(INSTALL_OBJS)
 	mkdir -p $(INSTALL_DIR)/lib
 	install -Cv -m 0644 libwtv-$(WTVLIB_FILE_SUFFIX).a $(INSTALL_DIR)/lib/libwtv-$(WTVLIB_FILE_SUFFIX).a
 	install -Cv -m 0644 wtv.ld $(INSTALL_DIR)/lib/wtv.ld
@@ -120,9 +118,10 @@ install: install-mk libwtv
 	install -Cv -m 0644 include/libc/__strerror.h $(INSTALL_DIR)/include/libc/__strerror.h
 	install -Cv -m 0644 include/libc/string.h $(INSTALL_DIR)/include/libc/string.h
 
-clean:
+clean: $(CLEAN_OBJS)
 	rm -f *.o *.a
 	rm -rf $(CURDIR)/build
+	@echo libwtv cleaned!
 
 clobber: clean
 
