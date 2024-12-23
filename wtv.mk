@@ -368,7 +368,7 @@ WTV_CCOMPILE_FLAGS      += -falign-functions=32   # NOTE: if you change this, al
 WTV_CCOMPILE_FLAGS      += -ffunction-sections -fdata-sections
 WTV_CCOMPILE_FLAGS      += -ffast-math -ftrapping-math -fno-associative-math
 WTV_CCOMPILE_FLAGS      += -Wall -fdiagnostics-color=always -Werror -Wno-error=deprecated-declarations -Wno-error=unused-variable -Wno-error=unused-but-set-variable -Wno-error=unused-function -Wno-error=unused-parameter -Wno-error=unused-but-set-parameter -Wno-error=unused-label -Wno-error=unused-local-typedefs -Wno-error=unused-const-variable
-WTV_CCOMPILE_FLAGS      += -DX_PLATFORM=X_WEBTV -D_THREAD_SAFE
+WTV_CCOMPILE_FLAGS      += -DX_PLATFORM=X_LIBWTV -D_THREAD_SAFE
 WTV_CCOMPILE_FLAGS      += -DPRINTF_SUPPORT_EXPONENTIAL_SPECIFIERS=0 -DPRINTF_SUPPORT_DECIMAL_SPECIFIERS=0 -DPRINTF_ALIAS_STANDARD_FUNCTION_NAMES_HARD
 
 #-DPRINTF_SUPPORT_LONG_LONG=0  
