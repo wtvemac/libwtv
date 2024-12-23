@@ -42,7 +42,7 @@ OPTIMIZATION_OPTIONS   ?= -O3
 SOURCE_DIR             ?= .
 BUILD_DIR              ?= .
 
-INCLUDE_DIR            ?= $(LIBWTV_INSTALL_DIR)/include
+INC                    ?= -I$(LIBWTV_INSTALL_DIR)/include -I$(LIBWTV_INSTALL_DIR)/include/audio/minibae/
 LIB_DIR                ?= $(LIBWTV_INSTALL_DIR)/lib
 TOOLS_DIR              ?= $(LIBWTV_INSTALL_DIR)/bin
 
@@ -361,13 +361,14 @@ endif
 
 WTVLIB_FILE_SUFFIX      ?= $(BOX_CPU_ARCHITECTURE)-$(BOX_CPU_SUBARCHITECTURE)
 
-WTV_CCOMPILE_FLAGS       = -march=$(BOX_CPU_SUBARCHITECTURE) $(OPTIMIZATION_OPTIONS) -MMD -I$(INCLUDE_DIR)
+WTV_CCOMPILE_FLAGS       = -march=$(BOX_CPU_SUBARCHITECTURE) $(OPTIMIZATION_OPTIONS) -MMD $(INC)
 WTV_CCOMPILE_FLAGS      += -mxgot -mno-abicalls -fno-pic -fno-plt
 WTV_CCOMPILE_FLAGS      += -nostdlib -nostdlib++ -nodefaultlibs -nostartfiles -ffreestanding
 WTV_CCOMPILE_FLAGS      += -falign-functions=32   # NOTE: if you change this, also change backtrace() in backtrace.c
 WTV_CCOMPILE_FLAGS      += -ffunction-sections -fdata-sections
 WTV_CCOMPILE_FLAGS      += -ffast-math -ftrapping-math -fno-associative-math
 WTV_CCOMPILE_FLAGS      += -Wall -fdiagnostics-color=always -Werror -Wno-error=deprecated-declarations -Wno-error=unused-variable -Wno-error=unused-but-set-variable -Wno-error=unused-function -Wno-error=unused-parameter -Wno-error=unused-but-set-parameter -Wno-error=unused-label -Wno-error=unused-local-typedefs -Wno-error=unused-const-variable
+WTV_CCOMPILE_FLAGS      += -DX_PLATFORM=X_WEBTV -D_THREAD_SAFE
 WTV_CCOMPILE_FLAGS      += -DPRINTF_SUPPORT_EXPONENTIAL_SPECIFIERS=0 -DPRINTF_SUPPORT_DECIMAL_SPECIFIERS=0 -DPRINTF_ALIAS_STANDARD_FUNCTION_NAMES_HARD
 
 #-DPRINTF_SUPPORT_LONG_LONG=0  
@@ -385,8 +386,8 @@ WTV_ASFLAGS              = $(WTV_CCOMPILE_FLAGS)
 WTV_LDFLAGS              = -L$(LIB_DIR) --warn-multiple-gp --gc-sections -lm
 
 ifeq ($(DEBUG),1)
-WTV_CFLAGS              += -g3
-WTV_CXXFLAGS            += -g3
+WTV_CFLAGS              += -g3 -D_DEBUG=1
+WTV_CXXFLAGS            += -g3 -D_DEBUG=1
 WTV_ASFLAGS             += -g
 WTV_LDFLAGS             += -g
 endif
@@ -417,17 +418,17 @@ endif
 
 $(BUILD_DIR)/%.o: $(SOURCE_DIR)/%.S
 	@mkdir -p $(dir $@)
-	@echo "    [AS -$(WTVLIB_FILE_SUFFIX)] $<"
+	@echo "    [AS $(WTVLIB_FILE_SUFFIX)] $<"
 	$(CC)  -c $(ASFLAGS) -o $@ $<
 
 $(BUILD_DIR)/%.o: $(SOURCE_DIR)/%.c 
 	@mkdir -p $(dir $@)
-	@echo "    [CC -$(WTVLIB_FILE_SUFFIX)] $<"
+	@echo "    [CC $(WTVLIB_FILE_SUFFIX)] $<"
 	$(CC) -c $(CFLAGS) -o $@ $<
 
 $(BUILD_DIR)/%.o: $(SOURCE_DIR)/%.cpp
 	@mkdir -p $(dir $@)
-	@echo "    [CXX-$(WTVLIB_FILE_SUFFIX)] $<"
+	@echo "    [CXX $(WTVLIB_FILE_SUFFIX)] $<"
 	$(CXX) -c $(CXXFLAGS) -o $@ $<
 
 %.elf: LDFLAGS+=-lc -Map=$(BUILD_DIR)/$(notdir $(basename $@)).map

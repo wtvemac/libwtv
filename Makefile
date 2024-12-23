@@ -3,7 +3,7 @@ all: libwtv
 BOX_CPU_ARCHITECTURE    ?= mips
 BOX_CPU_SUBARCHITECTURE ?= 4650
 LIBWTV_INSTALL_DIR      ?= /opt/libwtv
-INCLUDE_DIR              = $(CURDIR)/include
+INC                      = -I$(CURDIR)/include
 SOURCE_DIR               = $(CURDIR)/src
 BUILD_DIR                = $(CURDIR)/build/$(WTVLIB_FILE_SUFFIX)
 INSTALL_DIR              = $(LIBWTV_INSTALL_DIR)
