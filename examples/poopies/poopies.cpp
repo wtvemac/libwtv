@@ -182,7 +182,7 @@ int main()
 	draw_fiducials();
 
 	printf("Audio init.\x0a\x0d");
-	audio_init(44100, -1);
+	minibae_init();
 	audio_set_outx_buffer_callback(sound_callback);
 
 	printf("Enabling keyboard (IR and/or PS2)... Press any key to get its key map.\x0a\x0d");
