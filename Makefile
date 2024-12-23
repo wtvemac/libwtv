@@ -102,6 +102,8 @@ install: $(INSTALL_OBJS)
 	install -Cv -m 0644 include/serial.h $(INSTALL_DIR)/include/serial.h
 	install -Cv -m 0644 include/surface.h $(INSTALL_DIR)/include/surface.h
 	install -Cv -m 0644 include/hid.h $(INSTALL_DIR)/include/hid.h
+	mkdir -p $(INSTALL_DIR)/include/audio
+	install -Cv -m 0644 include/audio/minibae.h $(INSTALL_DIR)/include/audio/minibae.h
 	mkdir -p $(INSTALL_DIR)/include/hid
 	install -Cv -m 0644 include/hid/ir.h $(INSTALL_DIR)/include/hid/ir.h
 	install -Cv -m 0644 include/hid/ps2.h $(INSTALL_DIR)/include/hid/ps2.h

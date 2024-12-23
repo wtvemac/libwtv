@@ -2,6 +2,7 @@
 #define __LIBWTV_LIBWTV_H
 
 #include "audio.h"
+#include "audio/minibae.h"
 #include "cop0.h"
 #include "cop1.h"
 #include "display.h"
