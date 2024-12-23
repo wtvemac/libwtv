@@ -63,9 +63,9 @@ copy_data_section_dword:
 	lw    t3, 0x0(t0)
 	addu  t0, 0x4
 	sw    t3, 0x0(t2)
-	subu  t1, 0x1
-	bne   t1, 0x0, copy_data_section_dword
 	addu  t2, 0x4
+	bne   t1, 0x0, copy_data_section_dword
+	subu  t1, 0x1
 	b     setup_bss_section
 	nop
 setup_data_section_compressed:
@@ -77,13 +77,14 @@ setup_data_section_compressed:
 
 setup_bss_section:
 	lw    t1, bss_size
+	la    t2, __bss_start
 	beq   t1, 0x0, setup_exception_vectors
 	nop
 zero_bss_section_dword:
 	sw    zero, 0x0(t2)
-	subu  t1, 0x1
-	bne   t1, 0x0, zero_bss_section_dword
 	addu  t2, 0x4
+	bne   t1, 0x0, zero_bss_section_dword
+	subu  t1, 0x1
 
 setup_exception_vectors:
 	la    t0, goto_exception_handler
