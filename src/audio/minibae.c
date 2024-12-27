@@ -4,55 +4,41 @@
 #include "wtvsys.h"
 
 BAEMixer bae_mixer                = NULL;
-void*    audio_buffer             = NULL;
+void*    audio_buffer1            = NULL;
+void*    audio_buffer2            = NULL;
+void*    playing_audio_buffer     = NULL;
 
 audio_callback_data __sound_callback()
 {
-	if(audio_buffer != NULL)
+	audio_callback_data ret;
+
+	if(playing_audio_buffer != NULL)
 	{
-		//uint32_t start = get_ticks_us();
-		BAE_BuildMixerSlice(NULL, audio_buffer, AUDIO_BUFFER_SIZE, SAMPLES_PER_BUFFER);
-		//printf("TIME: %08llx\x0a\x0d", (get_ticks_us() - start));
+		BAE_BuildMixerSlice(NULL, playing_audio_buffer, AUDIO_BUFFER_SIZE, SAMPLES_PER_BUFFER);
 
-		/*unsigned int cunt = 0;
-		for (int i = 0; i < AUDIO_BUFFER_SIZE; i++)
-		{
-			cunt += ((char*)audio_buffer)[i];
-		}
-		if(cunt != 0x00)
-		{
-			printf("BAE_BuildMixerSlice: mWritingDataBlockSize=%08x, numSamples=%08x\n", AUDIO_BUFFER_SIZE, SAMPLES_PER_BUFFER);
-			for (int i = 0; i < AUDIO_BUFFER_SIZE; i+=2)
-			{
-				if (i == 0)
-				{
-					printf("\t");
-				}
-				
-				printf("%02x", ((char*)audio_buffer)[i+1]);
-				printf("%02x", ((char*)audio_buffer)[i]);
-
-				if(i == 2)
-				{
-					//while(1){}
-				}
-			}
-			printf("\n");
-			//while(1){}
-		}*/
-
-		return (audio_callback_data) {
-			.buffer = audio_buffer,
+		ret = (audio_callback_data) {
+			.buffer = playing_audio_buffer,
 			.length = AUDIO_BUFFER_SIZE
 		};
+
+		if(playing_audio_buffer == audio_buffer1)
+		{
+			playing_audio_buffer = audio_buffer2;
+		}
+		else
+		{
+			playing_audio_buffer = audio_buffer1;
+		}
 	}
 	else
 	{
-		return (audio_callback_data) {
+		ret = (audio_callback_data) {
 			.buffer = NULL,
 			.length = 0
 		};
 	}
+
+	return ret;
 }
 
 BAEMixer minibae_init()
@@ -291,7 +277,10 @@ int BAE_AquireAudioCard(void *threadContext, unsigned long sampleRate, unsigned 
 	{
 		if(bits == 16)
 		{
-			audio_buffer = malloc(AUDIO_BUFFER_SIZE);
+			audio_buffer1 = malloc(AUDIO_BUFFER_SIZE);
+			audio_buffer2 = malloc(AUDIO_BUFFER_SIZE);
+
+			playing_audio_buffer = audio_buffer1;
 
 			audio_init((int)sampleRate, -1);
 			audio_set_outx_buffer_callback(__sound_callback);
@@ -318,7 +307,11 @@ int BAE_AquireAudioCard(void *threadContext, unsigned long sampleRate, unsigned 
 int BAE_ReleaseAudioCard(void *threadContext)
 {
 	audio_close();
-	free(audio_buffer);
+	
+	playing_audio_buffer = NULL;
+
+	free(audio_buffer1);
+	free(audio_buffer2);
 
 	return 0;
 }
