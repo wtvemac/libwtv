@@ -24,5 +24,6 @@
 #include "ssid.h"
 #include "storage.h"
 #include "hid.h"
+#include "compress.h"
 
 #endif

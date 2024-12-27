@@ -53,6 +53,14 @@ LIBWTV_SRCS = \
 	libc/printf.c \
 	libc/math.c \
 	libc.c \
+	compress/lzss.c \
+	compress/lzpf.c \
+	compress/lzj.c \
+	compress/gzip.c \
+	compress/lz4.c \
+	compress/lzh5.c \
+	compress/aplib.c \
+	compress/shrinkler.c \
 	storage/flash.c \
 	storage/ide.c \
 	storage/nvram.c \
@@ -63,7 +71,7 @@ LIBWTV_SRCS = \
 	storage/romfs.c \
 	storage/fatfs.c \
 	storage/ext4.c \
-	storage/dragonfs.c \
+	storage/dragonfs.c
 
 LIBWTV_OBJS := $(addprefix $(BUILD_DIR)/,$(addsuffix .o,$(basename ${LIBWTV_SRCS})))
 INSTALL_OBJS := install-mk libwtv
@@ -125,6 +133,16 @@ install: $(INSTALL_OBJS)
 	install -Cv -m 0644 include/libc/printf.h $(INSTALL_DIR)/include/libc/printf.h
 	install -Cv -m 0644 include/libc/__strerror.h $(INSTALL_DIR)/include/libc/__strerror.h
 	install -Cv -m 0644 include/libc/string.h $(INSTALL_DIR)/include/libc/string.h
+	install -Cv -m 0644 include/compress.h $(INSTALL_DIR)/include/compress.h
+	mkdir -p $(INSTALL_DIR)/include/compress
+	install -Cv -m 0644 include/compress/lzss.h $(INSTALL_DIR)/include/compress/lzss.h
+	install -Cv -m 0644 include/compress/lzpf.h $(INSTALL_DIR)/include/compress/lzpf.h
+	install -Cv -m 0644 include/compress/lzj.h $(INSTALL_DIR)/include/compress/lzj.h
+	install -Cv -m 0644 include/compress/gzip.h $(INSTALL_DIR)/include/compress/gzip.h
+	install -Cv -m 0644 include/compress/lz4.h $(INSTALL_DIR)/include/compress/lz4.h
+	install -Cv -m 0644 include/compress/lzh5.h $(INSTALL_DIR)/include/compress/lzh5.h
+	install -Cv -m 0644 include/compress/aplib.h $(INSTALL_DIR)/include/compress/aplib.h
+	install -Cv -m 0644 include/compress/shrinkler.h $(INSTALL_DIR)/include/compress/shrinkler.h
 	install -Cv -m 0644 include/storage.h $(INSTALL_DIR)/include/storage.h
 	mkdir -p $(INSTALL_DIR)/include/storage
 	install -Cv -m 0644 include/storage/flash.h $(INSTALL_DIR)/include/storage/flash.h

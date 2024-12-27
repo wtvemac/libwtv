@@ -1,0 +1,8 @@
+#include "compress/lzss.h"
+#include "compress/lzpf.h"
+#include "compress/lzj.h"
+#include "compress/gzip.h"
+#include "compress/lz4.h"
+#include "compress/lzh5.h"
+#include "compress/aplib.h"
+#include "compress/shrinkler.h"
