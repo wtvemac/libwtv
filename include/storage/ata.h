@@ -1,5 +1,5 @@
-#ifndef __LIBWTV_STORAGE_ATAPWD_H
-#define __LIBWTV_STORAGE_ATAPWD_H
+#ifndef __LIBWTV_STORAGE_ATA_H
+#define __LIBWTV_STORAGE_ATA_H
 
 #include <stdint.h>
 #include <stdbool.h>

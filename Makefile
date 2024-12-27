@@ -48,13 +48,22 @@ LIBWTV_SRCS = \
 	hid/ir.c \
 	hid/ps2.c \
 	hid/event.c \
-	storage/nvram.c \
-	storage/atapwd.c \
 	libc/o1heap.c \
 	libc/string.c \
 	libc/printf.c \
 	libc/math.c \
-	libc.c
+	libc.c \
+	storage/flash.c \
+	storage/ide.c \
+	storage/nvram.c \
+	storage/ata.c \
+	storage/wtvpt.c \
+	storage/mbr.c \
+	storage/gpt.c \
+	storage/romfs.c \
+	storage/fatfs.c \
+	storage/ext4.c \
+	storage/dragonfs.c \
 
 LIBWTV_OBJS := $(addprefix $(BUILD_DIR)/,$(addsuffix .o,$(basename ${LIBWTV_SRCS})))
 INSTALL_OBJS := install-mk libwtv
@@ -110,15 +119,25 @@ install: $(INSTALL_OBJS)
 	install -Cv -m 0644 include/hid/event.h $(INSTALL_DIR)/include/hid/event.h
 	mkdir -p $(INSTALL_DIR)/include/hid/event
 	install -Cv -m 0644 include/hid/event/keyboard.h $(INSTALL_DIR)/include/hid/event/keyboard.h
-	mkdir -p $(INSTALL_DIR)/include/storage
-	install -Cv -m 0644 include/storage/nvram.h $(INSTALL_DIR)/include/storage/nvram.h
-	install -Cv -m 0644 include/storage/atapwd.h $(INSTALL_DIR)/include/storage/atapwd.h
 	mkdir -p $(INSTALL_DIR)/include/libc
 	install -Cv -m 0644 include/libc/io.h $(INSTALL_DIR)/include/libc/io.h
 	install -Cv -m 0644 include/libc/o1heap.h $(INSTALL_DIR)/include/libc/o1heap.h
 	install -Cv -m 0644 include/libc/printf.h $(INSTALL_DIR)/include/libc/printf.h
 	install -Cv -m 0644 include/libc/__strerror.h $(INSTALL_DIR)/include/libc/__strerror.h
 	install -Cv -m 0644 include/libc/string.h $(INSTALL_DIR)/include/libc/string.h
+	install -Cv -m 0644 include/storage.h $(INSTALL_DIR)/include/storage.h
+	mkdir -p $(INSTALL_DIR)/include/storage
+	install -Cv -m 0644 include/storage/flash.h $(INSTALL_DIR)/include/storage/flash.h
+	install -Cv -m 0644 include/storage/ide.h $(INSTALL_DIR)/include/storage/ide.h
+	install -Cv -m 0644 include/storage/nvram.h $(INSTALL_DIR)/include/storage/nvram.h
+	install -Cv -m 0644 include/storage/ata.h $(INSTALL_DIR)/include/storage/ata.h
+	install -Cv -m 0644 include/storage/wtvpt.h $(INSTALL_DIR)/include/storage/wtvpt.h
+	install -Cv -m 0644 include/storage/mbr.h $(INSTALL_DIR)/include/storage/mbr.h
+	install -Cv -m 0644 include/storage/gpt.h $(INSTALL_DIR)/include/storage/gpt.h
+	install -Cv -m 0644 include/storage/romfs.h $(INSTALL_DIR)/include/storage/romfs.h
+	install -Cv -m 0644 include/storage/fatfs.h $(INSTALL_DIR)/include/storage/fatfs.h
+	install -Cv -m 0644 include/storage/ext4.h $(INSTALL_DIR)/include/storage/ext4.h
+	install -Cv -m 0644 include/storage/dragonfs.h $(INSTALL_DIR)/include/storage/dragonfs.h
 
 clean: $(CLEAN_OBJS)
 	rm -f *.o *.a

@@ -22,8 +22,7 @@
 #include "console.h"
 #include "timer.h"
 #include "ssid.h"
-#include "storage/nvram.h"
-#include "storage/atapwd.h"
+#include "storage.h"
 #include "hid.h"
 
 #endif

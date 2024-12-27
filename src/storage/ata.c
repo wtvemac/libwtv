@@ -1,4 +1,4 @@
-#include "storage/atapwd.h"
+#include "storage/ata.h"
 #include "storage/nvram.h"
 #include "ssid.h"
 #include "libc.h"
