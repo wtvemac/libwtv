@@ -282,6 +282,8 @@ int BAE_AquireAudioCard(void *threadContext, unsigned long sampleRate, unsigned 
 
 			playing_audio_buffer = audio_buffer1;
 
+			memset(playing_audio_buffer, 0, AUDIO_BUFFER_SIZE);
+
 			audio_init((int)sampleRate, -1);
 			audio_set_outx_buffer_callback(__sound_callback);
 
