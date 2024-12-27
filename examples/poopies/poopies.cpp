@@ -8,10 +8,6 @@
 // NOTE: the state of libwtv is experimental. This may break over time until I get libwtv in a more stable state.
 // Interacting with the SDK will end up being close to how you'd interact with libdragon (with some N64-specific calls removed and some WebTV-specific calls added)
 
-int32_t audio_buffer_index = -1;
-uint32_t audio_buffer_chunk = 6300;
-uint16_t blank_sound[1] = {0x0000};
-
 // NOTE: Random functions will be integraded.
 #define PHI 0x9e3779b9
 static uint32_t Q[4096], c = 362436;
@@ -99,40 +95,6 @@ void draw_poopie(int x, int y)
 	}
 
 	display_show(disp);
-}
-
-audio_callback_data sound_callback()
-{
-	audio_callback_data ret;
-
-	if(audio_buffer_index >= 0 && audio_buffer_index < fart_sound_size)
-	{
-		if((audio_buffer_index + audio_buffer_chunk) >= fart_sound_size)
-		{
-			ret = (audio_callback_data) {
-				.buffer = (asamp*)(((uint32_t)(&fart_sound)) + audio_buffer_index),
-				.length = ((uint32_t)fart_sound_size - audio_buffer_index)
-			};
-			audio_buffer_index = -1;
-		}
-		else
-		{
-			ret = (audio_callback_data) {
-				.buffer = (asamp*)(((uint32_t)(&fart_sound)) + audio_buffer_index),
-				.length = audio_buffer_chunk
-			};
-			audio_buffer_index += audio_buffer_chunk;
-		}
-	}
-	else
-	{
-		ret = (audio_callback_data) {
-			.buffer = (asamp*)((uint32_t)(&blank_sound)),
-			.length = 2
-		};
-	}
-
-	return ret;
 }
 
 int main()
@@ -319,7 +281,9 @@ int main()
 					}
 
 					default:
-						audio_buffer_index = 0;
+						BAESound sound = BAESound_New(test);
+						BAEResult r6 = BAESound_LoadMemorySample(sound, &fart_sound, fart_sound_size, BAE_WAVE_TYPE);
+						BAEResult r7 = BAESound_Start(sound, 1, BAE_FIXED_1, 0);
 						printf("MattMan sends his condolences...\x0a\x0d");
 						draw_poopie((rand_cmwc() % (560 - 48)), (260 + (rand_cmwc() % 112)));
 						break;
