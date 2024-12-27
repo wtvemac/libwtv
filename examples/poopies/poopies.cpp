@@ -188,9 +188,7 @@ int main()
 	BAEMixer test = minibae_init();
 	BAEBankToken bank = NULL;
 	
-	void* memSoundBankData = malloc(lc2nup_hsb_len);
-	memcpy(memSoundBankData, lc2nup_hsb, lc2nup_hsb_len);
-	BAEResult r2 = BAEMixer_AddBankFromMemory(test, memSoundBankData, lc2nup_hsb_len, &bank);
+	BAEResult r2 = BAEMixer_AddBankFromMemory(test, &lc2nup_hsb, lc2nup_hsb_len, &bank);
 	printf("r2=0x%08x, bank=%p\x0a\x0d", r2, bank);
 
 	int16_t pVersionMajor = 0;
@@ -200,9 +198,7 @@ int main()
 	printf("r3=0x%08x, pVersionMajor=%08x, pVersionMinor=%08x, pVersionSubMinor=%08x\x0a\x0d", r3, pVersionMajor, pVersionMinor, pVersionSubMinor);
 
 	BAESong song = BAESong_New(test);
-	void* memMIDIData = malloc(chill_jingle_mid_len);
-	memcpy(memMIDIData, chill_jingle_mid, chill_jingle_mid_len);
-	BAEResult r4 = BAESong_LoadMidiFromMemory(song, memMIDIData, chill_jingle_mid_len, true);
+	BAEResult r4 = BAESong_LoadMidiFromMemory(song, &chill_jingle_mid, chill_jingle_mid_len, true);
 	printf("r4=0x%08x\x0a\x0d", r4);
 	BAESong_DisplayInfo(song);
 
