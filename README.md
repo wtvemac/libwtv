@@ -34,11 +34,19 @@ The examples directory shows a few approms I've been experimenting with.
 
 ![Doom running on MAME](example1.png)
 
-This is a port of [64doom](https://github.com/jnmartin84/64doom) to the MAME bf0 version of WebTV. Doom runs at a smaller resolution than the WebTV screen and uses a different color space. The screen size will likely remain a defect on bf0 boxes but I plan to fix the colors in software. WNI's Doom on the WebTV Plus and Echostar boxes used the Solo's gfxUnit to create a RGB color table, draw the screen to a rectangle and enlarge it to fit the screen.
+This is a port of [64doom](https://github.com/jnmartin84/64doom) to the WebTV classic (INT-W100) running in emulation. Doom runs at a smaller resolution and colors don't map correctly because the WebTV uses a different color space. The screen size will likely remain a defect for Doom on bf0 boxes but I plan to convert the RGB to YCbYCr in software.
 
-https://github.com/user-attachments/assets/f3c6a3d7-4e06-4d4f-9086-40b50b677427
+WNI's Doom on the WebTV Plus and Echostar boxes used the Solo's gfxUnit to create a RGB lookup table, draw the screen to a rectangle and enlarge it to fit the screen. I will be doing something similar after I finish up other parts of libwtv and get to the gfxUnit code.
 
-The game is a bit faster than normal due to the timer interval being setup for the N64 CPU. Easy fix that will be applied soon.
+Controls should work now as well. There needs to be some debouncing work done if you use IR but keys should register.
+
+https://github.com/user-attachments/assets/58c67883-68ba-4e36-b725-92341bff1d47
+
+An example of the Doom demo.
+
+https://github.com/user-attachments/assets/e5e135fa-1d4d-4310-9fbc-e89fea40a1c4
+
+This is an example of loading up the LC2 patchbank and playing WNI's chill jingle MIDI file. A fart WAV is played at a lower volume when keys are pressed. Make sure the video's sound is unmuted!
 
 ![Example approm on the WebTV Plus](example2.png)
 
