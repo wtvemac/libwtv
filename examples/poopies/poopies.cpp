@@ -120,7 +120,7 @@ int main()
 
 	printf("=============================================================\x0a\x0d");
 
-	/*display_init(RESOLUTION_560x420, FMT_YUV16, 1, WSRFC_BLACK_COLOR);
+	display_init(RESOLUTION_560x420, FMT_YUV16, 1, WSRFC_BLACK_COLOR);
 
 	console_alloc(0, 20, 560, 220, HORIZONTAL_PADDING, VERTICAL_PADDING, TAB_WIDTH, LINE_FEED_HEIGHT, true);
 
@@ -137,7 +137,7 @@ int main()
 	printf("SSID:         %s\x0a\x0d", get_ssid_string());
 	printf("HD LOCK 0x36: %s\x0a\x0d", get_atapwd_random_string());
 
-	console_close();*/
+	console_close();
 
 	printf("HD PASSWORD:  %s\x0a\x0d", get_ata_pwd_string(get_ata_userpwd()));
 
