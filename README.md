@@ -14,7 +14,7 @@ There's some hardcoded paths and oither thorns that you'd need to deal with. I p
 - IIC handling
 - Serial communication over smartcard bitbang.
 - Setting the LEDs
-- Audio output (raw PCM samples only)
+- Audio output. Raw PCM samples or through a modified version of the Beatnik audio engine (RMF, MIDI, WAV, AIFF or AU)
 
 ### SOLO
 
@@ -26,7 +26,7 @@ There's some hardcoded paths and oither thorns that you'd need to deal with. I p
 - IIC handling
 - Serial communication over UART.
 - Setting the LEDs
-- Audio output (raw PCM samples only)
+- Audio output. Raw PCM samples or through a modified version of the Beatnik audio engine (RMF, MIDI, WAV, AIFF or AU)
 
 A Linux MIPS executable is built then its sections are extracted and formated into WebTV's ROM executable format. I'm using [o1heap](https://github.com/pavel-kirienko/o1heap) for the memory manager. I may add the option to use other memory managers in the future. [miniBAE](https://github.com/heyigor/miniBAE) is used for audio processing. I have plans to use [lwIP](https://www.nongnu.org/lwip/2_1_x/index.html) for networking.
 
