@@ -126,6 +126,19 @@ int audio_get_frequency();
  */
 int audio_get_buffer_length();
 
+/**
+ * @brief Get the number of bytes allocated in an audio buffer
+ *
+ * @return The number of bytes in an allocated buffer
+ */
+int audio_get_buffer_size();
+
+/**
+ * @brief Get the number of audio buffers alocated
+ *
+ * @return The number of buffers allocated for audio playback
+ */
+int audio_get_buffer_count();
 
 /**
  * @brief Start writing to the first free internal buffer.

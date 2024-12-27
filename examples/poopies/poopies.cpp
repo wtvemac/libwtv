@@ -2,6 +2,8 @@
 // There is no storage system right now so data is stored as pre-allocated data within the executable.
 #include "fart-sound.h"
 #include "poop-emoji.h"
+#include "lc2nup_hsb.h"
+#include "chill_jingle.h"
 
 // NOTE: the state of libwtv is experimental. This may break over time until I get libwtv in a more stable state.
 // Interacting with the SDK will end up being close to how you'd interact with libdragon (with some N64-specific calls removed and some WebTV-specific calls added)
@@ -156,7 +158,7 @@ int main()
 
 	printf("=============================================================\x0a\x0d");
 
-	display_init(RESOLUTION_560x420, FMT_YUV16, 1, WSRFC_BLACK_COLOR);
+	/*display_init(RESOLUTION_560x420, FMT_YUV16, 1, WSRFC_BLACK_COLOR);
 
 	console_alloc(0, 20, 560, 220, HORIZONTAL_PADDING, VERTICAL_PADDING, TAB_WIDTH, LINE_FEED_HEIGHT, true);
 
@@ -173,7 +175,7 @@ int main()
 	printf("SSID:         %s\x0a\x0d", get_ssid_string());
 	printf("HD LOCK 0x36: %s\x0a\x0d", get_atapwd_random_string());
 
-	console_close();
+	console_close();*/
 
 	printf("HD PASSWORD:  %s\x0a\x0d", get_ata_pwd_string(get_ata_userpwd()));
 
@@ -182,8 +184,32 @@ int main()
 	draw_fiducials();
 
 	printf("Audio init.\x0a\x0d");
-	minibae_init();
-	audio_set_outx_buffer_callback(sound_callback);
+	
+	BAEMixer test = minibae_init();
+	BAEBankToken bank = NULL;
+	
+	void* memSoundBankData = malloc(lc2nup_hsb_len);
+	memcpy(memSoundBankData, lc2nup_hsb, lc2nup_hsb_len);
+	BAEResult r2 = BAEMixer_AddBankFromMemory(test, memSoundBankData, lc2nup_hsb_len, &bank);
+	printf("r2=0x%08x, bank=%p\x0a\x0d", r2, bank);
+
+	int16_t pVersionMajor = 0;
+	int16_t pVersionMinor = 0;
+	int16_t pVersionSubMinor = 0;
+	BAEResult r3 = BAEMixer_GetBankVersion(test, bank, &pVersionMajor, &pVersionMinor, &pVersionSubMinor);
+	printf("r3=0x%08x, pVersionMajor=%08x, pVersionMinor=%08x, pVersionSubMinor=%08x\x0a\x0d", r3, pVersionMajor, pVersionMinor, pVersionSubMinor);
+
+	BAESong song = BAESong_New(test);
+	void* memMIDIData = malloc(chill_jingle_mid_len);
+	memcpy(memMIDIData, chill_jingle_mid, chill_jingle_mid_len);
+	BAEResult r4 = BAESong_LoadMidiFromMemory(song, memMIDIData, chill_jingle_mid_len, true);
+	printf("r4=0x%08x\x0a\x0d", r4);
+	BAESong_DisplayInfo(song);
+
+	BAEResult r5 = BAESong_Start(song, 0);
+	printf("r5=0x%08x\x0a\x0d", r4);
+
+	//audio_set_outx_buffer_callback(sound_callback);
 
 	printf("Enabling keyboard (IR and/or PS2)... Press any key to get its key map.\x0a\x0d");
 	controller_init();

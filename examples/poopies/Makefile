@@ -2,6 +2,7 @@ all: poopies.wtv.o
 .PHONY: all
 
 LIBWTV_INSTALL_DIR ?= /opt/libwtv
+OPTIMIZATION_OPTIONS = -O3
 
 BUILD_DIR = build
 TARGET_BOX ?= bf0-app

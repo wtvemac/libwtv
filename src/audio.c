@@ -108,7 +108,6 @@ void __audocodec_init()
  */
 static void __audio_out_callback()
 {
-
 	if(_fill_outx_buffer_callback)
 	{
 		/* Disable interrupts so we don't get a race condition with writes */
@@ -116,15 +115,24 @@ static void __audio_out_callback()
 
 		audio_callback_data data = _fill_outx_buffer_callback();
 
-		REGISTER_WRITE(AUD_OUT_NSTART, PhysicalAddr(data.buffer));
-		REGISTER_WRITE(AUD_OUT_NSIZE, data.length);
+		if(data.buffer != NULL)
+		{
+			REGISTER_WRITE(AUD_OUT_DMA_CNTL, AUD_DMA_EN | AUD_NV | AUD_NVF);
+			REGISTER_WRITE(AUD_OUT_NSTART, PhysicalAddr(data.buffer));
+			REGISTER_WRITE(AUD_OUT_NSIZE, data.length);
+		}
+		else
+		{
+			REGISTER_XOR_WRITE(AUD_OUT_DMA_CNTL, AUD_DMA_EN | AUD_NV | AUD_NVF);
+			REGISTER_WRITE(AUD_OUT_NSTART, 0x00000000);
+			REGISTER_WRITE(AUD_OUT_NSIZE, 0x00);
+		}
 
 		/* Safe to enable interrupts here */
 		enable_interrupts();
 	}
-	else if(!buffers) /* Do not copy more data if we've freed the audio system */
+	else if(buffers) /* Do not copy more data if we've freed the audio system */
 	{
-
 		/* Disable interrupts so we don't get a race condition with writes */
 		disable_interrupts();
 
@@ -171,7 +179,6 @@ static void __audio_out_callback()
 		/* Safe to enable interrupts here */
 		enable_interrupts();
 	}
-
 }
 
 void audio_init(int frequency, int numbuffers)
@@ -507,5 +514,15 @@ int audio_get_frequency()
 
 int audio_get_buffer_length()
 {
+	return _buf_size / 2 / sizeof(asamp);
+}
+
+int audio_get_buffer_size()
+{
 	return _buf_size;
+}
+
+int audio_get_buffer_count()
+{
+	return _num_buf;
 }
