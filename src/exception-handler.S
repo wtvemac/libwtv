@@ -33,22 +33,25 @@ exception_handler:
 	sw    ra, (STACK_GPR + (R_RA * 4))(sp) # RA
 
 	mflo  k0
-	mfhi  k1
 	sw    k0, (STACK_LO)(sp)
+	
+	mfhi  k1
 	sw    k1, (STACK_HI)(sp)
 
 	mfc0  k0, C0_EPC
-	mfc0  k1, C0_SR
 	sw    k0, (STACK_EPC)(sp)
-	sw    k1, (STACK_SR)(sp)
 
+	mfc0  k1, C0_SR
+	sw    k1, (STACK_SR)(sp)
 	and   k1, ~(SR_IE | SR_EXL)
 	mtc0  k1, C0_SR
 
 	mfc0  saved_cause, C0_CAUSE
-	sw    t8, (STACK_CR)(sp)
-	andi  t0, t8, 0xff
+	sw    saved_cause, (STACK_CR)(sp)
 
+	/* EMAC: Need to handle reset exception here */
+
+	andi  t0, saved_cause, 0xff
 	beqz  t0, interrupt_exception
 	nop
 
@@ -80,8 +83,8 @@ interrupt_exception:
 	beqz  t0, check_system_asic_interrupt
 
 cpu_timer_interrupt:
-	mfc0  t0,C0_COMPARE
-	mtc0  t0,C0_COMPARE
+	mfc0  t0, C0_COMPARE
+	mtc0  t0, C0_COMPARE
 	jal   __TI_handler
 	nop
 	j     return_from_exception
