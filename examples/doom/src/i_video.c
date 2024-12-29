@@ -171,7 +171,7 @@ void I_SetDefaultPalette(void)
 void I_InitGraphics(void)
 {
     printf("EMAC: init screen SCREENWIDTH=%08x, SCREENHEIGHT=%08x\x0a\x0d", SCREENWIDTH, SCREENHEIGHT);
-    display_init_direct(RESOLUTION_320x200, FMT_YUV16, 0x108080);
+    display_init(RESOLUTION_320x200, FMT_YUV16, 3, WSRFC_BLACK_COLOR);
 
     I_SetDefaultPalette();
 
