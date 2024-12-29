@@ -275,7 +275,7 @@ void console_init()
     /* In case they initialized the display already */
     display_close();
 
-    display_init(CONSOLE_RESOLUTION, FMT_YUV16, 1, 0x0);
+    display_init(CONSOLE_RESOLUTION, FMT_YUV16, 1, WSRFC_BLACK_COLOR);
 
     console_alloc(0, 0, (MAX_CONSOLE_X + HORIZONTAL_PADDING), (MAX_CONSOLE_Y + VERTICAL_PADDING), HORIZONTAL_PADDING, VERTICAL_PADDING, TAB_WIDTH, LINE_FEED_HEIGHT, true);
 
