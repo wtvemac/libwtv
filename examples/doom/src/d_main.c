@@ -874,16 +874,13 @@ void D_DoomMain(void)
     M_Init ();
 
     // clear the console as part of clearing screen before game starts
-    //EMAC:console_close();
+    console_close();
     
     printf ("R_Init: Init DOOM refresh daemon - \x0a\x0d");
     R_Init ();
 
     printf ("\x0a\x0dP_Init: Init Playloop state.\x0a\x0d");
     P_Init ();
-
-    //EMAC:
-    console_close();
 
     printf ("I_Init: Setting up machine state.\x0a\x0d");
     I_Init ();
