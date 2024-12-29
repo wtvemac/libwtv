@@ -7,10 +7,10 @@
 #include "exception_internal.h"
 #include "console.h"
 #include "wtvsys.h"
+#include "leds.h"
 #include "debug.h"
 #include "regs_internal.h"
 #include "libc.h"
-#include "wtvsys.h"
 #include "serial.h"
 #include <string.h>
 #include <stdbool.h>
@@ -379,7 +379,15 @@ void __onCriticalException(reg_block_t* regs)
 	
 	debug_backtrace();
 
-	while(1) {}
+	while(1)
+	{
+		set_leds(4);
+		wait_ms(100);
+		set_leds(2);
+		wait_ms(100);
+		set_leds(1);
+		wait_ms(100);
+	}
 
 	if(!__exception_handler) { return; }
 
