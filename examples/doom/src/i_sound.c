@@ -910,6 +910,11 @@ void I_MixSound (void)
 
             uint32_t sample = FixedMul(wvbuff[index >> 16],master_vol);
 
+            if(iy == 0 && sample == -108)
+            {
+                sample = 0;
+            }
+
             uint32_t ssmp1 = FixedMul(sample, ltvol)<<16;
             uint32_t ssmp2 = FixedMul(sample, rtvol)&0xFFFF;
 
