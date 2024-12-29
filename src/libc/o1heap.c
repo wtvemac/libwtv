@@ -15,9 +15,9 @@
 // Authors: Pavel Kirienko <pavel.kirienko@zubax.com>
 
 #include "libc/o1heap.h"
-//EMAC:#include <assert.h>
+#include <assert.h>
 #include <limits.h>
-//EMAC:
+
 #include "serial.h"
 
 // ---------------------------------------- BUILD CONFIGURATION OPTIONS ----------------------------------------
@@ -30,12 +30,12 @@
 
 /// The assertion macro defaults to the standard assert().
 /// It can be overridden to manually suppress assertion checks or use a different error handling policy.
-//EMAC:#ifndef O1HEAP_ASSERT
+#ifndef O1HEAP_ASSERT
 // Intentional violation of MISRA: the assertion check macro cannot be replaced with a function definition.
-//EMAC:#    define O1HEAP_ASSERT(x) assert(x)  // NOSONAR
-//EMAC:#endif
+#    define O1HEAP_ASSERT(x) assert(x)  // NOSONAR
+#endif
 
-//EMAC: remove below
+//EMAC:  remove below
 #define O1HEAP_USE_INTRINSICS 0
 
 /// Allow usage of compiler intrinsics for branch annotation and CLZ.
@@ -72,7 +72,7 @@
 #ifndef O1HEAP_CLZ
 O1HEAP_PRIVATE uint_fast8_t O1HEAP_CLZ(const size_t x)
 {
-    //EMAC:O1HEAP_ASSERT(x > 0);
+    O1HEAP_ASSERT(x > 0);
     size_t       t = ((size_t) 1U) << ((sizeof(size_t) * CHAR_BIT) - 1U);
     uint_fast8_t r = 0;
     while ((x & t) == 0)
@@ -92,10 +92,10 @@ O1HEAP_PRIVATE uint_fast8_t O1HEAP_CLZ(const size_t x)
 
 #if __STDC_VERSION__ < 201112L
 // Intentional violation of MISRA: static assertion macro cannot be replaced with a function definition.
-//EMAC:#    define static_assert(x, ...) typedef char _static_assert_gl(_static_assertion_, __LINE__)[(x) ? 1 : -1]  // NOSONAR
-//EMAC:#    define _static_assert_gl(a, b) _static_assert_gl_impl(a, b)                                              // NOSONAR
+#    define static_assert(x, ...) typedef char _static_assert_gl(_static_assertion_, __LINE__)[(x) ? 1 : -1]  // NOSONAR
+#    define _static_assert_gl(a, b) _static_assert_gl_impl(a, b)                                              // NOSONAR
 // Intentional violation of MISRA: the paste operator ## cannot be avoided in this context.
-//EMAC:#    define _static_assert_gl_impl(a, b) a##b  // NOSONAR
+#    define _static_assert_gl_impl(a, b) a##b  // NOSONAR
 #endif
 
 /// The overhead is at most O1HEAP_ALIGNMENT bytes large,
@@ -111,9 +111,9 @@ O1HEAP_PRIVATE uint_fast8_t O1HEAP_CLZ(const size_t x)
 /// We will certainly end up with unused bins this way, but it is cheap to ignore.
 #define NUM_BINS_MAX (sizeof(size_t) * CHAR_BIT)
 
-//EMAC:static_assert((O1HEAP_ALIGNMENT & (O1HEAP_ALIGNMENT - 1U)) == 0U, "Not a power of 2");
-//EMAC:static_assert((FRAGMENT_SIZE_MIN & (FRAGMENT_SIZE_MIN - 1U)) == 0U, "Not a power of 2");
-//EMAC:static_assert((FRAGMENT_SIZE_MAX & (FRAGMENT_SIZE_MAX - 1U)) == 0U, "Not a power of 2");
+static_assert((O1HEAP_ALIGNMENT & (O1HEAP_ALIGNMENT - 1U)) == 0U, "Not a power of 2");
+static_assert((FRAGMENT_SIZE_MIN & (FRAGMENT_SIZE_MIN - 1U)) == 0U, "Not a power of 2");
+static_assert((FRAGMENT_SIZE_MAX & (FRAGMENT_SIZE_MAX - 1U)) == 0U, "Not a power of 2");
 
 typedef struct Fragment Fragment;
 
@@ -124,7 +124,7 @@ typedef struct FragmentHeader
     size_t    size;
     bool      used;
 } FragmentHeader;
-//EMAC:static_assert(sizeof(FragmentHeader) <= O1HEAP_ALIGNMENT, "Memory layout error");
+static_assert(sizeof(FragmentHeader) <= O1HEAP_ALIGNMENT, "Memory layout error");
 
 struct Fragment
 {
@@ -133,7 +133,7 @@ struct Fragment
     Fragment* next_free;  // Next free fragment in the bin; NULL in the last one.
     Fragment* prev_free;  // Same but points back; NULL in the first one.
 };
-//EMAC:static_assert(sizeof(Fragment) <= FRAGMENT_SIZE_MIN, "Memory layout error");
+static_assert(sizeof(Fragment) <= FRAGMENT_SIZE_MIN, "Memory layout error");
 
 struct O1HeapInstance
 {
@@ -147,13 +147,13 @@ struct O1HeapInstance
 /// Its size is padded up to O1HEAP_ALIGNMENT to ensure correct alignment of the allocation arena that follows.
 #define INSTANCE_SIZE_PADDED ((sizeof(O1HeapInstance) + O1HEAP_ALIGNMENT - 1U) & ~(O1HEAP_ALIGNMENT - 1U))
 
-//EMAC:static_assert(INSTANCE_SIZE_PADDED >= sizeof(O1HeapInstance), "Invalid instance footprint computation");
-//EMAC:static_assert((INSTANCE_SIZE_PADDED % O1HEAP_ALIGNMENT) == 0U, "Invalid instance footprint computation");
+static_assert(INSTANCE_SIZE_PADDED >= sizeof(O1HeapInstance), "Invalid instance footprint computation");
+static_assert((INSTANCE_SIZE_PADDED % O1HEAP_ALIGNMENT) == 0U, "Invalid instance footprint computation");
 
 /// Undefined for zero argument.
 O1HEAP_PRIVATE uint_fast8_t log2Floor(const size_t x)
 {
-    //EMAC:O1HEAP_ASSERT(x > 0);
+    O1HEAP_ASSERT(x > 0);
     // NOLINTNEXTLINE redundant cast to the same type.
     return (uint_fast8_t) (((sizeof(x) * CHAR_BIT) - 1U) - ((uint_fast8_t) O1HEAP_CLZ(x)));
 }
@@ -172,11 +172,12 @@ O1HEAP_PRIVATE size_t pow2(const uint_fast8_t power)
 {
     return ((size_t) 1U) << power;
 }
-
+#include "libc.h"
+#include "console.h"
 /// This is equivalent to pow2(log2Ceil(x)). Undefined for x<2.
 O1HEAP_PRIVATE size_t roundUpToPowerOf2(const size_t x)
 {
-    //EMAC:O1HEAP_ASSERT(x >= 2U);
+    O1HEAP_ASSERT(x >= 2U);
     // NOLINTNEXTLINE redundant cast to the same type.
     return ((size_t) 1U) << ((sizeof(x) * CHAR_BIT) - ((uint_fast8_t) O1HEAP_CLZ(x - 1U)));
 }
@@ -197,12 +198,12 @@ O1HEAP_PRIVATE void interlink(Fragment* const left, Fragment* const right)
 /// Adds a new fragment into the appropriate bin and updates the lookup mask.
 O1HEAP_PRIVATE void rebin(O1HeapInstance* const handle, Fragment* const fragment)
 {
-    //EMAC:O1HEAP_ASSERT(handle != NULL);
-    //EMAC:O1HEAP_ASSERT(fragment != NULL);
-    //EMAC:O1HEAP_ASSERT(fragment->header.size >= FRAGMENT_SIZE_MIN);
-    //EMAC:O1HEAP_ASSERT((fragment->header.size % FRAGMENT_SIZE_MIN) == 0U);
+    O1HEAP_ASSERT(handle != NULL);
+    O1HEAP_ASSERT(fragment != NULL);
+    O1HEAP_ASSERT(fragment->header.size >= FRAGMENT_SIZE_MIN);
+    O1HEAP_ASSERT((fragment->header.size % FRAGMENT_SIZE_MIN) == 0U);
     const uint_fast8_t idx = log2Floor(fragment->header.size / FRAGMENT_SIZE_MIN);  // Round DOWN when inserting.
-    //EMAC:O1HEAP_ASSERT(idx < NUM_BINS_MAX);
+    O1HEAP_ASSERT(idx < NUM_BINS_MAX);
     // Add the new fragment to the beginning of the bin list.
     // I.e., each allocation will be returning the most-recently-used fragment -- good for caching.
     fragment->next_free = handle->bins[idx];
@@ -218,12 +219,12 @@ O1HEAP_PRIVATE void rebin(O1HeapInstance* const handle, Fragment* const fragment
 /// Removes the specified fragment from its bin.
 O1HEAP_PRIVATE void unbin(O1HeapInstance* const handle, const Fragment* const fragment)
 {
-    //EMAC:O1HEAP_ASSERT(handle != NULL);
-    //EMAC:O1HEAP_ASSERT(fragment != NULL);
-    //EMAC:O1HEAP_ASSERT(fragment->header.size >= FRAGMENT_SIZE_MIN);
-    //EMAC:O1HEAP_ASSERT((fragment->header.size % FRAGMENT_SIZE_MIN) == 0U);
+    O1HEAP_ASSERT(handle != NULL);
+    O1HEAP_ASSERT(fragment != NULL);
+    O1HEAP_ASSERT(fragment->header.size >= FRAGMENT_SIZE_MIN);
+    O1HEAP_ASSERT((fragment->header.size % FRAGMENT_SIZE_MIN) == 0U);
     const uint_fast8_t idx = log2Floor(fragment->header.size / FRAGMENT_SIZE_MIN);  // Round DOWN when removing.
-    //EMAC:O1HEAP_ASSERT(idx < NUM_BINS_MAX);
+    O1HEAP_ASSERT(idx < NUM_BINS_MAX);
     // Remove the bin from the free fragment list.
     if (O1HEAP_LIKELY(fragment->next_free != NULL))
     {
@@ -236,7 +237,7 @@ O1HEAP_PRIVATE void unbin(O1HeapInstance* const handle, const Fragment* const fr
     // Update the bin header.
     if (O1HEAP_LIKELY(handle->bins[idx] == fragment))
     {
-        //EMAC:O1HEAP_ASSERT(fragment->prev_free == NULL);
+        O1HEAP_ASSERT(fragment->prev_free == NULL);
         handle->bins[idx] = fragment->next_free;
         if (O1HEAP_LIKELY(handle->bins[idx] == NULL))
         {
@@ -254,7 +255,7 @@ O1HeapInstance* o1heapInit(void* const base, const size_t size)
         (size >= (INSTANCE_SIZE_PADDED + FRAGMENT_SIZE_MIN)))
     {
         // Allocate the core heap metadata structure in the beginning of the arena.
-        //EMAC:O1HEAP_ASSERT(((size_t) base) % sizeof(O1HeapInstance*) == 0U);
+        O1HEAP_ASSERT(((size_t) base) % sizeof(O1HeapInstance*) == 0U);
         out                    = (O1HeapInstance*) base;
         out->nonempty_bin_mask = 0U;
         for (size_t i = 0; i < NUM_BINS_MAX; i++)
@@ -270,15 +271,15 @@ O1HeapInstance* o1heapInit(void* const base, const size_t size)
         }
         while ((capacity % FRAGMENT_SIZE_MIN) != 0)
         {
-            //EMAC:O1HEAP_ASSERT(capacity > 0U);
+            O1HEAP_ASSERT(capacity > 0U);
             capacity--;
         }
-        //EMAC:O1HEAP_ASSERT((capacity % FRAGMENT_SIZE_MIN) == 0);
-        //EMAC:O1HEAP_ASSERT((capacity >= FRAGMENT_SIZE_MIN) && (capacity <= FRAGMENT_SIZE_MAX));
+        O1HEAP_ASSERT((capacity % FRAGMENT_SIZE_MIN) == 0);
+        O1HEAP_ASSERT((capacity >= FRAGMENT_SIZE_MIN) && (capacity <= FRAGMENT_SIZE_MAX));
 
         // Initialize the root fragment.
         Fragment* const frag = (Fragment*) (void*) (((char*) base) + INSTANCE_SIZE_PADDED);
-        //EMAC:O1HEAP_ASSERT((((size_t) frag) % O1HEAP_ALIGNMENT) == 0U);
+        O1HEAP_ASSERT((((size_t) frag) % O1HEAP_ALIGNMENT) == 0U);
         frag->header.next = NULL;
         frag->header.prev = NULL;
         frag->header.size = capacity;
@@ -286,7 +287,7 @@ O1HeapInstance* o1heapInit(void* const base, const size_t size)
         frag->next_free   = NULL;
         frag->prev_free   = NULL;
         rebin(out, frag);
-        //EMAC:O1HEAP_ASSERT(out->nonempty_bin_mask != 0U);
+        O1HEAP_ASSERT(out->nonempty_bin_mask != 0U);
 
         // Initialize the diagnostics.
         out->diagnostics.capacity          = capacity;
@@ -301,8 +302,8 @@ O1HeapInstance* o1heapInit(void* const base, const size_t size)
 
 void* o1heapAllocate(O1HeapInstance* const handle, const size_t amount)
 {
-    //EMAC:O1HEAP_ASSERT(handle != NULL);
-    //EMAC:O1HEAP_ASSERT(handle->diagnostics.capacity <= FRAGMENT_SIZE_MAX);
+    O1HEAP_ASSERT(handle != NULL);
+    O1HEAP_ASSERT(handle->diagnostics.capacity <= FRAGMENT_SIZE_MAX);
     void* out = NULL;
 
     // If the amount approaches approx. SIZE_MAX/2, an undetected integer overflow may occur.
@@ -313,13 +314,13 @@ void* o1heapAllocate(O1HeapInstance* const handle, const size_t amount)
         // Add the header size and align the allocation size to the power of 2.
         // See "Timing-Predictable Memory Allocation In Hard Real-Time Systems", Herter, page 27.
         const size_t fragment_size = roundUpToPowerOf2(amount + O1HEAP_ALIGNMENT);
-        //EMAC:O1HEAP_ASSERT(fragment_size <= FRAGMENT_SIZE_MAX);
-        //EMAC:O1HEAP_ASSERT(fragment_size >= FRAGMENT_SIZE_MIN);
-        //EMAC:O1HEAP_ASSERT(fragment_size >= amount + O1HEAP_ALIGNMENT);
-        //EMAC:O1HEAP_ASSERT((fragment_size & (fragment_size - 1U)) == 0U);  // Is power of 2.
+        O1HEAP_ASSERT(fragment_size <= FRAGMENT_SIZE_MAX);
+        O1HEAP_ASSERT(fragment_size >= FRAGMENT_SIZE_MIN);
+        O1HEAP_ASSERT(fragment_size >= amount + O1HEAP_ALIGNMENT);
+        O1HEAP_ASSERT((fragment_size & (fragment_size - 1U)) == 0U);  // Is power of 2.
 
         const uint_fast8_t optimal_bin_index = log2Ceil(fragment_size / FRAGMENT_SIZE_MIN);  // Use CEIL when fetching.
-        //EMAC:O1HEAP_ASSERT(optimal_bin_index < NUM_BINS_MAX);
+        O1HEAP_ASSERT(optimal_bin_index < NUM_BINS_MAX);
         const size_t candidate_bin_mask = ~(pow2(optimal_bin_index) - 1U);
 
         // Find the smallest non-empty bin we can use.
@@ -327,28 +328,28 @@ void* o1heapAllocate(O1HeapInstance* const handle, const size_t amount)
         const size_t smallest_bin_mask = suitable_bins & ~(suitable_bins - 1U);  // Clear all bits but the lowest.
         if (O1HEAP_LIKELY(smallest_bin_mask != 0))
         {
-            //EMAC:O1HEAP_ASSERT((smallest_bin_mask & (smallest_bin_mask - 1U)) == 0U);  // Is power of 2.
+            O1HEAP_ASSERT((smallest_bin_mask & (smallest_bin_mask - 1U)) == 0U);  // Is power of 2.
             const uint_fast8_t bin_index = log2Floor(smallest_bin_mask);
-            //EMAC:O1HEAP_ASSERT(bin_index >= optimal_bin_index);
-            //EMAC:O1HEAP_ASSERT(bin_index < NUM_BINS_MAX);
+            O1HEAP_ASSERT(bin_index >= optimal_bin_index);
+            O1HEAP_ASSERT(bin_index < NUM_BINS_MAX);
 
             // The bin we found shall not be empty, otherwise it's a state divergence (memory corruption?).
             Fragment* const frag = handle->bins[bin_index];
-            //EMAC:O1HEAP_ASSERT(frag != NULL);
-            //EMAC:O1HEAP_ASSERT(frag->header.size >= fragment_size);
-            //EMAC:O1HEAP_ASSERT((frag->header.size % FRAGMENT_SIZE_MIN) == 0U);
-            //EMAC:O1HEAP_ASSERT(!frag->header.used);
+            O1HEAP_ASSERT(frag != NULL);
+            O1HEAP_ASSERT(frag->header.size >= fragment_size);
+            O1HEAP_ASSERT((frag->header.size % FRAGMENT_SIZE_MIN) == 0U);
+            O1HEAP_ASSERT(!frag->header.used);
             unbin(handle, frag);
 
             // Split the fragment if it is too large.
             const size_t leftover = frag->header.size - fragment_size;
             frag->header.size     = fragment_size;
-            //EMAC:O1HEAP_ASSERT(leftover < handle->diagnostics.capacity);  // Overflow check.
-            //EMAC:O1HEAP_ASSERT(leftover % FRAGMENT_SIZE_MIN == 0U);       // Alignment check.
+            O1HEAP_ASSERT(leftover < handle->diagnostics.capacity);  // Overflow check.
+            O1HEAP_ASSERT(leftover % FRAGMENT_SIZE_MIN == 0U);       // Alignment check.
             if (O1HEAP_LIKELY(leftover >= FRAGMENT_SIZE_MIN))
             {
                 Fragment* const new_frag = (Fragment*) (void*) (((char*) frag) + fragment_size);
-                //EMAC:O1HEAP_ASSERT(((size_t) new_frag) % O1HEAP_ALIGNMENT == 0U);
+                O1HEAP_ASSERT(((size_t) new_frag) % O1HEAP_ALIGNMENT == 0U);
                 new_frag->header.size = leftover;
                 new_frag->header.used = false;
                 interlink(new_frag, frag->header.next);
@@ -357,16 +358,16 @@ void* o1heapAllocate(O1HeapInstance* const handle, const size_t amount)
             }
 
             // Update the diagnostics.
-            //EMAC:O1HEAP_ASSERT((handle->diagnostics.allocated % FRAGMENT_SIZE_MIN) == 0U);
+            O1HEAP_ASSERT((handle->diagnostics.allocated % FRAGMENT_SIZE_MIN) == 0U);
             handle->diagnostics.allocated += fragment_size;
-            //EMAC:O1HEAP_ASSERT(handle->diagnostics.allocated <= handle->diagnostics.capacity);
+            O1HEAP_ASSERT(handle->diagnostics.allocated <= handle->diagnostics.capacity);
             if (O1HEAP_LIKELY(handle->diagnostics.peak_allocated < handle->diagnostics.allocated))
             {
                 handle->diagnostics.peak_allocated = handle->diagnostics.allocated;
             }
 
             // Finalize the fragment we just allocated.
-            //EMAC:O1HEAP_ASSERT(frag->header.size >= amount + O1HEAP_ALIGNMENT);
+            O1HEAP_ASSERT(frag->header.size >= amount + O1HEAP_ALIGNMENT);
             frag->header.used = true;
 
             out = ((char*) frag) + O1HEAP_ALIGNMENT;
@@ -393,29 +394,29 @@ void* o1heapAllocate(O1HeapInstance* const handle, const size_t amount)
 
 void o1heapFree(O1HeapInstance* const handle, void* const pointer)
 {
-    //EMAC:O1HEAP_ASSERT(handle != NULL);
-    //EMAC:O1HEAP_ASSERT(handle->diagnostics.capacity <= FRAGMENT_SIZE_MAX);
+    O1HEAP_ASSERT(handle != NULL);
+    O1HEAP_ASSERT(handle->diagnostics.capacity <= FRAGMENT_SIZE_MAX);
     if (O1HEAP_LIKELY(pointer != NULL))  // NULL pointer is a no-op.
     {
         Fragment* const frag = (Fragment*) (void*) (((char*) pointer) - O1HEAP_ALIGNMENT);
 
         // Check for heap corruption in debug builds.
-        //EMAC:O1HEAP_ASSERT(((size_t) frag) % sizeof(Fragment*) == 0U);
-        //EMAC:O1HEAP_ASSERT(((size_t) frag) >= (((size_t) handle) + INSTANCE_SIZE_PADDED));
-        //EMAC:O1HEAP_ASSERT(((size_t) frag) <=
-        //              (((size_t) handle) + INSTANCE_SIZE_PADDED + handle->diagnostics.capacity - FRAGMENT_SIZE_MIN));
-        //EMAC:O1HEAP_ASSERT(frag->header.used);  // Catch double-free
-        //EMAC:O1HEAP_ASSERT(((size_t) frag->header.next) % sizeof(Fragment*) == 0U);
-        //EMAC:O1HEAP_ASSERT(((size_t) frag->header.prev) % sizeof(Fragment*) == 0U);
-        //EMAC:O1HEAP_ASSERT(frag->header.size >= FRAGMENT_SIZE_MIN);
-        //EMAC:O1HEAP_ASSERT(frag->header.size <= handle->diagnostics.capacity);
-        //EMAC:O1HEAP_ASSERT((frag->header.size % FRAGMENT_SIZE_MIN) == 0U);
+        O1HEAP_ASSERT(((size_t) frag) % sizeof(Fragment*) == 0U);
+        O1HEAP_ASSERT(((size_t) frag) >= (((size_t) handle) + INSTANCE_SIZE_PADDED));
+        O1HEAP_ASSERT(((size_t) frag) <=
+                      (((size_t) handle) + INSTANCE_SIZE_PADDED + handle->diagnostics.capacity - FRAGMENT_SIZE_MIN));
+        O1HEAP_ASSERT(frag->header.used);  // Catch double-free
+        O1HEAP_ASSERT(((size_t) frag->header.next) % sizeof(Fragment*) == 0U);
+        O1HEAP_ASSERT(((size_t) frag->header.prev) % sizeof(Fragment*) == 0U);
+        O1HEAP_ASSERT(frag->header.size >= FRAGMENT_SIZE_MIN);
+        O1HEAP_ASSERT(frag->header.size <= handle->diagnostics.capacity);
+        O1HEAP_ASSERT((frag->header.size % FRAGMENT_SIZE_MIN) == 0U);
 
         // Even if we're going to drop the fragment later, mark it free anyway to prevent double-free.
         frag->header.used = false;
 
         // Update the diagnostics. It must be done before merging because it invalidates the fragment size information.
-        //EMAC:O1HEAP_ASSERT(handle->diagnostics.allocated >= frag->header.size);  // Heap corruption check.
+        O1HEAP_ASSERT(handle->diagnostics.allocated >= frag->header.size);  // Heap corruption check.
         handle->diagnostics.allocated -= frag->header.size;
 
         // Merge with siblings and insert the returned fragment into the appropriate bin and update metadata.
@@ -430,7 +431,7 @@ void o1heapFree(O1HeapInstance* const handle, void* const pointer)
             prev->header.size += frag->header.size + next->header.size;
             frag->header.size = 0;  // Invalidate the dropped fragment headers to prevent double-free.
             next->header.size = 0;
-            //EMAC:O1HEAP_ASSERT((prev->header.size % FRAGMENT_SIZE_MIN) == 0U);
+            O1HEAP_ASSERT((prev->header.size % FRAGMENT_SIZE_MIN) == 0U);
             interlink(prev, next->header.next);
             rebin(handle, prev);
         }
@@ -439,7 +440,7 @@ void o1heapFree(O1HeapInstance* const handle, void* const pointer)
             unbin(handle, prev);
             prev->header.size += frag->header.size;
             frag->header.size = 0;
-            //EMAC:O1HEAP_ASSERT((prev->header.size % FRAGMENT_SIZE_MIN) == 0U);
+            O1HEAP_ASSERT((prev->header.size % FRAGMENT_SIZE_MIN) == 0U);
             interlink(prev, next);
             rebin(handle, prev);
         }
@@ -448,7 +449,7 @@ void o1heapFree(O1HeapInstance* const handle, void* const pointer)
             unbin(handle, next);
             frag->header.size += next->header.size;
             next->header.size = 0;
-            //EMAC:O1HEAP_ASSERT((frag->header.size % FRAGMENT_SIZE_MIN) == 0U);
+            O1HEAP_ASSERT((frag->header.size % FRAGMENT_SIZE_MIN) == 0U);
             interlink(frag, next->header.next);
             rebin(handle, frag);
         }
@@ -461,7 +462,7 @@ void o1heapFree(O1HeapInstance* const handle, void* const pointer)
 
 bool o1heapDoInvariantsHold(const O1HeapInstance* const handle)
 {
-    //EMAC:O1HEAP_ASSERT(handle != NULL);
+    O1HEAP_ASSERT(handle != NULL);
     bool valid = true;
 
     // Check the bin mask consistency.
@@ -501,7 +502,7 @@ bool o1heapDoInvariantsHold(const O1HeapInstance* const handle)
 
 O1HeapDiagnostics o1heapGetDiagnostics(const O1HeapInstance* const handle)
 {
-    //EMAC:O1HEAP_ASSERT(handle != NULL);
+    O1HEAP_ASSERT(handle != NULL);
     const O1HeapDiagnostics out = handle->diagnostics;
     return out;
 }

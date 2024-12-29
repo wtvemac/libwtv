@@ -254,3 +254,10 @@ int stricmp2(const char *s1, const char *s2, size_t n)
     }
     return (*s1 == 0 && *s2 == 0) ? 0 : -1;
 }
+
+void __assert_fail(const char* assertion, const char* file, unsigned int line, const char* function)
+{
+    printf("Error: %s\x0a\x0d\tfile %s [%s] line %d\x0a\x0d", assertion, file, function, line);
+    __asm__("break");
+    while(1) {}
+}
