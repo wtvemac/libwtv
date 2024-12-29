@@ -60,7 +60,7 @@ extern int numChannels;
 
 
 #define SAMPLERATE 44100
-
+#define SOUNDPITCH 11610
 // NUM_VOICES = SFX_VOICES + MUS_VOICES
 #define NUM_MIDI_INSTRUMENTS 182
 #define SFX_VOICES 8
@@ -397,7 +397,7 @@ int I_StartSound (
   int priority )
 {
     I_StopSound(cnum);
-    Sfx_Start (S_sfx[id].data, cnum, changepitch ? 2765 + (((pitch<<2) + pitch)<<5) : 7350, vol, sep, lengths[id]);
+    Sfx_Start (S_sfx[id].data, cnum, changepitch ? 2765 + (((pitch<<2) + pitch)<<5) : SOUNDPITCH, vol, sep, lengths[id]);
     return cnum;
 }
 
@@ -427,7 +427,7 @@ I_UpdateSoundParams
   int        sep,
   int        pitch )
 {
-    Sfx_Update(handle, changepitch ? 2765 + (((pitch<<2) + pitch)<<5) : 7350, vol, sep);
+    Sfx_Update(handle, changepitch ? 2765 + (((pitch<<2) + pitch)<<5) : SOUNDPITCH, vol, sep);
 }
 
 /**********************************************************************/
