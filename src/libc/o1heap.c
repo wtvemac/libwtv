@@ -172,8 +172,7 @@ O1HEAP_PRIVATE size_t pow2(const uint_fast8_t power)
 {
     return ((size_t) 1U) << power;
 }
-#include "libc.h"
-#include "console.h"
+
 /// This is equivalent to pow2(log2Ceil(x)). Undefined for x<2.
 O1HEAP_PRIVATE size_t roundUpToPowerOf2(const size_t x)
 {
