@@ -280,7 +280,14 @@ void R_DrawTranslatedColumn (int cyl,int cyh,int cx)
         //  used with PLAY sprites.
         // Thus the "green" ramp of the player 0 sprite
         //  is mapped to gray, red, black/indigo.
-        *dest = palarray[dc_colormap[dc_translation[dc_source[frac>>FRACBITS]]]];
+        if(((uint32_t)dest) & 2)
+        {
+            *dest = (palarray[dc_colormap[dc_translation[dc_source[frac>>FRACBITS]]]] >> 0x00) & 0xffff;
+        }
+        else
+        {
+            *dest = (palarray[dc_colormap[dc_translation[dc_source[frac>>FRACBITS]]]] >> 0x10) & 0xffff;
+        }
         dest += SCREENWIDTH;
         frac += fracstep;
     }
@@ -333,7 +340,14 @@ void R_DrawTranslatedColumnLow (int cyl,int cyh,int cx)
         //  is mapped to gray, red, black/indigo.
 
         // 32-bit write, double-pixel write with one store instruction
-        *dest = palarray[dc_colormap[dc_translation[dc_source[frac>>FRACBITS]]]];
+        if(((uint32_t)dest) & 2)
+        {
+            *dest = (palarray[dc_colormap[dc_translation[dc_source[frac>>FRACBITS]]]] >> 0x00) & 0xffff;
+        }
+        else
+        {
+            *dest = (palarray[dc_colormap[dc_translation[dc_source[frac>>FRACBITS]]]] >> 0x10) & 0xffff;
+        }
         dest += (SCREENWIDTH >> 1);
         frac += fracstep;
     }
@@ -380,7 +394,14 @@ void R_DrawColumn (int cyl,int cyh,int cx)
 
     do
     {
-        *dest = palarray[dc_colormap[dc_source[(frac>>FRACBITS)&127]]];
+        if(((uint32_t)dest) & 2)
+        {
+            *dest = (palarray[dc_colormap[dc_source[(frac>>FRACBITS)&127]]] >> 0x00) & 0xffff;
+        }
+        else
+        {
+            *dest = (palarray[dc_colormap[dc_source[(frac>>FRACBITS)&127]]] >> 0x10) & 0xffff;
+        }
         dest += SCREENWIDTH;
         frac += fracstep;
     }
@@ -413,7 +434,14 @@ void R_DrawColumnLow (int cyl,int cyh,int cx)
 
     do
     {
-        *dest = palarray[dc_colormap[dc_source[(frac>>FRACBITS)&127]]];
+        if(((uint32_t)dest) & 2)
+        {
+            *dest = (palarray[dc_colormap[dc_source[(frac>>FRACBITS)&127]]] >> 0x00) & 0xffff;
+        }
+        else
+        {
+            *dest = (palarray[dc_colormap[dc_source[(frac>>FRACBITS)&127]]] >> 0x10) & 0xffff;
+        }
         dest += (SCREENWIDTH >> 1);
         frac += fracstep;
     }
@@ -484,7 +512,14 @@ void R_DrawSpan (int sx1, int sx2, int sy)
 
         // Lookup pixel from flat texture tile,
         //  re-index using light/colormap.
-        *dest++ = palarray[ds_colormap[ds_source[spot]]];
+        if(((uint32_t)dest) & 2)
+        {
+            *dest++ = (palarray[ds_colormap[ds_source[spot]]] >> 0x00) & 0xffff;
+        }
+        else
+        {
+            *dest++ = (palarray[ds_colormap[ds_source[spot]]] >> 0x10) & 0xffff;
+        }
     } while (count--); 
 }
 
@@ -524,7 +559,14 @@ void R_DrawSpanLow (int sx1, int sx2, int sy)
     
         // Lookup pixel from flat texture tile,
         //  re-index using light/colormap.
-        *dest++ = palarray[ds_colormap[ds_source[spot]]];
+        if(((uint32_t)dest) & 2)
+        {
+            *dest++ = (palarray[ds_colormap[ds_source[spot]]] >> 0x00) & 0xffff;
+        }
+        else
+        {
+            *dest++ = (palarray[ds_colormap[ds_source[spot]]] >> 0x10) & 0xffff;
+        }
     } while (count--); 
 } 
 

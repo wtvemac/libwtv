@@ -140,22 +140,47 @@ void I_RestorePalette(void)
 
 void I_SetPalette(byte* palette)
 {
-    const byte *gammaptr = gammatable[usegamma];
-
     unsigned int i;
-    
+
     for (i = 0; i < 256; i++)
     {
         int r = *palette++;
         int g = *palette++;
         int b = *palette++;
 
-        r = gammaptr[r];
-        g = gammaptr[g];
-        b = gammaptr[b];
+        uint16_t y = (uint16_t)(((77 * r) + (150 * g) + (29 * b) + 0x80) >> 8);
+        
+        uint16_t u = (uint16_t)(WSRFC_UV_OFFSET + (((144 * (b - y)) + 0x80) >> 8));
+        if(u < WSRFC_Y_DARKEST)
+        {
+            u = WSRFC_Y_DARKEST;
+        }
+        else if (u > WSRFC_Y_LIGHTEST)
+        {
+            u = WSRFC_Y_LIGHTEST;
+        }
 
-        uint16_t unpackedcol = ((r >> 3) << 11) | ((g >> 3) << 6) | ((b >> 3) << 1);
-        uint32_t packedcol = (unpackedcol << 16) | unpackedcol;
+        uint16_t v = (uint16_t)(WSRFC_UV_OFFSET + (((183 * (r - y)) + 0x80) >> 8));
+        if (v < WSRFC_Y_DARKEST)
+        {
+            v = WSRFC_Y_DARKEST;
+        }
+        else if (v > WSRFC_Y_LIGHTEST)
+        {
+            v = WSRFC_Y_LIGHTEST;
+        }
+
+        y = (short)(WSRFC_Y_DARKEST + (((y * WSRFC_Y_RANGE) + 0x80) >> 8));
+        if (y < WSRFC_Y_DARKEST)
+        {
+            y = WSRFC_Y_DARKEST;
+        }
+        else if (y > WSRFC_Y_LIGHTEST)
+        {
+            y = WSRFC_Y_LIGHTEST;
+        }
+
+        uint32_t packedcol = (y << 0x18) | (u << 0x10) | (y << 0x08) | (v << 0);
         current_palarray[i] = packedcol;
     }
 }
@@ -171,7 +196,7 @@ void I_SetDefaultPalette(void)
 void I_InitGraphics(void)
 {
     printf("EMAC: init screen SCREENWIDTH=%08x, SCREENHEIGHT=%08x\x0a\x0d", SCREENWIDTH, SCREENHEIGHT);
-    display_init(RESOLUTION_320x200, FMT_YUV16, 3, WSRFC_BLACK_COLOR);
+    display_init(RESOLUTION_320x200, FMT_YUV16, 3, 0x108080);
 
     I_SetDefaultPalette();
 
