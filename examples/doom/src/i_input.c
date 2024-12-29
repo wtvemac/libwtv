@@ -78,19 +78,32 @@ void I_GetEvent(void)
         event_t doom_input_event;
 
         uint16_t keycode = GET_KEYCODE(event_object.data);
+        bool alted = false;
 
         doom_input_event.data1 = 0x00;
 
         switch(keycode) {
+            case KY_E:
+                alted = true;
+                doom_input_event.data1 = KEY_RIGHTARROW;
+                break;
+            case KY_D:
             case KY_RIGHT:
                 doom_input_event.data1 = KEY_RIGHTARROW;
                 break;
+            case KY_Q:
+                alted = true;
+                doom_input_event.data1 = KEY_LEFTARROW;
+                break;
+            case KY_A:
             case KY_LEFT:
                 doom_input_event.data1 = KEY_LEFTARROW;
                 break;
+            case KY_W:
             case KY_UP:
                 doom_input_event.data1 = KEY_UPARROW;
                 break;
+            case KY_S:
             case KY_DOWN:
                 doom_input_event.data1 = KEY_DOWNARROW;
                 break;
@@ -144,6 +157,7 @@ void I_GetEvent(void)
             case KY_BACKSPACE:
                 doom_input_event.data1 = KEY_BACKSPACE;
                 break;
+            case KY_WTV_GOTO:
             case KY_PAUSE:
                 doom_input_event.data1 = KEY_PAUSE;
                 break;
@@ -159,9 +173,13 @@ void I_GetEvent(void)
                 doom_input_event.data1 = KEY_PLUS;
                 break;
 
+            case KY_SHIFTL:
             case KY_SHIFTR:
                 doom_input_event.data1 = KEY_RSHIFT;
                 break;
+            case KY_BACKSLASH:
+            case KY_END:
+            case KY_CTRLL:
             case KY_CTRLR:
                 doom_input_event.data1 = KEY_RCTRL;
                 break;
@@ -175,10 +193,62 @@ void I_GetEvent(void)
             case KY_CAPS_LOCK:
                 doom_input_event.data1 = KEY_CAPSLOCK;
                 break;
+
+            case KY_SPACE:
+                doom_input_event.data1 = ' ';
+                break;
+
+            case KY_0:
+                doom_input_event.data1 = '0';
+            case KY_1:
+                doom_input_event.data1 = '1';
+                break;
+            case KY_2:
+                doom_input_event.data1 = '2';
+                break;
+            case KY_3:
+                doom_input_event.data1 = '3';
+                break;
+            case KY_4:
+                doom_input_event.data1 = '4';
+                break;
+            case KY_5:
+                doom_input_event.data1 = '5';
+                break;
+            case KY_6:
+                doom_input_event.data1 = '6';
+                break;
+            case KY_7:
+                doom_input_event.data1 = '7';
+                break;
+            case KY_Y:
+                doom_input_event.data1 = 'y';
+                break;
+            case KY_N:
+                doom_input_event.data1 = 'n';
+                break;
+            case KY_M:
+                doom_input_event.data1 = 'm';
+                break;
+            case KY_C:
+                doom_input_event.data1 = 'c';
+                break;
+            case KY_F:
+                doom_input_event.data1 = 'f';
+                break;
         }
 
         if(doom_input_event.data1 != 0x00) {
             doom_input_event.type = (KY_IS_PRESSED(event_object.data)) ? ev_keydown : ev_keyup;
+
+            if(alted)
+            {
+                event_t doom_shift_event;
+                doom_shift_event.data1 = KEY_LALT;
+                doom_shift_event.type = doom_input_event.type;
+                D_PostEvent(&doom_shift_event);
+            }
+
             D_PostEvent(&doom_input_event);
         }
     }
