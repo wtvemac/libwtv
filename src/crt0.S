@@ -87,8 +87,8 @@ zero_bss_section_dword:
 	subu  t1, 0x1
 
 setup_exception_vectors:
-	la    t0, goto_exception_handler
-	la    t1, 0x0c
+	la    t0, prepare_exception
+	la    t1, __exception_prepare_dword_size
 	la    t2, K0BASE
 copy_exception_handler_dword:
 	lw    t3, 0x0(t0)
@@ -180,16 +180,6 @@ copy_exception_handler_dword:
 goto_main:
 	la   t0, main
 	j    t0
-	nop
-
-goto_exception_handler:
-	la   t0, exception_handler
-	jr   t0
-	nop
-	eret
-	nop
-	nop
-	nop
 	nop
 
 /*

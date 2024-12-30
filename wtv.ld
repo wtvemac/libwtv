@@ -50,6 +50,8 @@ __data_dword_size = (__data_size >> 2);
 __bss_size = (__bss_end - __bss_start);
 __bss_dword_size = (__bss_size >> 2);
 
+__exception_prepare_size = (handle_exception - prepare_exception);
+__exception_prepare_dword_size = (__exception_prepare_size >> 2);
 
 /* A bit of a ternary mess BUT this tries to select the defined memory region based on the 
  * supplied base address.
@@ -76,6 +78,9 @@ __data_region_end = (__data_region_end <= (__data_region_start + __data_region_l
 ASSERT(__bss_end < __data_region_end, "Combined data sections are too large. Try to reduce space needed for variables.");
 
 __heap_size = (__data_region_end - __heap_start);
+
+/* Caculate size of exception handler setup code that's copied to the MIPS exception vector address */
+ASSERT(__exception_prepare_size <= 0x80, "Exception prepare code too large. Please reduce the size of 'prepare_exception'.");
 
 /*
   * WebTV's original build object format defines three sections:

@@ -3,24 +3,34 @@
 #define saved_cause t8
 
 	.global exception_handler
+	.global prepare_exception
+	.global handle_exception
 	.global exception_handler_end
 
 	.func exception_handler
 exception_handler:
 	.set noreorder
-	.set noat
+	.set at
 
+prepare_exception:
 	addiu sp, -EXCEPTION_STACK_SIZE
 
+	sw    t0, (STACK_GPR + (R_T0 * 4))(sp) # T0
+
+	la    t0, handle_exception
+	jr    t0
+	nop
+	eret
+	nop
+
+handle_exception:
 	sw    _at, (STACK_GPR + (R_AT * 4))(sp) # AT
-	.set at
 	sw    v0, (STACK_GPR + (R_V0 * 4))(sp) # V0
 	sw    v1, (STACK_GPR + (R_V1 * 4))(sp) # V1
 	sw    a0, (STACK_GPR + (R_A0 * 4))(sp) # A0
 	sw    a1, (STACK_GPR + (R_A1 * 4))(sp) # A1
 	sw    a2, (STACK_GPR + (R_A2 * 4))(sp) # A2
 	sw    a3, (STACK_GPR + (R_A3 * 4))(sp) # A3
-	sw    t0, (STACK_GPR + (R_T0 * 4))(sp) # T0
 	sw    t1, (STACK_GPR + (R_T1 * 4))(sp) # T1
 	sw    t2, (STACK_GPR + (R_T2 * 4))(sp) # T2
 	sw    t3, (STACK_GPR + (R_T3 * 4))(sp) # T3
@@ -81,6 +91,7 @@ interrupt_exception:
 	sw    sp, interrupt_exception_frame
 	and   t0, saved_cause, 0x8000
 	beqz  t0, check_system_asic_interrupt
+	nop
 
 cpu_timer_interrupt:
 	mfc0  t0, C0_COMPARE
@@ -426,6 +437,7 @@ return_from_exception:
 	addiu sp, EXCEPTION_STACK_SIZE
 
 	eret
+	nop
 
 root_solo_interrupt_table:
 	/*
