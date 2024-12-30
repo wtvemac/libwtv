@@ -217,8 +217,6 @@ void M_DrawOptions(void);
 void M_DrawSound(void);
 void M_DrawLoad(void);
 void M_DrawSave(void);
-void M_DrawVideoSettings(void);
-void M_AdjustGamma(int choice);
 
 void M_DrawSaveLoadBorder(int x,int y);
 void M_SetupNextMenu(menu_t *menudef);
@@ -368,34 +366,6 @@ menu_t  OptionsDef =
     &MainDef,
     OptionsMenu,
     M_DrawOptions,
-    60,37,
-    0
-};
-// VIDEO SETTINGS menu
-enum
-{
-    detail,
-    scrnsize,
-    vid_empty0,
-    gammae,
-	vid_empty1,
-    vid_end
-} videoset_e;
-
-menuitem_t VideoSettingsMenu[]=
-{
-	{1,"X_RESOLU",	M_ChangeDetail,'g'},
-    {2,"M_SCRNSZ",	M_SizeDisplay,'s'},
-    {-1,"",0},
-	{2,"X_GAMMA",	M_AdjustGamma,'a'},
-    {-1,"",0},
-};
-menu_t  VideoSettingsDef =
-{
-    vid_end,
-    &OptionsDef,
-    VideoSettingsMenu,
-    M_DrawVideoSettings,
     60,37,
     0
 };
@@ -1015,43 +985,6 @@ void M_Episode(int choice)
 char    detailNames[2][9]	= {"M_GDHIGH","M_GDLOW"};
 char    resolutionNames[2][9] = {"X_RZHIGH","X_RZLOW"};
 char	msgNames[2][9]		= {"M_MSGOFF","M_MSGON"};
-
-void M_AdjustGamma(int choice)
-{
-    switch (choice)
-    {
-        case 0:
-	    if (usegamma)
-	        usegamma--;
-	    break;
-        case 1:
-            if (usegamma < 4)
-                usegamma++;
-            break;
-    }
-
-    I_SetPalette (W_CacheLumpName ("PLAYPAL",PU_CACHE));
-}
-
-void M_DrawVideoSettings(void)
-{
-    V_DrawPatch (70,15,W_CacheLumpName("X_VIDTTL",PU_CACHE));
-
-    V_DrawPatch (VideoSettingsDef.x + 140,VideoSettingsDef.y+LINEHEIGHT*(detail),
-                       W_CacheLumpName(resolutionNames[detailLevel],PU_CACHE));
-
-    M_DrawThermo(VideoSettingsDef.x,VideoSettingsDef.y+LINEHEIGHT*(scrnsize+1),
-                 9,screenSize);
-
-    M_DrawThermo(VideoSettingsDef.x,VideoSettingsDef.y+LINEHEIGHT*(gammae+1),
-                 5,usegamma);
-}
-
-
-void M_VideoSettings(int choice)
-{
-    M_SetupNextMenu(&VideoSettingsDef);
-}
 
 void M_DrawOptions(void)
 {
