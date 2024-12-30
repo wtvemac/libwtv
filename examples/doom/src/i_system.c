@@ -50,12 +50,7 @@ void DebugOutput_String_For_IError(const char *str, int lineNumber, int good);
 
 volatile uint32_t timekeeping;
 
-// freed up enough space through gc-sections to give 5.5 MB to zone
-// this also allowed me to get screen wipe working again
-//EMAC: change to work
-#define MB_FOR_ZONE 3
-#define BYTES_PER_MB 1048576
-const size_t zone_size = MB_FOR_ZONE * BYTES_PER_MB;
+const size_t zone_size = 2096128;
 int based_zone = 0;
 
 void I_Tactile(int on, int off, int total)
@@ -90,6 +85,7 @@ byte* I_ZoneBase(int* size)
     *size = zone_size;
 
     byte *ptr = (byte *)malloc(*size);
+    memset(ptr, 0, *size);
 
     //EMAC: check for ptr==NULL
     printf("I_ZoneBase->ptr=%p, zone_size=%08x\x0a\x0d", ptr, zone_size);
