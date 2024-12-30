@@ -730,7 +730,7 @@ void* W_CacheLumpName (char* name, int tag)
     // these lumps get loaded from DFS in W_Init
     else
     {
-        if (0 == strncmp(name,"X_G",3))
+        /*if (0 == strncmp(name,"X_G",3))
         {
             return (void *)GAMMA_lmp;
         }
@@ -754,7 +754,7 @@ void* W_CacheLumpName (char* name, int tag)
         {
             return (void *)RESOLUTI_lmp;
         }
-        else
+        else*/
         {
             return W_CacheLumpNum(W_GetNumForName(name), tag);
         }
