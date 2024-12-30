@@ -301,7 +301,7 @@ void R_RenderSegLoop (void)
         }
 
         // draw the wall tiers
-        if (midtexture && midtexture != 0xc0edbabe)
+        if (midtexture)
         {
             // single sided line
             dc_yl = yl;
@@ -318,7 +318,7 @@ void R_RenderSegLoop (void)
         else
         {
             // two sided line
-            if (toptexture && toptexture != 0xc0edbabe)
+            if (toptexture)
             {
                 // top wall
                 mid = pixhigh>>HEIGHTBITS;
@@ -347,7 +347,7 @@ void R_RenderSegLoop (void)
                     ceilingclip[rw_x] = yl-1;
                 }
 
-                if (bottomtexture && bottomtexture != 0xc0edbabe)
+                if (bottomtexture)
                 {
                 // bottom wall
                 mid = (pixlow+HEIGHTUNIT-1)>>HEIGHTBITS;
