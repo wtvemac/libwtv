@@ -97,6 +97,97 @@ void draw_poopie(int x, int y)
 	display_show(disp);
 }
 
+#define kMaxFilenameLen		28
+#define DIRECTORY_SEPARATOR '/'
+typedef struct FSNode	FSNode;
+struct FSNode
+{
+	FSNode *next;               /* pointer to next file's FSNode */
+	FSNode *parent;             /* pointer to parent directory */
+	FSNode *first;              /* 0 for object, or pointer to first FSNode in dir */
+	char *data;                 /* 0 for directory, or pointer to file data */
+	uint32_t dataLength;        /* size of object */
+	uint32_t nodeChecksum;
+	uint32_t dataChecksum;      /* 0 if data = nil */
+	char name[kMaxFilenameLen];
+};
+typedef struct /* only used by downloader & boot code to verify ROMFS */
+{
+	uint32_t uint32_count; // find good name?
+	uint32_t checksum;
+	
+} ROMFSHeader;
+
+FSNode* walk_romfs(FSNode* node, const char* file_path)
+{
+	while(node != NULL)
+	{
+		char* cur_node_char = (char *)node->name;
+		char* cur_path_char = (char *)file_path;
+		while(*cur_node_char != NULL && *cur_path_char != DIRECTORY_SEPARATOR && *cur_path_char != NULL)
+		{
+			// This node doesn't match searched file name, bail and go onto the next (if there is a next).
+			if(*cur_path_char != *cur_node_char || (cur_node_char - node->name) >= kMaxFilenameLen)
+			{
+				goto next_node;
+			}
+
+			cur_node_char++;
+			cur_path_char++;
+		}
+
+		if(node->first != 0)
+		{
+			return walk_romfs(node->first, (cur_path_char + 1)); // + 1 to go beyond the DIRECTORY_SEPARATOR
+		}
+		else
+		{
+			return node;
+		}
+
+	next_node:
+		node = node->next;
+	}
+
+	return NULL;
+}
+
+void romfs_tests()
+{
+	uint32_t* romfs_base = get_bootrom_romfs_base();
+
+	ROMFSHeader* romfs_header = (ROMFSHeader*)((uint32_t)romfs_base - sizeof(ROMFSHeader));
+
+	printf("---------------------------\n");
+	printf("HEADER CHECKSUM=0x%08x\n", romfs_header->checksum);
+	printf("HEADER SIZE=0x%08x\n", romfs_header->uint32_count);
+	printf("---------------------------\n");
+
+	uint32_t* checksum_base = (uint32_t*)((uint32_t)romfs_base - sizeof(ROMFSHeader) - (sizeof(uint32_t) * romfs_header->uint32_count));
+	uint32_t checksum = 0x00000000;
+	for(uint32_t i = 0; i < romfs_header->uint32_count; i++)
+	{
+		checksum += *checksum_base;
+		checksum_base++;
+	}
+	printf("CALCULATED CHECKSUM=0x%08x\n", checksum);
+	printf("---------------------------\n");
+
+	FSNode* root_node = (FSNode*)((uint32_t)romfs_base - sizeof(ROMFSHeader) - sizeof(FSNode));
+	
+	//FSNode* found_node = walk_romfs(root_node, "ROM/GMPatches/Data");
+	FSNode* found_node = walk_romfs(root_node, "ROM/Sounds/Message.mid");
+	if(found_node != NULL)
+	{
+		printf("found_node->name=%s, found_node->data=%p .. 0x%08x\n", found_node->name, found_node->data, found_node->dataLength);
+	}
+	else
+	{
+		printf("FILE NOT FOUND!");
+	}
+	printf("---------------------------\n");
+}
+
 int main()
 {
 	set_leds(2); // NOTE: this will change
@@ -150,7 +241,10 @@ int main()
 	BAEMixer test = minibae_init();
 	BAEBankToken bank = NULL;
 	
-	BAEResult r2 = BAEMixer_AddBankFromMemory(test, &lc2nup_hsb, lc2nup_hsb_len, &bank);
+	uint32_t* romfs_base = get_bootrom_romfs_base();
+	FSNode* root_node = (FSNode*)((uint32_t)romfs_base - sizeof(ROMFSHeader) - sizeof(FSNode));
+	FSNode* patchbank_node = walk_romfs(root_node, "ROM/GMPatches/Data");
+	BAEResult r2 = BAEMixer_AddBankFromMemory(test, patchbank_node->data, patchbank_node->dataLength, &bank);
 	printf("r2=0x%08x, bank=%p\x0a\x0d", r2, bank);
 
 	int16_t pVersionMajor = 0;
@@ -160,6 +254,8 @@ int main()
 	printf("r3=0x%08x, pVersionMajor=%08x, pVersionMinor=%08x, pVersionSubMinor=%08x\x0a\x0d", r3, pVersionMajor, pVersionMinor, pVersionSubMinor);
 
 	BAESong song = BAESong_New(test);
+	FSNode* midi_node = walk_romfs(root_node, "ROM/Cache/Music/DialingWebTV.mid");
+	//BAEResult r4 = BAESong_LoadMidiFromMemory(song, midi_node->data, midi_node->dataLength, true);
 	BAEResult r4 = BAESong_LoadMidiFromMemory(song, &chill_jingle_mid, chill_jingle_mid_len, true);
 	printf("r4=0x%08x\x0a\x0d", r4);
 	BAESong_DisplayInfo(song);
@@ -168,6 +264,8 @@ int main()
 	printf("r5=0x%08x\x0a\x0d", r4);
 
 	//audio_set_outx_buffer_callback(sound_callback);
+
+	romfs_tests();
 
 	printf("Enabling keyboard (IR and/or PS2)... Press any key to get its key map.\x0a\x0d");
 	controller_init();

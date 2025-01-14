@@ -182,6 +182,36 @@ uint32_t get_bus_speed()
     return AG(bus_speed);
 }
 
+uint32_t* get_first_romfs_base()
+{
+    return AG(first_romfs_base);
+}
+
+void set_first_romfs_base(uint32_t* romfs_base)
+{
+    AGS(first_romfs_base, romfs_base);
+}
+
+uint32_t* get_bootrom_romfs_base()
+{
+    if(is_spot_box())
+    {
+        return (uint32_t*)(BOOTROM_BASE_ADDRESS + DEFAULT_BOOTROM_SIZE);
+    }
+    else
+    {
+        uint32_t bootrom_romfs_base = GET_BF(BOOTROM_BASE_ADDRESS, romfs_base);
+
+        if(bootrom_romfs_base != NO_ROMFS_BASE)
+        {
+            return (uint32_t*)bootrom_romfs_base;
+        }
+        else
+        {
+            return NULL;
+        }
+    }
+}
 
 uint64_t get_ticks(void)
 {

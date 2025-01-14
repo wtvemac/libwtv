@@ -526,6 +526,9 @@ tv_type_t get_tv_type();
 uint32_t get_ticks_per_microsec();
 uint32_t get_cpu_speed();
 uint32_t get_bus_speed();
+uint32_t* get_first_romfs_base();
+void set_first_romfs_base(uint32_t* romfs_base);
+uint32_t* get_bootrom_romfs_base();
 
 /** @cond */
 /* Deprecated version of get_ticks */

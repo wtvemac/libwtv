@@ -70,7 +70,13 @@ typedef struct
 	uint32_t test_vector;
 } absolute_globals;
 #define GET_AG(b, f) (((absolute_globals *)(b))->f) 
+#define SET_AG(b, f, v) (((absolute_globals *)(b))->f = v)
 #define AG(f) GET_AG(ABSOLUTE_GLOBALS_BASE_ADDRESS, f)
+#define AGS(f, v) SET_AG(ABSOLUTE_GLOBALS_BASE_ADDRESS, f, v)
+
+#define BOOTROM_BASE_ADDRESS 0x9fc00000
+#define DEFAULT_BOOTROM_SIZE 0x200000
+#define NO_ROMFS_BASE 0x4e6f4653
 
 typedef struct 
 {
