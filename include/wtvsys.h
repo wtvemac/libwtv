@@ -588,6 +588,7 @@ inline uint32_t register_read_safe(volatile uint32_t *register_address)
 bool is_solo_box();
 bool is_spot_box();
 uint32_t get_chip_id();
+bool is_diskful_box();
 uint32_t get_sysconfig();
 uint32_t gpio_write(uint32_t value, bool clear);
 

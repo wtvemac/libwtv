@@ -22,6 +22,11 @@ uint32_t get_chip_id()
 	return REGISTER_READ(BUS_CHIP_ID);
 }
 
+bool is_diskful_box()
+{
+	return ((REGISTER_READ(RIO_SYSCONFIG) & SYSCONFIG_NO_HD) != SYSCONFIG_NO_HD);
+}
+
 uint32_t get_sysconfig()
 {
 	return REGISTER_READ(RIO_SYSCONFIG);

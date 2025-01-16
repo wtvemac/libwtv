@@ -188,6 +188,31 @@ void romfs_tests()
 	printf("---------------------------\n");
 }
 
+void ide_tests()
+{
+	printf("\x0a\x0d\x0a\x0d");
+
+	printf("IDE Test:\x0a\x0d");
+
+	if(is_diskful_box())
+	{
+		printf("\tChecking for HD\x0a\x0d");
+		if(ide_primary_hd_exists(1))
+		{
+			printf("\t\tYes we have an HD\x0a\x0d");
+		}
+		else
+		{
+			printf("\t\tNo we don't have an HD\x0a\x0d");
+		}
+	}
+	else
+	{
+		printf("\tThis isn't a system with a disk. Skipping...\x0a\x0d");
+	}
+
+}
+
 int main()
 {
 	set_leds(2); // NOTE: this will change
@@ -266,6 +291,8 @@ int main()
 	//audio_set_outx_buffer_callback(sound_callback);
 
 	romfs_tests();
+
+	ide_tests();
 
 	printf("Enabling keyboard (IR and/or PS2)... Press any key to get its key map.\x0a\x0d");
 	controller_init();
