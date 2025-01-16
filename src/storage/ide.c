@@ -22,13 +22,11 @@ bool ide_primary_hd_exists(uint8_t selected_drive)
 
 	while((get_ticks_ms() - start) < IDE_PROBE_TIMEOUT)
 	{
-		ide_disk_select disk_select = {
-			.data = IDE_PRI(disk_select)
-		};
+		ide_disk_select disk_select = IDE_PRI(disk_select);
 
 		disk_select.selected_drive = selected_drive;
 
-		IDE_PRI_SET(disk_select, disk_select.data);
+		IDE_PRI_SET(disk_select, disk_select);
 
 		if(disk_select.using_lba)
 		{
