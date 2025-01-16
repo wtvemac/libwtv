@@ -8,7 +8,7 @@
 extern "C" {
 #endif
 
-bool ide_primary_hd_exists(uint8_t drive_address);
+bool ide_primary_hd_exists(uint8_t selected_drive);
 
 #ifdef __cplusplus
 }

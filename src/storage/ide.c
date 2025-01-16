@@ -6,19 +6,19 @@
 
 static uint8_t ide_probe_number = 0x01;
 
-bool ide_primary_hd_exists(uint8_t drive_address)
+bool ide_primary_hd_exists(uint8_t selected_drive)
 {
 	// The WebTV OS sends "Joe" and B and checks for B.
 	
 	// We're sending "wtv" and a incremented number, then check for that number.
-	// The random number is so we can call this multiple times and see the change.
+	// The number is so we can call this multiple times and see the change.
 
 	uint64_t start = get_ticks_ms();
 
 	ide_probe_number++;
 
 	// There can only be two devices on an IDE bus, addressed by 0 or 1.
-	drive_address &= 0x01;
+	selected_drive &= 0x01;
 
 	while((get_ticks_ms() - start) < IDE_PROBE_TIMEOUT)
 	{
@@ -26,7 +26,7 @@ bool ide_primary_hd_exists(uint8_t drive_address)
 			.data = IDE_PRI(disk_select)
 		};
 
-		disk_select.drive_address = drive_address;
+		disk_select.selected_drive = selected_drive;
 
 		IDE_PRI_SET(disk_select, disk_select.data);
 
