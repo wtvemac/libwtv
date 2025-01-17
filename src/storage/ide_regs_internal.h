@@ -10,45 +10,7 @@
 
 #define IDE_REG_PADLEN     0x00400000
 
-#define IDE_ERROR_BBK           0x80 // Bad block
-#define IDE_ERROR_UNC           0x40 // Uncorrectable data
-#define IDE_ERROR_MC            0x20 // Media changed
-#define IDE_ERROR_IDNF          0x10 // ID mark not found
-#define IDE_ERROR_MCR           0x08 // Media change request
-#define IDE_ERROR_ABRT          0x04 // Command aborted
-#define IDE_ERROR_TKNOF         0x02 // Track 0 not found
-#define IDE_ERROR_AMNF          0x01 // No address mark
-
-#define IDE_STATUS_BSY          0x80 // Busy
-#define IDE_STATUS_DRDY         0x40 // Drive ready
-#define IDE_STATUS_DWF          0x20 // Drive write fault
-#define IDE_STATUS_DSC          0x10 // Drive seek complete
-#define IDE_STATUS_DRQ          0x08 // Drive request ready
-#define IDE_STATUS_CORR         0x04 // Corrected data
-#define IDE_STATUS_IDX          0x02 // Index
-#define IDE_STATUS_ERR          0x01 // Error
-
-typedef struct 
-{
-	union
-	{
-		struct
-		{
-			uint32_t data : 32;
-		};
-		struct
-		{
-			unsigned unused : 24;
-			unsigned always1_a : 1;
-			unsigned using_lba : 1;
-			unsigned always1_b : 1;
-			unsigned selected_drive : 1;
-			unsigned address : 4;
-		};
-	};
-} ide_disk_select;
-
-typedef struct 
+typedef struct __attribute__((__packed__))
 {
 	uint32_t data;                    // +0x000000
 	uint32_t error_or_feature;        // +0x000004
@@ -62,8 +24,8 @@ typedef struct
 	uint32_t altstatus_or_devcontrol; // +0x400018
 	uint32_t device_address;          // +0x40001c
 } ide_device_registers;
-#define GET_IDE_REG(b, f) (((ide_device_registers *)(b))->f)
-#define SET_IDE_REG(b, f, v) (((ide_device_registers *)(b))->f = v)
+#define GET_IDE_REG(b, f) (((volatile ide_device_registers *)(b))->f)
+#define SET_IDE_REG(b, f, v) (((volatile ide_device_registers *)(b))->f = v)
 #define IDE_PRI(f) GET_IDE_REG(IDE_PRI_BASE, f)
 #define IDE_PRI_SET(f, v) SET_IDE_REG(IDE_PRI_BASE, f, v)
 #define IDE_SEC(f) GET_IDE_REG(IDE_SEC_BASE, f)
