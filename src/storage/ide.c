@@ -1,10 +1,24 @@
 #include "storage/ide.h"
-#include "./ide_regs_internal.h"
 #include "wtvsys.h"
 
-static uint8_t ide_probe_number = 0x01;
+// SOLO RIO device slots 1 and 2
+#define IDE_SOLO_PRI_BASE ((ide_device_registers_t*)(0xbe400000))
+// SOLO RIO device slots 5 and 6
+#define IDE_SOLO_SEC_BASE ((ide_device_registers_t*)(0xbd400000))
 
-bool ide_primary_hd_exists(uint8_t selected_drive, uint32_t timeout)
+// HAN RIO device slots 1 and 2
+#define IDE_HAN_PRI_BASE   ((ide_device_registers_t*)(0x10000100))
+// HAN RIO device slots 5 and 6
+#define IDE_HAN_SEC_BASE   ((ide_device_registers_t*)(0x10000000)) // this isn't known.
+
+static volatile ide_device_registers_t* ide_base;
+
+void ide_init()
+{
+	ide_base = IDE_SOLO_PRI_BASE;
+}
+
+bool ide_probe(uint32_t timeout)
 {
 	if(timeout == 0)
 	{
@@ -13,33 +27,22 @@ bool ide_primary_hd_exists(uint8_t selected_drive, uint32_t timeout)
 
 	// The WebTV OS sends "Joe" and B and checks for B.
 	
-	// We're sending "wtv" and a incremented number, then check for that number.
-	// The number is so we can call this multiple times and see the change.
-
-	ide_probe_number++;
-
-	// There can only be two devices on an IDE bus, addressed by 0 or 1.
-	selected_drive &= 0x01;
+	// We're sending "wtv" and a number.
 
 	uint64_t start = get_ticks_ms();
+	uint8_t ide_probe_number = (start & 0xff);
 
 	while((get_ticks_ms() - start) < timeout)
 	{
-		ide_disk_select disk_select = IDE_PRI(disk_select);
-
-		disk_select.selected_drive = selected_drive;
-
-		IDE_PRI_SET(disk_select, disk_select);
-
 		// Any drive that doesn't support LBA will be ignored.
-		if(disk_select.using_lba)
+		if(ide_base->disk_select.using_lba)
 		{
-			IDE_PRI_SET(sector_count,  0x77); // w
-			IDE_PRI_SET(sector_number, 0x74); // t
-			IDE_PRI_SET(cylinder_low,  0x76); // v
-			IDE_PRI_SET(cylinder_high, ide_probe_number);
+			ide_base->sector_count  = 0x77; // w
+			ide_base->sector_number = 0x74; // t
+			ide_base->cylinder_low  = 0x76; // v
+			ide_base->cylinder_high = ide_probe_number;
 
-			if((IDE_PRI(cylinder_high) & 0xff) == ide_probe_number)
+			if((ide_base->cylinder_high & 0xff) == ide_probe_number)
 			{
 				return true;
 			}
@@ -49,7 +52,7 @@ bool ide_primary_hd_exists(uint8_t selected_drive, uint32_t timeout)
 	return false;
 }
 
-bool ide_primary_wait_for_status(uint8_t status_mask, uint8_t status_match, uint32_t timeout)
+bool ide_wait_for_status(uint8_t status_mask, uint8_t status_match, uint32_t timeout)
 {
 	if(timeout == 0)
 	{
@@ -62,7 +65,7 @@ bool ide_primary_wait_for_status(uint8_t status_mask, uint8_t status_match, uint
 
 	while(!status_good && ((get_ticks_ms() - start) < timeout))
 	{
-		uint8_t current_status = (IDE_PRI(status_or_command) & 0xff);
+		uint8_t current_status = (ide_base->status_or_command & 0xff);
 
 		status_good = ((current_status & status_mask) == status_match);
 	}
@@ -71,7 +74,7 @@ bool ide_primary_wait_for_status(uint8_t status_mask, uint8_t status_match, uint
 }
 
 // Will add more reading and writing routines depending on the disk type.
-bool ide_primary_read_data16(uint8_t* in_data, uint32_t data_length)
+bool ide_read_data16(void* in_data, uint32_t data_length)
 {
 	data_length &= ~0x01;
 
@@ -79,9 +82,10 @@ bool ide_primary_read_data16(uint8_t* in_data, uint32_t data_length)
 	{
 		for(uint32_t i = 0; i < data_length; i += 2)
 		{
-			uint32_t ide_data = IDE_PRI(data);
+			uint32_t ide_data = *((uint32_t*)ide_base);
 
-			*((uint16_t*)(in_data + i)) = (ide_data & 0xffff);
+			*((uint8_t*)(in_data + (i + 0))) = ((ide_data >> 0x08) & 0xff);
+			*((uint8_t*)(in_data + (i + 1))) = ((ide_data >> 0x00) & 0xff);
 		}
 
 		return true;
@@ -93,12 +97,29 @@ bool ide_primary_read_data16(uint8_t* in_data, uint32_t data_length)
 	}
 }
 
-void ide_setup_command(ide_command_block* command_block, uint8_t selected_drive, uint8_t device_control, uint8_t command, uint8_t feature, uint32_t lba_address, void* data, uint32_t data_length)
+uint8_t ide_send_command(ide_command_block_t* command_block)
+{
+	ide_base->error_or_feature = command_block->feature;
+	ide_base->sector_number = command_block->sector_number;
+	ide_base->cylinder_low = command_block->cylinder_low;
+	ide_base->cylinder_high = command_block->cylinder_high;
+	ide_base->disk_select = command_block->disk_select;
+	ide_base->altstatus_or_devcontrol = command_block->device_control;
+	ide_base->sector_count = ((command_block->data_length >> IDE_SECTOR_BSHIFT) & 0xff);
+
+	uint8_t current_status = (ide_base->status_or_command & 0xff);
+
+	ide_base->status_or_command = command_block->command;
+
+	return current_status;
+}
+
+void ide_setup_command(ide_command_block_t* command_block, uint8_t selected_drive, uint8_t device_control, uint8_t command, uint8_t feature, uint32_t lba_address, void* data, uint32_t data_length)
 {
 	command_block->disk_select.always1_a = 1;
 	command_block->disk_select.always1_b = 1;
 
-	command_block->disk_select.selected_drive = selected_drive;
+	command_block->disk_select.selected_drive = selected_drive & 0x01;
 	command_block->device_control = (uint32_t)(0x08 | (device_control & 0x06));
 	command_block->command = (uint32_t)command;
 	command_block->feature = (uint32_t)feature;
@@ -112,44 +133,26 @@ void ide_setup_command(ide_command_block* command_block, uint8_t selected_drive,
 	command_block->data_length = data_length;
 }
 
-uint8_t ide_primary_send_command(ide_command_block command_block)
+bool ide_handle_simple_command(bool async, ide_command_block_t* command_block)
 {
-	IDE_PRI_SET(error_or_feature, command_block.feature);
-	IDE_PRI_SET(sector_number, command_block.sector_number);
-	IDE_PRI_SET(cylinder_low, command_block.cylinder_low);
-	IDE_PRI_SET(cylinder_high, command_block.cylinder_high);
-	IDE_PRI_SET(disk_select, command_block.disk_select);
-	IDE_PRI_SET(altstatus_or_devcontrol, command_block.device_control);
+	ide_send_command(command_block);
 
-	IDE_PRI_SET(sector_count, ((command_block.data_length >> IDE_SECTOR_BSHIFT) & 0xff));
-
-	uint8_t current_status = (IDE_PRI(status_or_command) & 0xff);
-
-	IDE_PRI_SET(status_or_command, command_block.command);
-
-	return current_status;
+	return ide_wait_for_status(IDE_STATUS_BSY, IDE_STATUS_NONE, IDE_DEFAULT_TIMEOUT);
 }
 
-bool ide_primary_handle_nodata_command(bool async, ide_command_block command_block)
+bool ide_handle_pio_in_command(bool async, ide_command_block_t* command_block)
 {
-	ide_primary_send_command(command_block);
-
-	return ide_primary_wait_for_status(IDE_STATUS_BSY, IDE_STATUS_NONE, IDE_DEFAULT_TIMEOUT);
-}
-
-bool ide_primary_handle_pioin_command(bool async, ide_command_block command_block)
-{
-	if(command_block.data_length > 0)
+	if(command_block->data_length > 0)
 	{
-		ide_primary_send_command(command_block);
+		ide_send_command(command_block);
 
-		if(ide_primary_wait_for_status(IDE_STATUS_BSY, IDE_STATUS_NONE, IDE_DEFAULT_TIMEOUT))
+		if(ide_wait_for_status(IDE_STATUS_BSY, IDE_STATUS_NONE, IDE_DEFAULT_TIMEOUT))
 		{
-			uint8_t current_status = (IDE_PRI(status_or_command) & 0xff);
+			uint8_t current_status = (ide_base->status_or_command & 0xff);
 
 			if(current_status & IDE_STATUS_DRQ)
 			{
-				return ide_primary_read_data16(command_block.data, command_block.data_length);
+				return ide_read_data16(command_block->data, (command_block->data_length >> 1));
 			}
 			else
 			{
@@ -171,44 +174,44 @@ bool ide_primary_handle_pioin_command(bool async, ide_command_block command_bloc
 	}
 }
 
-bool ide_primary_handle_pioout_command(bool async, ide_command_block command_block)
+bool ide_handle_pio_out_command(bool async, ide_command_block_t* command_block)
 {
 	return false;
 }
 
-bool ide_primary_handle_command(ide_proto protocol, ide_command_block command_block)
+bool ide_handle_command(ide_proto protocol, ide_command_block_t* command_block)
 {
-	if(ide_primary_wait_for_status(IDE_STATUS_BSY, IDE_STATUS_NONE, IDE_DEFAULT_TIMEOUT))
+	if(ide_wait_for_status(IDE_STATUS_BSY, IDE_STATUS_NONE, IDE_DEFAULT_TIMEOUT))
 	{
-		if(ide_primary_wait_for_status(IDE_STATUS_DRDY, IDE_STATUS_DRDY, IDE_DEFAULT_TIMEOUT))
+		if(ide_wait_for_status(IDE_STATUS_DRDY, IDE_STATUS_DRDY, IDE_DEFAULT_TIMEOUT))
 		{
 			switch(protocol)
 			{
 				case IDE_PROTO_NO_DATA:
-					return ide_primary_handle_nodata_command(false, command_block);
+					return ide_handle_simple_command(false, command_block);
+					
+				case IDE_PROTO_SYNC_PIO_IN:
+					return ide_handle_pio_in_command(false, command_block);
 					
 				case IDE_PROTO_PIO_IN:
-					return ide_primary_handle_pioin_command(false, command_block);
-					
-				case IDE_PROTO_ASYNC_PIO_IN:
-					return ide_primary_handle_pioin_command(true, command_block);
+					return ide_handle_pio_in_command(true, command_block);
 
+				case IDE_PROTO_SYNC_PIO_OUT:
+					return ide_handle_pio_out_command(false, command_block);
+					
 				case IDE_PROTO_PIO_OUT:
-					return ide_primary_handle_pioout_command(false, command_block);
-					
-				case IDE_PROTO_ASYNC_PIO_OUT:
-					return ide_primary_handle_pioout_command(true, command_block);
+					return ide_handle_pio_out_command(true, command_block);
 
+				case IDE_PROTO_SYNC_DMA_IN:
+					return false;
+					
 				case IDE_PROTO_DMA_IN:
 					return false;
 					
-				case IDE_PROTO_ASYNC_DMA_IN:
+				case IDE_PROTO_SYNC_DMA_OUT:
 					return false;
 					
 				case IDE_PROTO_DMA_OUT:
-					return false;
-					
-				case IDE_PROTO_ASYNC_DMA_OUT:
 					return false;
 
 				default:

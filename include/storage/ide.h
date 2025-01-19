@@ -8,7 +8,7 @@
 extern "C" {
 #endif
 
-#define IDE_DEFAULT_TIMEOUT     (20 * 1000) // 20 seconds
+#define IDE_DEFAULT_TIMEOUT     (20 * 1000)
 
 #define IDE_DRIVE0              0x00
 #define IDE_DRIVE1              0x01
@@ -36,18 +36,20 @@ extern "C" {
 #define IDE_STATUS_IDX          0x02 // Index
 #define IDE_STATUS_ERR          0x01 // Error
 
+#define IDE_REG_PADLEN     0x003ffff8
+
 // These async options are only async for data transfer. They will block sending the command.
 typedef enum
 {
 	IDE_PROTO_NO_DATA       = 0x00,
-	IDE_PROTO_PIO_IN        = 0x01,
-	IDE_PROTO_PIO_OUT       = 0x02,
-	IDE_PROTO_ASYNC_PIO_IN  = 0x03,
-	IDE_PROTO_ASYNC_PIO_OUT = 0x04,
-	IDE_PROTO_DMA_IN        = 0x05,
-	IDE_PROTO_DMA_OUT       = 0x06,
-	IDE_PROTO_ASYNC_DMA_IN  = 0x07,
-	IDE_PROTO_ASYNC_DMA_OUT = 0x08
+	IDE_PROTO_SYNC_PIO_IN   = 0x01,
+	IDE_PROTO_SYNC_PIO_OUT  = 0x02,
+	IDE_PROTO_PIO_IN        = 0x03,
+	IDE_PROTO_PIO_OUT       = 0x04,
+	IDE_PROTO_SYNC_DMA_IN   = 0x05,
+	IDE_PROTO_SYNC_DMA_OUT  = 0x06,
+	IDE_PROTO_DMA_IN        = 0x07,
+	IDE_PROTO_DMA_OUT       = 0x08
 } ide_proto;
 
 typedef struct
@@ -56,7 +58,7 @@ typedef struct
 	{
 		struct
 		{
-			uint32_t data : 32;
+			uint32_t data;
 		};
 		struct
 		{
@@ -68,39 +70,58 @@ typedef struct
 			unsigned address : 4;
 		};
 	};
-} ide_disk_select;
+} ide_disk_select_t;
+
+typedef struct __attribute__((__packed__))
+{
+	uint32_t data;                    // +0x000000
+	uint32_t error_or_feature;        // +0x000004
+	uint32_t sector_count;            // +0x000008
+	uint32_t sector_number;           // +0x00000c
+	uint32_t cylinder_low;            // +0x000010
+	uint32_t cylinder_high;           // +0x000014
+	ide_disk_select_t disk_select;    // +0x000018 aka Drive/Head register
+	uint32_t status_or_command;       // +0x00001c
+	uint8_t _padding[IDE_REG_PADLEN];
+	uint32_t altstatus_or_devcontrol; // +0x400018
+	uint32_t device_address;          // +0x40001c
+} ide_device_registers_t;
 
 typedef struct 
 {
-	uint32_t feature;
+	ide_disk_select_t disk_select;
 	uint32_t sector_number;
 	uint32_t cylinder_low;
 	uint32_t cylinder_high;
-	ide_disk_select disk_select;
 	uint32_t device_control;
+	uint32_t feature;
 	uint32_t command;
 	void* data;
 	uint32_t data_length;
-} ide_command_block;
+} ide_command_block_t;
 
-bool ide_primary_hd_exists(uint8_t selected_drive, uint32_t timeout);
+void ide_init();
 
-bool ide_primary_wait_for_status(uint8_t status_mask, uint8_t status_match, uint32_t timeout);
+bool ide_probe(uint32_t timeout);
+
+volatile ide_device_registers_t* ide_get_base(uint8_t selected_bus);
+
+bool ide_wait_for_status(uint8_t status_mask, uint8_t status_match, uint32_t timeout);
 
 // Will add more reading and writing routines depending on the disk type.
-bool ide_primary_read_data16(uint8_t* in_data, uint32_t data_length);
+bool ide_read_data16(void* in_data, uint32_t data_length);
 
-void ide_setup_command(ide_command_block* command_block, uint8_t selected_drive, uint8_t device_control, uint8_t command, uint8_t feature, uint32_t lba_address, void* data, uint32_t data_length);
+void ide_setup_command(ide_command_block_t* command_block, uint8_t selected_drive, uint8_t device_control, uint8_t command, uint8_t feature, uint32_t lba_address, void* data, uint32_t data_length);
 
-uint8_t ide_primary_send_command(ide_command_block command_block);
+uint8_t ide_send_command(ide_command_block_t* command_block);
 
-bool ide_primary_handle_nodata_command(bool async, ide_command_block command_block);
+bool ide_handle_simple_command(bool async, ide_command_block_t* command_block);
 
-bool ide_primary_handle_pioin_command(bool async, ide_command_block command_block);
+bool ide_handle_pio_in_command(bool async, ide_command_block_t* command_block);
 
-bool ide_primary_handle_pioout_command(bool async, ide_command_block command_block);
+bool ide_handle_pio_out_command(bool async, ide_command_block_t* command_block);
 
-bool ide_primary_handle_command(ide_proto protocol, ide_command_block command_block);
+bool ide_handle_command(ide_proto protocol, ide_command_block_t* command_block);
 
 #ifdef __cplusplus
 }

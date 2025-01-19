@@ -1,10 +1,83 @@
 #include "storage/ata.h"
 #include "storage/nvram.h"
+#include "storage/ide.h"
 #include "ssid.h"
 #include "libc.h"
 #include "../regs_internal.h"
 
-uint32_t __get_ata_userpwd_pdes_random(uint32_t* input_hi, uint32_t* input_lo)
+typedef struct {
+	bool ata_enabled;
+	uint8_t selected_drive;
+	ata_identity_t drive_identity;
+} ata_context_t;
+
+static ata_context_t ata_context;
+
+void ata_init()
+{
+	ide_command_block_t command_block;
+	
+	ide_init();
+
+	if(ide_probe(IDE_DEFAULT_TIMEOUT))
+	{
+		ata_context.selected_drive = IDE_DRIVE0;
+
+		if(!get_ata_identity(&ata_context.drive_identity))
+		{
+			ata_context.selected_drive = IDE_DRIVE1;
+
+			if(!get_ata_identity(&ata_context.drive_identity))
+			{
+				ata_context.selected_drive = IDE_DRIVE0;
+				ata_context.ata_enabled = false;
+			}
+			else
+			{
+				ata_context.ata_enabled = true;
+			}
+		}
+		else
+		{
+			ata_context.ata_enabled = true;
+		}
+	}
+	else
+	{
+		ata_context.ata_enabled = false;
+	}
+}
+
+void ata_close()
+{
+	//
+}
+
+bool ata_enabled()
+{
+	return ata_context.ata_enabled;
+}
+
+ata_identity_t ata_get_identity()
+{
+	return ata_context.drive_identity;
+}
+
+bool get_ata_identity(ata_identity_t* identity)
+{
+	ide_command_block_t command_block;
+
+	ide_setup_command(&command_block, ata_context.selected_drive, 0x00, 0xec, 0, 0x00, (void*)identity, sizeof(ata_identity_t));
+
+	if(ide_handle_command(IDE_PROTO_PIO_IN, &command_block))
+	{
+		return true;
+	}
+
+	return false;
+}
+
+uint32_t __ata_get_userpwd_pdes(uint32_t* input_hi, uint32_t* input_lo)
 {
 	uint32_t xor_group1[] = {
 		0xbaa96887,
@@ -36,16 +109,16 @@ uint32_t __get_ata_userpwd_pdes_random(uint32_t* input_hi, uint32_t* input_lo)
 
 uint8_t* get_ata_userpwd()
 {
-	static uint8_t ata_pwd[32];
+	static uint8_t ata_pwd[ATA_PWD_LEN];
 
-	atapwd_random_t atapwd_random = get_atapwd_random();
+	ata_pwd_random_t pwd_random = ata_get_userpwd_random();
 
-	uint32_t xor_hi = (atapwd_random.hi ^ AG(ssid_hi));
-	uint32_t xor_lo = (atapwd_random.lo ^ AG(ssid_lo));
+	uint32_t xor_hi = (pwd_random.hi ^ AG(ssid_hi));
+	uint32_t xor_lo = (pwd_random.lo ^ AG(ssid_lo));
 
 	for (int i = 0; i < 8; i++)
 	{
-		uint32_t random = __get_ata_userpwd_pdes_random(&xor_hi, &xor_lo);
+		uint32_t random = __ata_get_userpwd_pdes(&xor_hi, &xor_lo);
 
 		*((uint32_t*)(ata_pwd + (i * 4))) = random;
 	}
@@ -53,50 +126,54 @@ uint8_t* get_ata_userpwd()
 	return ata_pwd;
 }
 
-uint8_t* get_ata_masterpwd()
+char* ata_get_userpwd_string()
 {
-	static uint8_t ata_pwd[32];
+	static char ata_pwd_string[(ATA_PWD_LEN * 2) + 1];
 
-	memset(ata_pwd, 0, sizeof(ata_pwd));
+	uint8_t* ata_pwd = get_ata_userpwd();
 
-	memcpy(ata_pwd, ATA_MASTERPWD, sizeof(ATA_MASTERPWD));
-
-	return ata_pwd;
-}
-
-char* get_ata_pwd_string(const uint8_t ata_pwd[32])
-{
-	static char ata_pwd_string[65];
-
-	for(int i = 0; i < 64; i += 2)
+	for(int i = 0; i < (ATA_PWD_LEN * 2); i += 2)
 	{
 		sprintf((char*)(ata_pwd_string + i), "%02x", *(ata_pwd + (i / 2)));
 	}
 
-	ata_pwd_string[64] = 0;
+	ata_pwd_string[(ATA_PWD_LEN * 2)] = 0;
 
 	return ata_pwd_string;
 }
 
 
-atapwd_random_t get_atapwd_random()
+ata_pwd_random_t ata_get_userpwd_random()
 {
-	static atapwd_random_t atapwd_random;
+	static ata_pwd_random_t pwd_random;
 
-	nvram_secondary_read(SECONDARY_NVRAM_ATAPWD_RANDOM_OFFSET, (uint8_t*)&atapwd_random, sizeof(atapwd_random));
+	nvram_secondary_read(SECONDARY_NVRAM_ATAPWD_RANDOM_OFFSET, (uint8_t*)&pwd_random, sizeof(pwd_random));
 
-	return atapwd_random;
+	return pwd_random;
 }
 
-char* get_atapwd_random_string()
+char* ata_get_userpwd_random_string()
 {
-	static char atapwd_random_string[17];
+	static char pwd_random_string[(ATA_PWD_RAND_LEN * 2) + 1];
 
-	atapwd_random_t atapwd_random = get_atapwd_random();
+	ata_pwd_random_t pwd_random = ata_get_userpwd_random();
 
-	sprintf(atapwd_random_string, "%08x%08x", atapwd_random.hi, atapwd_random.lo);
+	sprintf(pwd_random_string, "%08x%08x", pwd_random.hi, pwd_random.lo);
 
-	atapwd_random_string[16] = 0;
+	pwd_random_string[(ATA_PWD_RAND_LEN * 2)] = 0;
 
-	return atapwd_random_string;
+	return pwd_random_string;
+}
+
+uint8_t* ata_get_masterpwd()
+{
+	static uint8_t ata_pwd[(ATA_PWD_LEN * 2) + 1];
+
+	memset(ata_pwd, 0x00, sizeof(ata_pwd));
+
+	memcpy(ata_pwd, ATA_MASTERPWD, sizeof(ATA_MASTERPWD));
+	
+	ata_pwd[(ATA_PWD_LEN * 2)] = 0;
+
+	return ata_pwd;
 }
