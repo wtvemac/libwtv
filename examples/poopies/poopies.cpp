@@ -222,6 +222,10 @@ void ide_flash_tests()
 	else
 	{
 		printf("Flash Test:\x0a\x0d");
+
+		flash_init();
+
+		printf("Flash identity: %08x\x0a\x0d", flash_get_identity());
 	}
 
 }
