@@ -61,6 +61,7 @@ LIBWTV_SRCS = \
 	compress/lzh5.c \
 	compress/aplib.c \
 	compress/shrinkler.c \
+	storage/flash_inram.S \
 	storage/flash.c \
 	storage/ide.c \
 	storage/nvram.c \

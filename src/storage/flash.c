@@ -1,12 +1,47 @@
 #include "storage/flash.h"
 #include "interrupt.h"
 
-// Need to copy this to RAM (0x80000000), and be under 0x100 bytes
-// This is because the code is usually ran from flash and it'll break if we run flash command or write to flash
-// The RAM interrupt vectors also starts at 0x100 so we can't go beyond that.
+typedef uint32_t (*inram_function_t)(volatile uint32_t*);
 
-#define FLASH_BASE (volatile uint32_t*)0xbf000000
-#define MASK_BASE  (volatile uint32_t*)0xbfc00000
+#define INRAM_BASE (inram_function_t)0x80000000
+#define INRAM_SIZE 0x180
+
+#define FLASH_APPROM_BASE     (volatile uint32_t*)0xbf000000
+#define FLASH_ALT_APPROM_BASE (volatile uint32_t*)0xbfe00000
+#define FLASH_BOOTROM_BASE    (volatile uint32_t*)0xbfc00000
+#define FLASH_DIAG_BASE       (volatile uint32_t*)0xbf400000
+
+// flash_inram.S
+uint32_t flash_get_device_id(volatile uint32_t* flash_base_address);
+
+uint32_t __flash_invoke_inram_function(inram_function_t stored_inram_function, volatile uint32_t* flash_base_address)
+{
+	inram_function_t prepared_inram_function = INRAM_BASE;
+
+	for(int i = 0; i < (INRAM_SIZE / sizeof(uint32_t)); i++)
+	{
+		*((uint32_t*)prepared_inram_function + i) = *((uint32_t*)stored_inram_function + i);
+	}
+
+	return prepared_inram_function(flash_base_address);
+}
+
+volatile uint32_t* __flash_get_base_address(flash_base base)
+{
+	switch(base)
+	{
+		case APPROM_BASE:
+			return FLASH_APPROM_BASE;
+		case ALT_APPROM_BASE:
+			return FLASH_ALT_APPROM_BASE;
+		case BOOTROM_BASE:
+			return FLASH_BOOTROM_BASE;
+		case DIAG_BASE:
+			return FLASH_DIAG_BASE;
+		default:
+			return 0;
+	}
+}
 
 void flash_init()
 {
@@ -18,53 +53,7 @@ void flash_close()
 	//
 }
 
-uint32_t flash_get_identity()
+uint32_t flash_get_identity(flash_base base)
 {
-	disable_interrupts();
-
-	uint32_t flash_identity = 0x00000000;
-	
-	// This is just a test to check if it works. This will be changed.
-
-	uint32_t start_before = *((volatile uint32_t*)(FLASH_BASE) + 0);
-
-	*(FLASH_BASE) = 0x90909090;
-
-	if(start_before != *((volatile uint32_t*)(FLASH_BASE) + 0))
-	{
-		*(FLASH_BASE) = 0xffffffff;
-
-		flash_identity = *(FLASH_BASE);
-	}
-	else
-	{
-		*((volatile uint32_t*)(FLASH_BASE) + 0x00015554) = 0x00aa00aa;
-		*((volatile uint32_t*)(FLASH_BASE) + 0x0000aaa8) = 0x00550055;
-		*((volatile uint32_t*)(FLASH_BASE) + 0x00015554) = 0x00900090;
-
-		if(start_before != *((volatile uint32_t*)(FLASH_BASE + 0)))
-		{
-			*(FLASH_BASE) = 0x00f000f0;
-
-			if((start_before != *((volatile uint32_t*)(FLASH_BASE) + 0)))
-			{
-				flash_identity = *(FLASH_BASE);
-			}
-		}
-		else
-		{
-			*((volatile uint32_t*)(FLASH_BASE) + 0x00015554) = 0x00aa00aa;
-			*((volatile uint32_t*)(FLASH_BASE) + 0x0000aaa8) = 0x00550055;
-			*((volatile uint32_t*)(FLASH_BASE) + 0x00015554) = 0x00f000f0;
-
-			if((start_before != *((volatile uint32_t*)(FLASH_BASE) + 0)))
-			{
-				flash_identity = *(FLASH_BASE);
-			}
-		}
-	}
-
-	enable_interrupts();
-
-	return flash_identity;
+	return __flash_invoke_inram_function(flash_get_device_id, __flash_get_base_address(base));
 }

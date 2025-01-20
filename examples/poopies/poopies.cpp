@@ -225,7 +225,7 @@ void ide_flash_tests()
 
 		flash_init();
 
-		printf("Flash identity: %08x\x0a\x0d", flash_get_identity());
+		printf("\tFlash identity: %08x\x0a\x0d", flash_get_identity(APPROM_BASE));
 	}
 
 }
