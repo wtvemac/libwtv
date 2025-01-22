@@ -23,11 +23,11 @@ void ata_init()
 	{
 		ata_context.selected_drive = IDE_DRIVE0;
 
-		if(!get_ata_identity(&ata_context.drive_identity))
+		if(!ata_request_identity(&ata_context.drive_identity))
 		{
 			ata_context.selected_drive = IDE_DRIVE1;
 
-			if(!get_ata_identity(&ata_context.drive_identity))
+			if(!ata_request_identity(&ata_context.drive_identity))
 			{
 				ata_context.selected_drive = IDE_DRIVE0;
 				ata_context.ata_enabled = false;
@@ -63,7 +63,7 @@ ata_identity_t ata_get_identity()
 	return ata_context.drive_identity;
 }
 
-bool get_ata_identity(ata_identity_t* identity)
+bool ata_request_identity(ata_identity_t* identity)
 {
 	ide_command_block_t command_block;
 

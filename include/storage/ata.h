@@ -573,7 +573,7 @@ void ata_init();
 void ata_close();
 bool ata_enabled();
 ata_identity_t ata_get_identity();
-bool get_ata_identity(ata_identity_t* identity);
+bool ata_request_identity(ata_identity_t* identity);
 uint8_t* get_ata_userpwd();
 char* ata_get_userpwd_string();
 ata_pwd_random_t ata_get_userpwd_random();
