@@ -10,9 +10,9 @@ extern "C" {
 
 typedef enum
 {
-	USE_APPROM     = 0x00,
-	USE_ALT_APPROM = 0x01,
-	USE_BOOTROM    = 0x02,
+	USE_APPROM_FLASH     = 0x00,
+	USE_ALT_APPROM_FLASH = 0x01,
+	USE_BOOTROM_FLASH    = 0x02,
 } selected_flash_base;
 
 typedef enum : uint16_t
