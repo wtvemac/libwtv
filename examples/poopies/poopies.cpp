@@ -213,6 +213,27 @@ void ide_flash_tests()
 			printf("\tMinPIOXferTimeIORDY = %d ns\x0a\x0d", identity.minimum_pio_cycle_time_iordy);
 			printf("\tFirmware Revision: %.8s\x0a\x0d", identity.firmware_revision);
 			printf("\tDevice Name: %.40s\x0a\x0d", identity.model_number);
+
+			void* data = malloc(IDE_SECTOR_LENGTH);
+			printf("\tRead test:");
+			if(ata_test_read_sector(2, data))
+			{
+				for(int i = 0; i < IDE_SECTOR_LENGTH; i++)
+				{
+					if((i%32) == 0)
+					{
+						printf("\x0a\x0d\t\t");
+					}
+
+					printf("%02x", *((uint8_t*)(data) + i));
+				}
+				printf("\x0a\x0d");
+			}
+			else
+			{
+				printf("\x0a\x0d\t\tCouldn't read...\x0a\x0d");
+			}
+
 		}
 		else
 		{

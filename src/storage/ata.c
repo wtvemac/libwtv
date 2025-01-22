@@ -63,6 +63,29 @@ ata_identity_t ata_get_identity()
 	return ata_context.drive_identity;
 }
 
+bool ata_test_read_sector(uint32_t lba_address, void* data)
+{
+	ide_command_block_t command_block;
+
+	ide_setup_command(
+		&command_block,             // IDE parameters to set
+		ata_context.selected_drive, // Selected drive on the IDE bus to work on.
+		0x00,                       // IDE device control byte
+		ATA_CMD_READ_SECTOR,        // IDE command byte
+		0,                          // IDE feature byte
+		lba_address,                // LBA address
+		data,                       // Data to store or send
+		IDE_SECTOR_LENGTH           // Length of the data to store or send
+	);
+
+	if(ide_handle_command(IDE_PROTO_PIO_IN, &command_block))
+	{
+		return true;
+	}
+
+	return false;
+}
+
 bool ata_request_identity(ata_identity_t* identity)
 {
 	ide_command_block_t command_block;
