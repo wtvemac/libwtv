@@ -225,7 +225,10 @@ void ide_flash_tests()
 
 		flash_init();
 
-		printf("\tFlash identity: %08x\x0a\x0d", flash_get_identity(APPROM_BASE));
+		flash_identity_t identity = flash_get_identity(USE_APPROM);
+		
+
+		printf("\tFlash identity: identity.manufacture_id=%08x, identity.device_id=%08x\x0a\x0d", identity.manufacture_id, identity.device_id);
 	}
 
 }

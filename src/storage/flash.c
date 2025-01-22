@@ -46,7 +46,11 @@ void flash_close()
 	//
 }
 
-uint32_t flash_get_identity(selected_flash_base base)
+flash_identity_t flash_get_identity(selected_flash_base base)
 {
-	return __flash_invoke_inram_function(flash_get_device_id, __flash_get_base_address(base));
+	static flash_identity_t identity;
+
+	identity.id_data = __flash_invoke_inram_function(flash_get_device_id, __flash_get_base_address(base));
+
+	return identity;
 }
