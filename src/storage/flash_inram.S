@@ -43,7 +43,7 @@ flash_found_id:
 	beq   t1, t5, flash_get_device_id_exit
 	nop
 
-flash_hard_reset:
+alternative_reset:
 	sw    t2, 0x5554(a1)
 	sw    t3, -0x5558(a1)
 	sw    t4, 0x5554(a1)

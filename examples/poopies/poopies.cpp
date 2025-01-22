@@ -223,12 +223,20 @@ void ide_flash_tests()
 	{
 		printf("Flash Test:\x0a\x0d");
 
-		flash_init();
+		flash_init(APPROM_FLASH);
 
-		flash_identity_t identity = flash_get_identity(USE_APPROM_FLASH);
-		
+		if(flash_enabled())
+		{
+			flash_identity_t identity = flash_get_identity();
 
-		printf("\tFlash identity: identity.manufacture_id=%08x, identity.device_id=%08x\x0a\x0d", identity.manufacture_id, identity.device_id);
+			printf("\tFlash identity: identity.manufacture_id=%08x, identity.device_id=%08x\x0a\x0d", identity.manufacture_id, identity.device_id);
+			printf("\tManufacture Name: %s\x0a\x0d", flash_get_manufacture_name());
+			printf("\tDevice Name: %s\x0a\x0d", flash_get_device_name());
+		}
+		else
+		{
+			printf("\tFlash isn't enabled. Unknown or non-existant flash IC?\x0a\x0d");
+		}
 	}
 
 }
