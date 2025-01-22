@@ -207,7 +207,7 @@ uint32_t* get_bootrom_romfs_base()
     {
         uint32_t bootrom_romfs_base = GET_BF(BOOTROM_BASE_ADDRESS, romfs_base);
 
-        if(bootrom_romfs_base != NO_ROMFS_BASE)
+        if(bootrom_romfs_base != NO_ROMFS_FLAG)
         {
             return (uint32_t*)bootrom_romfs_base;
         }

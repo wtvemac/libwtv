@@ -7,40 +7,50 @@
 #define __LIBWTV_REGS_INTERNAL_H
 
 #include <stdint.h>
-#include "regs_internal/busUnit.h"
-#include "regs_internal/memUnit.h"
-#include "regs_internal/rioUnit.h"
-#include "regs_internal/pixelUnits.h"
-#include "regs_internal/audUnit.h"
-#include "regs_internal/devUnit.h"
-#include "regs_internal/sucUnit.h"
-#include "regs_internal/divUnit.h"
-#include "regs_internal/dveUnit.h"
-#include "regs_internal/gfxUnit.h"
-#include "regs_internal/modUnit.h"
 
-/**
- * @defgroup lowlevel Low Level Hardware Interfaces
- * @ingroup libdragon
- * @brief Low level hardware interface descriptions and functionality
- *
- * The low level hardware interfaces handle several functions in the N64 that
- * would otherwise be handled by a kernel or RTOS.  This includes the @ref dma,
- * the @ref exceptions, the @ref interrupt and the @ref n64sys.  The DMA controller
- * handles DMA requests between the cartridge and the N64 RDRAM.  Other systems
- * in the N64 have their own DMA controllers that are handled in the relevant
- * subsystems.  The exception handler traps any exceptions raised by the N64,
- * including the reset exception.  The interrupt handler sets up the MIPS
- * interface (MI) which handles low level interrupt functionality for all other
- * systems in the N64.  The N64 system interface provides the ability for code to
- * manipulate cache and boot options.
- */
+// MIPS memory map
 
-/**
- * @brief Register definition for the AI interface
- * @ingroup lowlevel
- */
-#define ABSOLUTE_GLOBALS_BASE_ADDRESS 0x80000280
+#define MIPS_KSEG0_BASE_ADDRESS  0x80000000 // Cached
+#define MIPS_KSEG1_BASE_ADDRESS  0xa0000000 // Uncached
+#define MIPS_KSSEG_BASE_ADDRESS  0xc0000000 // TLB-mapped
+
+// WebTV memory map
+
+#define ROMU_BASE_ADDRESS        0x1f800000
+#define ROMU_DATA_SIZE           0x800000   // 8MB
+
+#define DIAG_SPACE_BASE_ADDRESS  0x1f400000
+#define DIAG_SPACE_DATA_SIZE     0x400000   // 4MB
+
+#define ROML_BASE_ADDRESS        0x1f000000
+#define ROML_DATA_SIZE           0x400000   // 4MB
+
+#define EXDEV7_BASE_ADDRESS      0x07800000
+#define EXDEV7_DATA_SIZE         0x800000   // 8MB
+#define EXDEV6_BASE_ADDRESS      0x07000000
+#define EXDEV6_DATA_SIZE         0x800000   // 8MB
+#define EXDEV5_BASE_ADDRESS      0x06800000
+#define EXDEV5_DATA_SIZE         0x800000   // 8MB
+#define EXDEV4_BASE_ADDRESS      0x06000000
+#define EXDEV4_DATA_SIZE         0x800000   // 8MB
+#define EXDEV3_BASE_ADDRESS      0x05800000
+#define EXDEV3_DATA_SIZE         0x800000   // 8MB
+#define EXDEV2_BASE_ADDRESS      0x05000000
+#define EXDEV2_DATA_SIZE         0x800000   // 8MB
+#define EXDEV1_BASE_ADDRESS      0x04800000
+#define EXDEV1_DATA_SIZE         0x800000   // 8MB
+
+#define CNTL_SPACE_BASE_ADDRESS  0x04000000
+#define CNTL_SPACE_DATA_SIZE     0x800000   // 8MB
+
+#define RAM_BASE_ADDRESS         0x00000000
+#define RAM_DATA_SIZE            0x4000000  // 64MB
+
+////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////
+
+#define ABSOLUTE_GLOBALS_BASE_ADDRESS (0x00000280 | MIPS_KSEG0_BASE_ADDRESS)
 
 typedef struct 
 {
@@ -74,9 +84,40 @@ typedef struct
 #define AG(f) GET_AG(ABSOLUTE_GLOBALS_BASE_ADDRESS, f)
 #define AGS(f, v) SET_AG(ABSOLUTE_GLOBALS_BASE_ADDRESS, f, v)
 
-#define BOOTROM_BASE_ADDRESS 0x9fc00000
+////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////
+
+// WebTV control space
+
+#define CNTL_BASE_ADDRESS    (0x04000000 | MIPS_KSEG1_BASE_ADDRESS)
+
+#include "regs_internal/busUnit.h"
+#include "regs_internal/memUnit.h"
+#include "regs_internal/rioUnit.h"
+#include "regs_internal/pixelUnits.h"
+#include "regs_internal/audUnit.h"
+#include "regs_internal/devUnit.h"
+#include "regs_internal/sucUnit.h"
+#include "regs_internal/divUnit.h"
+#include "regs_internal/dveUnit.h"
+#include "regs_internal/gfxUnit.h"
+#include "regs_internal/modUnit.h"
+
+////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////
+
+#define BOOTROM_BASE_ADDRESS (0x1fc00000 | MIPS_KSEG1_BASE_ADDRESS)
 #define DEFAULT_BOOTROM_SIZE 0x200000
-#define NO_ROMFS_BASE 0x4e6f4653
+
+#define APPROM_BASE_ADDRESS  (0x1f000000 | MIPS_KSEG1_BASE_ADDRESS)
+#define DEFAULT_APPROM_SIZE  0x200000
+
+#define ALTROM_BASE_ADDRESS  (0x1fe00000 | MIPS_KSEG1_BASE_ADDRESS)
+#define DEFAULT_ALTROM_SIZE  0x100000
+
+#define NO_ROMFS_FLAG 0x4e6f4653
 
 typedef struct 
 {
