@@ -67,7 +67,16 @@ bool ata_request_identity(ata_identity_t* identity)
 {
 	ide_command_block_t command_block;
 
-	ide_setup_command(&command_block, ata_context.selected_drive, 0x00, 0xec, 0, 0x00, (void*)identity, sizeof(ata_identity_t));
+	ide_setup_command(
+		&command_block,             // IDE parameters to set
+		ata_context.selected_drive, // Selected drive on the IDE bus to work on.
+		0x00,                       // IDE device control byte
+		ATA_CMD_IDENTIFY_DEVICE,    // IDE command byte
+		0,                          // IDE feature byte
+		0x00,                       // LBA address
+		(void*)identity,            // Data to store or send
+		sizeof(ata_identity_t)      // Length of the data to store or send
+	);
 
 	if(ide_handle_command(IDE_PROTO_PIO_IN, &command_block))
 	{
