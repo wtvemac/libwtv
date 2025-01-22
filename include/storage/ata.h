@@ -31,7 +31,6 @@ typedef enum
 	ATA_CMD_READ_MULTIPLE_EXT = 0x29,
 	ATA_CMD_READ_STREAM_DMA_EXT = 0x2a,
 	ATA_CMD_READ_STREAM_EXT = 0x2b,
-	ATA_CMD_READ_STREAM_EXT = 0x2b,
 	ATA_CMD_READ_LOG_EXT = 0x2f,
 	ATA_CMD_WRITE_SECTOR = 0x30, // also 0x31 (but without retry)
 	ATA_CMD_WRITE_LONG = 0x32, // also 0x33 (but without retry)
@@ -689,6 +688,7 @@ typedef struct __attribute__((packed))
 void ata_init();
 void ata_close();
 bool ata_enabled();
+bool ata_test_read_sector(uint32_t lba_address, void* data);
 ata_identity_t ata_get_identity();
 bool ata_request_identity(ata_identity_t* identity);
 uint8_t* get_ata_userpwd();
