@@ -14,7 +14,8 @@ extern "C" {
 #define IDE_DRIVE1              0x01
 
 #define IDE_SECTOR_LENGTH       0x200
-#define IDE_SECTOR_BSHIFT       9
+#define IDE_SECTOR_OF_BSHIFT    9
+#define IDE_SECTOR_OF_MASK      0x1ff
 
 #define IDE_ERROR_NONE          0x00 // No error bits
 #define IDE_ERROR_BBK           0x80 // Bad block
@@ -96,6 +97,7 @@ typedef struct
 	uint32_t device_control;
 	uint32_t feature;
 	uint32_t command;
+	uint16_t data_skip;
 	void* data;
 	uint32_t data_length;
 } ide_command_block_t;
@@ -108,10 +110,9 @@ volatile ide_device_registers_t* ide_get_base(uint8_t selected_bus);
 
 bool ide_wait_for_status(uint8_t status_mask, uint8_t status_match, uint32_t timeout);
 
-// Will add more reading and writing routines depending on the disk type.
-bool ide_read_data16(void* in_data, uint32_t data_length);
+bool ide_read_data16(uint16_t data_skip, void* in_data, uint32_t data_length);
 
-void ide_setup_command(ide_command_block_t* command_block, uint8_t selected_drive, uint8_t device_control, uint8_t command, uint8_t feature, uint32_t lba_address, void* data, uint32_t data_length);
+void ide_setup_command(ide_command_block_t* command_block, uint8_t selected_drive, uint8_t device_control, uint8_t command, uint8_t feature, uint64_t data_offset, void* data, uint32_t data_length);
 
 uint8_t ide_send_command(ide_command_block_t* command_block);
 

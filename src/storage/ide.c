@@ -1,5 +1,6 @@
 #include "storage/ide.h"
 #include "wtvsys.h"
+#include "../utils.h"
 
 // SOLO RIO device slots 1 and 2
 #define IDE_SOLO_PRI_BASE ((ide_device_registers_t*)(0xbe400000))
@@ -73,28 +74,37 @@ bool ide_wait_for_status(uint8_t status_mask, uint8_t status_match, uint32_t tim
 	return status_good;
 }
 
-// Will add more reading and writing routines depending on the disk type.
-bool ide_read_data16(void* in_data, uint32_t data_length)
+bool ide_read_data16(uint16_t data_skip, void* in_data, uint32_t data_length)
 {
-	data_length &= ~0x01;
+	uint32_t read_idx = 0;
+	uint32_t copy_idx = 0;
+	uint32_t ide_data = 0x00000000;
 
-	if(data_length >= 2)
+	while(read_idx < data_length)
 	{
-		for(uint32_t i = 0; i < data_length; i += 2)
+		if((read_idx & 1) == 0)
 		{
-			uint32_t ide_data = *((uint32_t*)ide_base);
-
-			*((uint8_t*)(in_data + (i + 0))) = ((ide_data >> 0x08) & 0xff);
-			*((uint8_t*)(in_data + (i + 1))) = ((ide_data >> 0x00) & 0xff);
+			ide_data = *((volatile uint32_t*)ide_base);
 		}
 
-		return true;
+		if(read_idx >= data_skip)
+		{
+			if((read_idx & 1) == 0)
+			{
+				*((uint8_t*)(in_data + copy_idx)) = (ide_data >> 8);
+			}
+			else
+			{
+				*((uint8_t*)(in_data + copy_idx)) = (ide_data >> 0);
+			}
+
+			copy_idx++;
+		}
+
+		read_idx++;
 	}
-	else
-	{
-		// Data length too small.
-		return false;
-	}
+
+	return true;
 }
 
 uint8_t ide_send_command(ide_command_block_t* command_block)
@@ -105,7 +115,21 @@ uint8_t ide_send_command(ide_command_block_t* command_block)
 	ide_base->cylinder_high = command_block->cylinder_high;
 	ide_base->disk_select = command_block->disk_select;
 	ide_base->altstatus_or_devcontrol = command_block->device_control;
-	ide_base->sector_count = ((command_block->data_length >> IDE_SECTOR_BSHIFT) & 0xff);
+	if(command_block->data_length > 0)
+	{
+		uint32_t sector_count = MIN(command_block->data_length >> IDE_SECTOR_OF_BSHIFT, 0xff);
+		if((sector_count & IDE_SECTOR_OF_MASK) != 0)
+		{
+			sector_count++;
+		}
+
+		ide_base->sector_count = sector_count;
+	}
+	else
+	{
+		ide_base->sector_count = 0;
+	}
+
 
 	uint8_t current_status = (ide_base->status_or_command & 0xff);
 
@@ -114,23 +138,28 @@ uint8_t ide_send_command(ide_command_block_t* command_block)
 	return current_status;
 }
 
-void ide_setup_command(ide_command_block_t* command_block, uint8_t selected_drive, uint8_t device_control, uint8_t command, uint8_t feature, uint32_t lba_address, void* data, uint32_t data_length)
+void ide_setup_command(ide_command_block_t* command_block, uint8_t selected_drive, uint8_t device_control, uint8_t command, uint8_t feature, uint64_t data_offset, void* data, uint32_t data_length)
 {
 	command_block->disk_select.always1_a = 1;
 	command_block->disk_select.always1_b = 1;
+	command_block->disk_select.using_lba = 1;
 
 	command_block->disk_select.selected_drive = selected_drive & 0x01;
 	command_block->device_control = (uint32_t)(0x08 | (device_control & 0x06));
 	command_block->command = (uint32_t)command;
 	command_block->feature = (uint32_t)feature;
 
+	uint32_t lba_address = data_offset >> IDE_SECTOR_OF_BSHIFT;
+	uint16_t data_skip = data_offset & IDE_SECTOR_OF_MASK;
+
 	command_block->sector_number = lba_address & 0xff;
 	command_block->cylinder_low = (lba_address >> 8) & 0xff;
 	command_block->cylinder_high = (lba_address >> 16) & 0xff;
 	command_block->disk_select.address = (lba_address >> 24) & 0x0f;
 
+	command_block->data_skip = data_skip;
 	command_block->data = data;
-	command_block->data_length = data_length;
+	command_block->data_length = data_length + data_skip;
 }
 
 bool ide_handle_simple_command(bool async, ide_command_block_t* command_block)
@@ -152,7 +181,7 @@ bool ide_handle_pio_in_command(bool async, ide_command_block_t* command_block)
 
 			if(current_status & IDE_STATUS_DRQ)
 			{
-				return ide_read_data16(command_block->data, (command_block->data_length >> 1));
+				return ide_read_data16(command_block->data_skip, command_block->data, command_block->data_length);
 			}
 			else
 			{

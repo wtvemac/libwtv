@@ -214,11 +214,14 @@ void ide_flash_tests()
 			printf("\tFirmware Revision: %.8s\x0a\x0d", identity.firmware_revision);
 			printf("\tDevice Name: %.40s\x0a\x0d", identity.model_number);
 
-			void* data = malloc(IDE_SECTOR_LENGTH);
+			uint64_t build_offset = 0x80600;
+			uint32_t show_length = 0x300;
+
+			void* data = malloc(show_length);
 			printf("\tRead test:");
-			if(ata_test_read_sector(2, data))
+			if(ata_test_read_sector(build_offset, data, show_length))
 			{
-				for(int i = 0; i < IDE_SECTOR_LENGTH; i++)
+				for(uint32_t i = 0; i < show_length; i++)
 				{
 					if((i%32) == 0)
 					{

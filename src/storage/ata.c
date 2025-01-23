@@ -63,7 +63,7 @@ ata_identity_t ata_get_identity()
 	return ata_context.drive_identity;
 }
 
-bool ata_test_read_sector(uint32_t lba_address, void* data)
+bool ata_test_read_sector(uint64_t data_offset, void* data, uint32_t data_length)
 {
 	ide_command_block_t command_block;
 
@@ -73,9 +73,9 @@ bool ata_test_read_sector(uint32_t lba_address, void* data)
 		0x00,                       // IDE device control byte
 		ATA_CMD_READ_SECTOR,        // IDE command byte
 		0,                          // IDE feature byte
-		lba_address,                // LBA address
+		data_offset,                // Offset address to the data
 		data,                       // Data to store or send
-		IDE_SECTOR_LENGTH           // Length of the data to store or send
+		data_length                 // Length of the data to store or send
 	);
 
 	if(ide_handle_command(IDE_PROTO_PIO_IN, &command_block))
@@ -96,7 +96,7 @@ bool ata_request_identity(ata_identity_t* identity)
 		0x00,                       // IDE device control byte
 		ATA_CMD_IDENTIFY_DEVICE,    // IDE command byte
 		0,                          // IDE feature byte
-		0x00,                       // LBA address
+		0x00,                       // Offset address to the data
 		(void*)identity,            // Data to store or send
 		sizeof(ata_identity_t)      // Length of the data to store or send
 	);
