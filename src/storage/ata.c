@@ -63,27 +63,83 @@ ata_identity_t ata_get_identity()
 	return ata_context.drive_identity;
 }
 
-bool ata_test_read_sector(uint64_t data_offset, void* data, uint32_t data_length)
+bool ata_read_data(uint64_t data_offset, void* data, uint32_t data_length)
 {
 	ide_command_block_t command_block;
 
 	ide_setup_command(
-		&command_block,             // IDE parameters to set
-		ata_context.selected_drive, // Selected drive on the IDE bus to work on.
-		0x00,                       // IDE device control byte
-		ATA_CMD_READ_SECTOR,        // IDE command byte
-		0,                          // IDE feature byte
-		data_offset,                // Offset address to the data
-		data,                       // Data to store or send
-		data_length                 // Length of the data to store or send
+		&command_block,
+		ata_context.selected_drive,
+		0x00,
+		ATA_CMD_READ_MULTIPLE,
+		0,
+		data_offset,
+		data,
+		data_length
 	);
 
-	if(ide_handle_command(IDE_PROTO_PIO_IN, &command_block))
+	bool result = ide_handle_command(IDE_PROTO_SYNC_PIO_IN, &command_block);
+
+	return result;
+}
+
+bool ata_write_data(uint64_t data_offset, void* data, uint32_t data_length)
+{
+	ide_command_block_t command_block;
+
+	uint32_t data_offset_adjusted = data_offset;
+	void* data_adjusted = data;
+	uint32_t data_length_adjusted = data_length;
+
+	uint32_t left_underflow = (data_offset & IDE_SECTOR_OF_MASK);
+	uint32_t right_underflow = (data_length + left_underflow) & IDE_SECTOR_OF_MASK;
+
+	// If the data isn't aligned to sector boundries then we need to make it align by pulling the missing data.
+	if(left_underflow > 0 || right_underflow > 0)
 	{
-		return true;
+		uint32_t _left_rel_offset = left_underflow;
+
+		data_offset_adjusted = data_offset & ~IDE_SECTOR_OF_MASK;
+		// align up to nearest sector
+		data_length_adjusted = (data_length + left_underflow + right_underflow + IDE_SECTOR_OF_MASK) & ~IDE_SECTOR_OF_MASK;
+		data_adjusted = malloc(data_length_adjusted);
+
+		if(left_underflow > 0)
+		{
+			ata_read_data(data_offset_adjusted, data_adjusted, IDE_SECTOR_LENGTH);
+		}
+
+		if(right_underflow > 0)
+		{
+			uint32_t right_rel_offset = (data_length_adjusted - IDE_SECTOR_LENGTH);
+			uint32_t right_abs_offset = data_offset_adjusted + (data_length_adjusted - IDE_SECTOR_LENGTH);
+
+			ata_read_data(right_abs_offset, ((uint8_t*)(data_adjusted + right_rel_offset)), IDE_SECTOR_LENGTH);
+		}
+
+		memcpy(((uint8_t*)(data_adjusted + _left_rel_offset)), data, data_length);
 	}
 
-	return false;
+	ide_setup_command(
+		&command_block,
+		ata_context.selected_drive,
+		0x00,
+		ATA_CMD_WRITE_MULTIPLE,
+		0,
+		data_offset_adjusted,
+		data_adjusted,
+		data_length_adjusted
+	);
+
+	bool result = ide_handle_command(IDE_PROTO_SYNC_PIO_OUT, &command_block);
+
+	// If we expanded the input data then we need to free that data before we return.
+	if(data_adjusted != data)
+	{
+		free(data_adjusted);
+	}
+
+	return result;
 }
 
 bool ata_request_identity(ata_identity_t* identity)
@@ -91,17 +147,17 @@ bool ata_request_identity(ata_identity_t* identity)
 	ide_command_block_t command_block;
 
 	ide_setup_command(
-		&command_block,             // IDE parameters to set
-		ata_context.selected_drive, // Selected drive on the IDE bus to work on.
-		0x00,                       // IDE device control byte
-		ATA_CMD_IDENTIFY_DEVICE,    // IDE command byte
-		0,                          // IDE feature byte
-		0x00,                       // Offset address to the data
-		(void*)identity,            // Data to store or send
-		sizeof(ata_identity_t)      // Length of the data to store or send
+		&command_block,
+		ata_context.selected_drive,
+		0x00,
+		ATA_CMD_IDENTIFY_DEVICE,
+		0,
+		0x00,
+		(void*)identity,
+		sizeof(ata_identity_t)
 	);
 
-	if(ide_handle_command(IDE_PROTO_PIO_IN, &command_block))
+	if(ide_handle_command(IDE_PROTO_SYNC_PIO_IN, &command_block))
 	{
 		return true;
 	}

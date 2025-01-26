@@ -87,7 +87,7 @@ typedef enum
 	ATA_CMD_NV_CACHE = 0xb6,
 	ATA_CMD_CFA_ERASE_SECTORS = 0xc0,
 	ATA_CMD_READ_MULTIPLE = 0xc4,
-	ATA_CMD_WRITE_MILTIPLE = 0xc5,
+	ATA_CMD_WRITE_MULTIPLE = 0xc5,
 	ATA_CMD_SET_MULTIPLE_MODE = 0xc6,
 	ATA_CMD_READ_DMA_QUEUED = 0xc7,
 	ATA_CMD_READ_DMA = 0xc8, // also 0xc9 (but without retry)
@@ -688,7 +688,8 @@ typedef struct __attribute__((packed))
 void ata_init();
 void ata_close();
 bool ata_enabled();
-bool ata_test_read_sector(uint64_t data_offset, void* data, uint32_t data_length);
+bool ata_read_data(uint64_t data_offset, void* data, uint32_t data_length);
+bool ata_write_data(uint64_t data_offset, void* data, uint32_t data_length);
 ata_identity_t ata_get_identity();
 bool ata_request_identity(ata_identity_t* identity);
 uint8_t* get_ata_userpwd();

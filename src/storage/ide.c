@@ -31,19 +31,19 @@ bool ide_probe(uint32_t timeout)
 	// We're sending "wtv" and a number.
 
 	uint64_t start = get_ticks_ms();
-	uint8_t ide_probe_number = (start & 0xff);
+	uint32_t ide_probe_number = (start & 0xff);
 
 	while((get_ticks_ms() - start) < timeout)
 	{
 		// Any drive that doesn't support LBA will be ignored.
 		if(ide_base->disk_select.using_lba)
 		{
-			ide_base->sector_count  = 0x77; // w
-			ide_base->sector_number = 0x74; // t
-			ide_base->cylinder_low  = 0x76; // v
-			ide_base->cylinder_high = ide_probe_number;
+			__atomic_store_n(&ide_base->sector_count,  0x77,              __ATOMIC_RELAXED); // w
+			__atomic_store_n(&ide_base->sector_number, 0x74,              __ATOMIC_RELAXED); // t
+			__atomic_store_n(&ide_base->cylinder_low,  0x76,              __ATOMIC_RELAXED); // v
+			__atomic_store(  &ide_base->cylinder_high, &ide_probe_number, __ATOMIC_RELAXED);
 
-			if((ide_base->cylinder_high & 0xff) == ide_probe_number)
+			if((__atomic_load_n(&ide_base->cylinder_high, __ATOMIC_RELAXED) & 0xff) == ide_probe_number)
 			{
 				return true;
 			}
@@ -66,7 +66,7 @@ bool ide_wait_for_status(uint8_t status_mask, uint8_t status_match, uint32_t tim
 
 	while(!status_good && ((get_ticks_ms() - start) < timeout))
 	{
-		uint8_t current_status = (ide_base->status_or_command & 0xff);
+		uint8_t current_status = (__atomic_load_n(&ide_base->status_or_command, __ATOMIC_RELAXED) & 0xff);
 
 		status_good = ((current_status & status_mask) == status_match);
 	}
@@ -74,34 +74,72 @@ bool ide_wait_for_status(uint8_t status_mask, uint8_t status_match, uint32_t tim
 	return status_good;
 }
 
-bool ide_read_data16(uint16_t data_skip, void* in_data, uint32_t data_length)
+bool ide_check_for_status(uint8_t status_mask, uint8_t status_match)
 {
-	uint32_t read_idx = 0;
-	uint32_t copy_idx = 0;
-	uint32_t ide_data = 0x00000000;
+	uint8_t current_status = (__atomic_load_n(&ide_base->status_or_command, __ATOMIC_RELAXED) & 0xff);
 
-	while(read_idx < data_length)
+	return ((current_status & status_mask) == status_match);
+}
+
+bool ide_read_data16(uint16_t data_skip, void* in_data, uint32_t data_length, uint8_t sector_count)
+{
+	for(uint32_t sector_idx = 0, read_idx = 0, copy_idx = 0; sector_idx < sector_count; sector_idx++)
 	{
-		if((read_idx & 1) == 0)
+		for(uint32_t sector_byte_idx = 0, ide_data = 0; sector_byte_idx < IDE_SECTOR_LENGTH; sector_byte_idx++, read_idx++)
 		{
-			ide_data = *((volatile uint32_t*)ide_base);
+			if((sector_byte_idx & 1) == 0)
+			{
+				ide_data = __atomic_load_n(&ide_base->data, __ATOMIC_RELAXED);
+			}
+
+			if(read_idx >= data_skip && read_idx < data_length)
+			{
+				if((read_idx & 1) == 0)
+				{
+					*((uint8_t*)(in_data + copy_idx)) = (ide_data >> 8);
+				}
+				else
+				{
+					*((uint8_t*)(in_data + copy_idx)) = (ide_data >> 0);
+				}
+
+				copy_idx++;
+			}
 		}
 
-		if(read_idx >= data_skip)
+		if(!ide_wait_for_status(IDE_STATUS_BSY, IDE_STATUS_NONE, IDE_DEFAULT_TIMEOUT))
 		{
-			if((read_idx & 1) == 0)
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool ide_write_data16(void* out_data, uint32_t data_length, uint8_t sector_count)
+{
+	for(uint32_t sector_idx = 0, write_idx = 0; sector_idx < sector_count; sector_idx++)
+	{
+		for(uint32_t sector_byte_idx = 0; sector_byte_idx < IDE_SECTOR_LENGTH; sector_byte_idx += 2)
+		{
+			if(write_idx < data_length)
 			{
-				*((uint8_t*)(in_data + copy_idx)) = (ide_data >> 8);
+				uint32_t ide_data = *((uint16_t*)(out_data + write_idx));
+
+				__atomic_store(&ide_base->data, &ide_data, __ATOMIC_RELAXED);
+
+				write_idx += 2;
 			}
 			else
 			{
-				*((uint8_t*)(in_data + copy_idx)) = (ide_data >> 0);
+				__atomic_store_n(&ide_base->data, 0x00000000, __ATOMIC_RELAXED);
 			}
-
-			copy_idx++;
 		}
 
-		read_idx++;
+		if(!ide_wait_for_status(IDE_STATUS_BSY, IDE_STATUS_NONE, IDE_DEFAULT_TIMEOUT))
+		{
+			return false;
+		}
 	}
 
 	return true;
@@ -109,31 +147,17 @@ bool ide_read_data16(uint16_t data_skip, void* in_data, uint32_t data_length)
 
 uint8_t ide_send_command(ide_command_block_t* command_block)
 {
-	ide_base->error_or_feature = command_block->feature;
-	ide_base->sector_number = command_block->sector_number;
-	ide_base->cylinder_low = command_block->cylinder_low;
-	ide_base->cylinder_high = command_block->cylinder_high;
-	ide_base->disk_select = command_block->disk_select;
-	ide_base->altstatus_or_devcontrol = command_block->device_control;
-	if(command_block->data_length > 0)
-	{
-		uint32_t sector_count = MIN(command_block->data_length >> IDE_SECTOR_OF_BSHIFT, 0xff);
-		if((sector_count & IDE_SECTOR_OF_MASK) != 0)
-		{
-			sector_count++;
-		}
-
-		ide_base->sector_count = sector_count;
-	}
-	else
-	{
-		ide_base->sector_count = 0;
-	}
-
-
+	__atomic_store(&ide_base->error_or_feature, &command_block->feature, __ATOMIC_RELAXED);
+	__atomic_store(&ide_base->sector_number, &command_block->sector_number, __ATOMIC_RELAXED);
+	__atomic_store(&ide_base->cylinder_low, &command_block->cylinder_low, __ATOMIC_RELAXED);
+	__atomic_store(&ide_base->cylinder_high, &command_block->cylinder_high, __ATOMIC_RELAXED);
+	__atomic_store(&ide_base->disk_select, &command_block->disk_select, __ATOMIC_RELAXED);
+	__atomic_store(&ide_base->altstatus_or_devcontrol, &command_block->device_control, __ATOMIC_RELAXED);
+	__atomic_store(&ide_base->sector_count, &command_block->sector_count, __ATOMIC_RELAXED);
+	
 	uint8_t current_status = (ide_base->status_or_command & 0xff);
 
-	ide_base->status_or_command = command_block->command;
+	__atomic_store(&ide_base->status_or_command, &command_block->command, __ATOMIC_RELAXED);
 
 	return current_status;
 }
@@ -160,6 +184,21 @@ void ide_setup_command(ide_command_block_t* command_block, uint8_t selected_driv
 	command_block->data_skip = data_skip;
 	command_block->data = data;
 	command_block->data_length = data_length + data_skip;
+
+	if(command_block->data_length > 0)
+	{
+		uint32_t sector_count = MIN(command_block->data_length >> IDE_SECTOR_OF_BSHIFT, 0xff);
+		if((command_block->data_length & IDE_SECTOR_OF_MASK) != 0)
+		{
+			sector_count++;
+		}
+
+		command_block->sector_count = sector_count;
+	}
+	else
+	{
+		command_block->sector_count = 0;
+	}
 }
 
 bool ide_handle_simple_command(bool async, ide_command_block_t* command_block)
@@ -177,11 +216,9 @@ bool ide_handle_pio_in_command(bool async, ide_command_block_t* command_block)
 
 		if(ide_wait_for_status(IDE_STATUS_BSY, IDE_STATUS_NONE, IDE_DEFAULT_TIMEOUT))
 		{
-			uint8_t current_status = (ide_base->status_or_command & 0xff);
-
-			if(current_status & IDE_STATUS_DRQ)
+			if(ide_wait_for_status(IDE_STATUS_DRQ, IDE_STATUS_DRQ, IDE_DEFAULT_TIMEOUT))
 			{
-				return ide_read_data16(command_block->data_skip, command_block->data, command_block->data_length);
+				return ide_read_data16(command_block->data_skip, command_block->data, command_block->data_length, command_block->sector_count);
 			}
 			else
 			{
@@ -205,7 +242,25 @@ bool ide_handle_pio_in_command(bool async, ide_command_block_t* command_block)
 
 bool ide_handle_pio_out_command(bool async, ide_command_block_t* command_block)
 {
-	return false;
+	if(command_block->data_length > 0)
+	{
+		ide_send_command(command_block);
+
+		if(ide_wait_for_status(IDE_STATUS_BSY, IDE_STATUS_NONE, IDE_DEFAULT_TIMEOUT))
+		{
+			return ide_write_data16(command_block->data, command_block->data_length, command_block->sector_count);
+		}
+		else
+		{
+			// Timed out waiting for drive to become not busy.
+			return false;
+		}
+	}
+	else
+	{
+		// Can't capture data.
+		return false;
+	}
 }
 
 bool ide_handle_command(ide_proto protocol, ide_command_block_t* command_block)
