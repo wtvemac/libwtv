@@ -91,25 +91,33 @@ bool ata_write_data(uint64_t data_offset, void* data, uint32_t data_length)
 	void* data_adjusted = data;
 	uint32_t data_length_adjusted = data_length;
 
-	uint32_t left_underflow = (data_offset & IDE_SECTOR_OF_MASK);
-	uint32_t right_underflow = (data_length + left_underflow) & IDE_SECTOR_OF_MASK;
+	uint32_t left_offset = (data_offset & IDE_SECTOR_OF_MASK);
+	uint32_t right_offset = 0;
+	if((data_length + left_offset) > IDE_SECTOR_LENGTH)
+	{
+		right_offset = (data_length + left_offset) & IDE_SECTOR_OF_MASK;
+	}
+	else
+	{
+		right_offset = 0;
+	}
 
 	// If the data isn't aligned to sector boundries then we need to make it align by pulling the missing data.
-	if(left_underflow > 0 || right_underflow > 0)
+	if(left_offset > 0 || right_offset > 0)
 	{
-		uint32_t _left_rel_offset = left_underflow;
+		uint32_t _left_rel_offset = left_offset;
 
 		data_offset_adjusted = data_offset & ~IDE_SECTOR_OF_MASK;
 		// align up to nearest sector
-		data_length_adjusted = (data_length + left_underflow + right_underflow + IDE_SECTOR_OF_MASK) & ~IDE_SECTOR_OF_MASK;
+		data_length_adjusted = (data_length + left_offset + right_offset + IDE_SECTOR_OF_MASK) & ~IDE_SECTOR_OF_MASK;
 		data_adjusted = malloc(data_length_adjusted);
 
-		if(left_underflow > 0)
+		if(left_offset > 0)
 		{
 			ata_read_data(data_offset_adjusted, data_adjusted, IDE_SECTOR_LENGTH);
 		}
 
-		if(right_underflow > 0 && (data_length_adjusted > IDE_SECTOR_LENGTH || left_underflow == 0))
+		if(right_offset > 0 && (data_length_adjusted > IDE_SECTOR_LENGTH || left_offset == 0))
 		{
 			uint32_t right_rel_offset = (data_length_adjusted - IDE_SECTOR_LENGTH);
 			uint32_t right_abs_offset = data_offset_adjusted + (data_length_adjusted - IDE_SECTOR_LENGTH);

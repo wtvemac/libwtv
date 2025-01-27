@@ -1,5 +1,8 @@
 #include "../idtcpu-regs.S"
 
+#define INRAM_FUNCTION_FAILED    0xffffffff
+#define INRAM_FUNCTION_SUCCEEDED 0x00000000
+
 	.section .text.flash_inram_functions
 	.set noreorder
 
@@ -69,7 +72,7 @@ alternative_reset:
 	nop
 
 flash_unknown_identity:
-	la      v0, 0x00000000
+	la      v0, INRAM_FUNCTION_FAILED
 
 flash_get_device_id_exit:
 	mtc0    t0, C0_SR
@@ -131,8 +134,9 @@ flash_mx_erase_sector_reset:
 	sw      t5, 0x5554(t1)
 
 flash_mx_erase_sector_exit:
-	mtc0  t0, C0_SR
-	jr    ra
+	mtc0    t0, C0_SR
+	la      v0, INRAM_FUNCTION_SUCCEEDED
+	jr      ra
 	nop
 
 	.set reorder
@@ -150,7 +154,7 @@ flash_mx_program:
 	la      t1, 0x10000
 	addu    t1, a0, t1
 	move    t6, ra
-	la      t7, flash_get_programming_time
+	la      t7, flash_get_page_programming_time
 	jalr    t7
 	nop
 	move    ra, t6 
@@ -181,14 +185,14 @@ flash_mx_program_page_do:
 	bnez    t6, flash_mx_program_page_do
 	nop
 
-	mfc0      t6, C0_COUNT
-	mtc0      zero, C0_COUNT
+	mfc0    t6, C0_COUNT
+	mtc0    zero, C0_COUNT
 flash_mx_program_wait:
-	mfc0      t7, C0_COUNT
-	slt       t9, t7, t8
-	bnez      t9, flash_mx_program_wait
+	mfc0    t7, C0_COUNT
+	slt     t9, t7, t8
+	bnez    t9, flash_mx_program_wait
 	nop
-	mtc0      t6, C0_COUNT
+	mtc0    t6, C0_COUNT
 
 	la      t5, 0x00800080
 flash_mx_programmed_wait:
@@ -208,9 +212,19 @@ flash_mx_program_reset:
 	la      t5, 0x00f000f0
 	sw      t5, 0x5554(t1)
 
+	la      t5, 0x00100010
+	and     t6, t5, t6
+	bnez    t6, flash_mx_program_failed
+	nop
+
 	addi    a3, -0x100
 	bnez    a3, flash_mx_program_page_prepare
 	nop
+	la      v0, INRAM_FUNCTION_SUCCEEDED
+	b       flash_mx_program_exit
+
+flash_mx_program_failed:
+	la      v0, INRAM_FUNCTION_FAILED
 
 flash_mx_program_exit:
 	mtc0    t0, C0_SR

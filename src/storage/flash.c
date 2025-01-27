@@ -1,17 +1,24 @@
 #include "storage/flash.h"
 #include "../regs_internal.h"
+#include "../utils.h"
+#include "wtvsys.h"
+#include "libc.h"
 
 typedef uint32_t (*inram_function_t)(uint32_t, uint32_t, uint32_t, uint32_t);
 
-#define INRAM_BASE          (inram_function_t)0x80000000
-#define INRAM_SIZE          0x180
+#define INRAM_BASE               (inram_function_t)0x80000000
+#define INRAM_SIZE               0x180
+#define INRAM_FUNCTION_FAILED    0xffffffff
+#define INRAM_FUNCTION_SUCCEEDED 0x00000000
 
-#define SECTOR_SIZE_8K        8 * 1024
-#define SECTOR_SIZE_16K      16 * 1024
-#define SECTOR_SIZE_32K      32 * 1024
-#define SECTOR_SIZE_64K      64 * 1024
-#define SECTOR_SIZE_128K    128 * 1024
-#define DEFAULT_SECTOR_SIZE SECTOR_SIZE_128K
+#define SECTOR_SIZE_8K            8 * 1024
+#define SECTOR_SIZE_16K          16 * 1024
+#define SECTOR_SIZE_32K          32 * 1024
+#define SECTOR_SIZE_64K          64 * 1024
+#define SECTOR_SIZE_128K        128 * 1024
+#define DEFAULT_SECTOR_SIZE     SECTOR_SIZE_128K
+
+#define SECTORS_PER_BLOCK       2
 
 typedef struct {
 	bool flash_enabled;
@@ -19,6 +26,7 @@ typedef struct {
 	flash_image_type image_type;
 	volatile uint32_t* base_address;
 	uint32_t sector_size;
+	uint32_t page_programming_time;
 	flash_identity_t identity;
 	inram_function_t erase_function;
 	inram_function_t program_function;
@@ -61,7 +69,13 @@ volatile uint32_t* __flash_get_base_address(flash_image_type image_type)
 void __flash_resolve_identity(flash_image_type image_type)
 {
 	flash_context.base_address = __flash_get_base_address(image_type);
-	flash_context.identity.id_data = __flash_invoke_inram_function(flash_get_device_id, (uint32_t)flash_context.base_address, 0, 0, 0);
+	flash_context.identity.id_data = __flash_invoke_inram_function(
+		flash_get_device_id,
+		(uint32_t)flash_context.base_address,
+		0,
+		0,
+		0
+	);
 
 	switch(flash_context.identity.device_id)
 	{
@@ -70,14 +84,20 @@ void __flash_resolve_identity(flash_image_type image_type)
 		case AM29F800BB: // or MBM29F800B
 		case AM29F800BT: // or MBM29F800T
 		case MX29F1610:
-			flash_context.flash_enabled = true;
-			flash_context.identity.can_write = true;
+			flash_context.erase_function = flash_mx_erase_sector;
+			flash_context.program_function = flash_mx_program;
 			flash_context.sector_size = SECTOR_SIZE_128K;
+			flash_context.page_programming_time = (36 * get_ticks_ms());
+			flash_context.identity.can_write = true;
+			flash_context.flash_enabled = true;
 			break;
 		default:
-			flash_context.flash_enabled = false;
-			flash_context.identity.can_write = false;
+			flash_context.erase_function = NULL;
+			flash_context.program_function = NULL;
 			flash_context.sector_size = DEFAULT_SECTOR_SIZE;
+			flash_context.page_programming_time = 0;
+			flash_context.identity.can_write = false;
+			flash_context.flash_enabled = false;
 			break;
 	}
 }
@@ -101,6 +121,11 @@ void flash_close()
 bool flash_enabled()
 {
 	return flash_context.flash_enabled;
+}
+
+bool flash_can_write()
+{
+	return flash_context.identity.can_write;
 }
 
 flash_identity_t flash_get_identity()
@@ -173,16 +198,14 @@ const char* flash_get_device_name()
 	}
 }
 
-#include "libc.h"
-
 uint32_t flash_get_sector_size()
 {
 	return flash_context.sector_size;
 }
 
-uint32_t flash_get_programming_time()
+uint32_t flash_get_page_programming_time()
 {
-	return 22;
+	return flash_context.page_programming_time;
 }
 
 bool flash_read_data(uint64_t data_offset, void* data, uint32_t data_length)
@@ -194,60 +217,106 @@ bool flash_read_data(uint64_t data_offset, void* data, uint32_t data_length)
 
 bool flash_write_data(uint64_t data_offset, void* data, uint32_t data_length)
 {
-	uint32_t data_offset_adjusted = data_offset;
-	void* data_adjusted = data;
-	uint32_t data_length_adjusted = data_length;
-
-	uint32_t sector_size = flash_get_sector_size();
-	uint32_t sector_of_mask = (sector_size - 1);
-
-	uint32_t left_underflow = (data_offset & sector_of_mask);
-	uint32_t right_underflow = (data_length + left_underflow) & sector_of_mask;
-
-	if(left_underflow > 0 || right_underflow > 0)
+	if(flash_can_write())
 	{
-		uint32_t _left_rel_offset = left_underflow;
+		uint32_t data_offset_adjusted = data_offset;
+		void* data_adjusted = data;
+		uint32_t data_length_adjusted = data_length;
 
-		data_offset_adjusted = data_offset & ~sector_of_mask;
-		// align up to nearest sector
-		data_length_adjusted = (data_length + left_underflow + right_underflow + sector_of_mask) & ~sector_of_mask;
-		data_adjusted = malloc(data_length_adjusted);
+		uint32_t sector_size = flash_get_sector_size();
+		uint32_t sector_of_mask = (sector_size - 1);
 
-		if(left_underflow > 0)
+		uint32_t left_offset = (data_offset & sector_of_mask);
+		uint32_t right_offset = 0;
+		if((data_length + left_offset) > sector_size)
 		{
-			flash_read_data(data_offset_adjusted, data_adjusted, sector_size);
+			right_offset = (data_length + left_offset) & sector_of_mask;
+		}
+		else
+		{
+			right_offset = 0;
 		}
 
-		if(right_underflow > 0 && (data_length_adjusted > sector_size || left_underflow == 0))
+		if(left_offset > 0 || right_offset > 0)
 		{
-			uint32_t right_rel_offset = (data_length_adjusted - sector_size);
-			uint32_t right_abs_offset = data_offset_adjusted + (data_length_adjusted - sector_size);
+			uint32_t _left_rel_offset = left_offset;
 
-			flash_read_data(right_abs_offset, ((uint8_t*)(data_adjusted + right_rel_offset)), sector_size);
+			data_offset_adjusted = data_offset & ~sector_of_mask;
+			// align up to nearest sector
+			data_length_adjusted = (data_length + left_offset + right_offset + sector_of_mask) & ~sector_of_mask;
+			data_adjusted = malloc(data_length_adjusted);
+
+			if(left_offset > 0)
+			{
+				flash_read_data(data_offset_adjusted, data_adjusted, sector_size);
+			}
+
+			if(right_offset > 0 && (data_length_adjusted > sector_size || left_offset == 0))
+			{
+				uint32_t right_rel_offset = (data_length_adjusted - sector_size);
+				uint32_t right_abs_offset = data_offset_adjusted + (data_length_adjusted - sector_size);
+
+				flash_read_data(right_abs_offset, ((uint8_t*)(data_adjusted + right_rel_offset)), sector_size);
+			}
+
+			memcpy(((uint8_t*)(data_adjusted + _left_rel_offset)), data, data_length);
 		}
 
-		memcpy(((uint8_t*)(data_adjusted + _left_rel_offset)), data, data_length);
+		uint32_t sector_count = MAX((data_length_adjusted / sector_size), 1);
+		uint32_t block_count = MAX((sector_count / SECTORS_PER_BLOCK), 1);
+
+		uint8_t* flash_data = ((uint8_t*)flash_context.base_address + data_offset_adjusted);
+
+		for(uint32_t sector_idx = 0, block_idx = 0, programmed_size = 0; block_idx < block_count; block_idx++)
+		{
+			uint32_t erased_size = 0;
+			uint32_t sector_idx_stop = MIN(sector_count, (sector_idx + SECTORS_PER_BLOCK));
+
+			for(; sector_idx < sector_idx_stop; sector_idx++)
+			{
+				uint32_t result = __flash_invoke_inram_function(
+					flash_context.erase_function,
+					(uint32_t)flash_context.base_address,
+					(uint32_t)((uint8_t*)flash_data + erased_size),
+					0,
+					0
+				);
+
+				if(result != INRAM_FUNCTION_SUCCEEDED)
+				{
+					return false;
+				}
+
+				erased_size += sector_size;
+			}
+
+			uint32_t result = __flash_invoke_inram_function(
+				flash_context.program_function,
+				(uint32_t)flash_context.base_address,
+				(uint32_t)flash_data,
+				(uint32_t)((uint8_t*)data_adjusted + programmed_size),
+				erased_size
+			);
+
+			if(result != INRAM_FUNCTION_SUCCEEDED)
+			{
+				return false;
+			}
+
+			programmed_size += erased_size;
+			flash_data += erased_size;
+		}
+
+		if(data_adjusted != data)
+		{
+			free(data_adjusted);
+		}
+
+		return true;
 	}
-
-	uint32_t sector_count = (data_length_adjusted / sector_size);
-	
-	uint8_t* flash_data = ((uint8_t*)flash_context.base_address + data_offset_adjusted);
-	//for(uint32_t sector_idx = 0; sector_idx < sector_count; sector_idx++)
-	//{
-		uint8_t* block_data = data_adjusted;
-		uint32_t block_size = data_length_adjusted;
-
-		uint32_t result1 = __flash_invoke_inram_function(flash_mx_erase_sector, (uint32_t)flash_context.base_address, (uint32_t)flash_data, 0, 0);
-		uint32_t result2 = __flash_invoke_inram_function(flash_mx_program, (uint32_t)flash_context.base_address, (uint32_t)flash_data, (uint32_t)block_data, block_size);
-
-		//flash_data += sector_size;
-	//}
-
-	if(data_adjusted != data)
+	else
 	{
-		free(data_adjusted);
+		return false;
 	}
-
-	return true;
 }
 
