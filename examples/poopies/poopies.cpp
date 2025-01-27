@@ -221,7 +221,7 @@ void ide_flash_tests()
 
 			if(read_build)
 			{
-				void* in_data = malloc(show_length);
+				in_data = malloc(show_length);
 				printf("\tRead test:");
 			}
 			if(!read_build || ata_read_data(build_offset, in_data, show_length))
@@ -277,7 +277,6 @@ void ide_flash_tests()
 
 					free(in_data2);
 				}
-
 			}
 			else
 			{
@@ -303,6 +302,76 @@ void ide_flash_tests()
 			printf("\tFlash identity: identity.manufacture_id=%08x, identity.device_id=%08x\x0a\x0d", identity.manufacture_id, identity.device_id);
 			printf("\tManufacture Name: %s\x0a\x0d", flash_get_manufacture_name());
 			printf("\tDevice Name: %s\x0a\x0d", flash_get_device_name());
+
+
+			uint64_t build_offset = 0x0;
+			uint32_t show_length = 0x300;
+			bool read_build = true;
+			void* in_data = 0;
+
+			if(read_build)
+			{
+				in_data = malloc(show_length);
+				printf("\tRead test:");
+			}
+			if(!read_build || flash_read_data(build_offset, in_data, show_length))
+			{
+				if(read_build)
+				{
+					for(uint32_t i = 0; i < show_length; i++)
+					{
+						if((i%32) == 0)
+						{
+							printf("\x0a\x0d\t\t");
+						}
+
+						printf("%02x", *((uint8_t*)(in_data) + i));
+					}
+					printf("\x0a\x0d");
+
+					free(in_data);
+				}
+
+				printf("\tWrite test:\x0a\x0d");
+				uint32_t write_offset = 0x3c0000;
+				uint32_t write_length = 0x200;
+				uint32_t left_offset = 0x00;//0x10;
+				uint32_t right_offset = 0x10;
+
+				void* out_data = malloc(write_length + right_offset);
+				memset(out_data, 0, write_length + right_offset);
+				*((uint8_t*)out_data + 0) = 0x03;
+				*((uint8_t*)out_data + 1) = 0x02;
+				*((uint8_t*)out_data + 2) = 0x01;
+				*((uint8_t*)out_data + 3) = 0x00;
+				*((uint8_t*)out_data + 4) = 0xff;
+				*((uint8_t*)out_data + ((write_length + (right_offset - left_offset)) - 1)) = (get_ticks() & 0xff);
+				printf("\t\tresult=%08x [last=%02x]\x0a\x0d", flash_write_data(write_offset + left_offset, out_data, write_length + (right_offset - left_offset)), *((uint8_t*)out_data + 0x1ff));
+				free(out_data);
+
+				printf("\tRead back test:");
+
+				uint32_t readback_length = write_length * 2;
+
+				void* in_data2 = malloc(readback_length);
+				if(flash_read_data(write_offset, in_data2, readback_length))
+				{
+					for(uint32_t i = 0; i < readback_length; i++)
+					{
+						if((i%32) == 0)
+						{
+							printf("\x0a\x0d\t\t");
+						}
+
+						printf("%02x", *((uint8_t*)(in_data2) + i));
+					}
+					printf("\x0a\x0d");
+
+					free(in_data2);
+				}
+			}
+
+			printf("DONE!\x0a\x0d");
 		}
 		else
 		{

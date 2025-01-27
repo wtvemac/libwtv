@@ -109,7 +109,7 @@ bool ata_write_data(uint64_t data_offset, void* data, uint32_t data_length)
 			ata_read_data(data_offset_adjusted, data_adjusted, IDE_SECTOR_LENGTH);
 		}
 
-		if(right_underflow > 0)
+		if(right_underflow > 0 && (data_length_adjusted > IDE_SECTOR_LENGTH || left_underflow == 0))
 		{
 			uint32_t right_rel_offset = (data_length_adjusted - IDE_SECTOR_LENGTH);
 			uint32_t right_abs_offset = data_offset_adjusted + (data_length_adjusted - IDE_SECTOR_LENGTH);

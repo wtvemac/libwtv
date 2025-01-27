@@ -82,6 +82,8 @@ bool flash_enabled();
 flash_identity_t flash_get_identity();
 const char* flash_get_manufacture_name();
 const char* flash_get_device_name();
+bool flash_read_data(uint64_t data_offset, void* data, uint32_t data_length);
+bool flash_write_data(uint64_t data_offset, void* data, uint32_t data_length);
 
 #ifdef __cplusplus
 }
