@@ -37,7 +37,7 @@ static flash_context_t flash_context;
 // flash_inram.S
 uint32_t flash_get_device_id(uint32_t flash_base_address, uint32_t flash_sector_address, uint32_t arg2, uint32_t arg3);
 uint32_t flash_mx_erase_sector(uint32_t flash_base_address, uint32_t flash_sector_address, uint32_t arg2, uint32_t arg3);
-uint32_t flash_mx_program(uint32_t flash_base_address, uint32_t flash_sector_address, uint32_t arg2, uint32_t arg3);
+uint32_t flash_mx_program(uint32_t flash_base_address, uint32_t flash_sector_address, uint32_t data_address, uint32_t data_length);
 
 uint32_t __flash_invoke_inram_function(inram_function_t stored_inram_function, uint32_t arg0, uint32_t arg1, uint32_t arg2, uint32_t arg3)
 {

@@ -2,6 +2,7 @@
 
 #define INRAM_FUNCTION_FAILED    0xffffffff
 #define INRAM_FUNCTION_SUCCEEDED 0x00000000
+#define MX_PAGE_SIZE             0x100      /* = 128 bytes per page x 2 stripped flash chips */
 
 	.section .text.flash_inram_functions
 	.set noreorder
@@ -174,7 +175,7 @@ flash_mx_program_page_prepare:
 	sw      t4, -0x5558(t1)
 	la      t5, 0x00a000a0
 	sw      t5, 0x5554(t1)
-	la      t6, 0x100      /* = 128 bytes per page x 2 stripped flash chips */
+	la      t6, MX_PAGE_SIZE
 
 flash_mx_program_page_do:
 	lw      t7, 0x0000(a2)
@@ -217,7 +218,7 @@ flash_mx_program_reset:
 	bnez    t6, flash_mx_program_failed
 	nop
 
-	addi    a3, -0x100
+	addi    a3, -MX_PAGE_SIZE
 	bnez    a3, flash_mx_program_page_prepare
 	nop
 	la      v0, INRAM_FUNCTION_SUCCEEDED
