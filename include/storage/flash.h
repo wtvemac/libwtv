@@ -103,6 +103,7 @@ typedef struct __attribute__((__packed__))
 	bool page_mode;
 	flash_rom_timings_t timings;
 	uint32_t sector_size;
+	uint64_t total_size;
 } flash_identity_t;
 
 volatile uint32_t* flash_base_address_from_type(flash_image_type image_type);
@@ -115,6 +116,7 @@ const char* flash_get_manufacture_name();
 const char* flash_get_device_name();
 int8_t flash_get_bank();
 uint32_t flash_get_sector_size();
+uint64_t flash_get_size();
 uint32_t flash_get_post_page_programming_wait();
 void flash_set_timing(int8_t bank, const flash_rom_timings_t* timings);
 flash_rom_timings_t flash_get_timing(int8_t bank);

@@ -213,6 +213,7 @@ void ide_flash_tests()
 			printf("\tMinPIOXferTimeIORDY = %d ns\x0a\x0d", identity.minimum_pio_cycle_time_iordy);
 			printf("\tFirmware Revision: %.8s\x0a\x0d", identity.firmware_revision);
 			printf("\tDevice Name: %.40s\x0a\x0d", identity.model_number);
+			printf("\tSize: %lld MB\x0a\x0d", (ata_get_size() / 1024 / 1024));
 
 			uint64_t build_offset = 0x80600;
 			uint32_t show_length = 0x300;
@@ -302,7 +303,7 @@ void ide_flash_tests()
 			printf("\tFlash identity: identity.manufacture_id=%08x, identity.device_id=%08x\x0a\x0d", identity.manufacture_id, identity.device_id);
 			printf("\tManufacture Name: %s\x0a\x0d", flash_get_manufacture_name());
 			printf("\tDevice Name: %s\x0a\x0d", flash_get_device_name());
-
+			printf("\tSize: %lld MB\x0a\x0d", (flash_get_size() / 1024 / 1024));
 
 			uint64_t build_offset = 0x0;
 			uint32_t show_length = 0x300;

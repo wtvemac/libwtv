@@ -688,9 +688,11 @@ typedef struct __attribute__((packed))
 void ata_init();
 void ata_close();
 bool ata_enabled();
+ata_identity_t ata_get_identity();
+uint32_t ata_get_sector_size();
+uint64_t ata_get_size();
 bool ata_read_data(uint64_t data_offset, void* data, uint32_t data_length);
 bool ata_write_data(uint64_t data_offset, void* data, uint32_t data_length);
-ata_identity_t ata_get_identity();
 bool ata_request_identity(ata_identity_t* identity);
 uint8_t* get_ata_userpwd();
 char* ata_get_userpwd_string();

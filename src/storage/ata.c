@@ -63,6 +63,16 @@ ata_identity_t ata_get_identity()
 	return ata_context.drive_identity;
 }
 
+uint32_t ata_get_sector_size()
+{
+	return IDE_SECTOR_LENGTH;
+}
+
+uint64_t ata_get_size()
+{
+	return ((ata_context.drive_identity.num_cylinders * ata_context.drive_identity.num_heads * ata_context.drive_identity.num_sectors_per_track) * ata_get_sector_size());
+}
+
 bool ata_read_data(uint64_t data_offset, void* data, uint32_t data_length)
 {
 	ide_command_block_t command_block;
