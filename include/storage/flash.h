@@ -66,6 +66,31 @@ typedef struct __attribute__((__packed__))
 	{
 		struct
 		{
+			uint32_t timing_data;
+		};
+		struct
+		{
+			uint32_t reserved0 : 3;
+			uint32_t page_access : 5;
+			uint32_t reserved1 : 3;
+			uint32_t initial_access : 5;
+			uint32_t reserved2 : 1;
+			uint32_t to_next_chip_enable : 3;
+			uint32_t reserved3 : 2;
+			uint32_t chip_enable_to_write_enable : 2;
+			uint32_t reserved4 : 4;
+			uint32_t write_enable : 4;
+		};
+	};
+	uint32_t post_page_programming_wait;
+} flash_rom_timings_t;
+
+typedef struct __attribute__((__packed__))
+{
+	union
+	{
+		struct
+		{
 			uint32_t id_data;
 		};
 		struct
@@ -75,14 +100,33 @@ typedef struct __attribute__((__packed__))
 		};
 	};
 	bool can_write;
+	bool page_mode;
+	flash_rom_timings_t timings;
+	uint32_t sector_size;
 } flash_identity_t;
 
+volatile uint32_t* flash_base_address_from_type(flash_image_type image_type);
+int8_t flash_bank_from_address(volatile uint32_t* flash_base_address);
 void flash_init(flash_image_type image_type);
 void flash_close();
 bool flash_enabled();
 flash_identity_t flash_get_identity();
 const char* flash_get_manufacture_name();
 const char* flash_get_device_name();
+int8_t flash_get_bank();
+uint32_t flash_get_sector_size();
+uint32_t flash_get_post_page_programming_wait();
+void flash_set_timing(int8_t bank, const flash_rom_timings_t* timings);
+flash_rom_timings_t flash_get_timing(int8_t bank);
+bool flash_page_mode_enabled(int8_t bank);
+void flash_page_mode_enable(int8_t bank);
+void flash_page_mode_disable(int8_t bank);
+bool flash_write_enabled(int8_t bank);
+void flash_write_enable(int8_t bank);
+void flash_write_disable(int8_t bank);
+bool flash_ce_delay_enabled(int8_t bank);
+void flash_ce_delay_enable(int8_t bank);
+void flash_ce_delay_disable(int8_t bank);
 bool flash_read_data(uint64_t data_offset, void* data, uint32_t data_length);
 bool flash_write_data(uint64_t data_offset, void* data, uint32_t data_length);
 

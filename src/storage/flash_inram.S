@@ -155,7 +155,7 @@ flash_mx_program:
 	la      t1, 0x10000
 	addu    t1, a0, t1
 	move    t6, ra
-	la      t7, flash_get_page_programming_time
+	la      t7, flash_get_post_page_programming_wait
 	jalr    t7
 	nop
 	move    ra, t6 

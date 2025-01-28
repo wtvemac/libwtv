@@ -25,14 +25,15 @@ typedef struct {
 	bool writable;
 	flash_image_type image_type;
 	volatile uint32_t* base_address;
-	uint32_t sector_size;
-	uint32_t page_programming_time;
+	int8_t bank;
 	flash_identity_t identity;
 	inram_function_t erase_function;
 	inram_function_t program_function;
 } flash_context_t;
 
 static flash_context_t flash_context;
+
+static bool watchdog_was_enabled = false;
 
 // flash_inram.S
 uint32_t flash_get_device_id(uint32_t flash_base_address, uint32_t flash_sector_address, uint32_t arg2, uint32_t arg3);
@@ -51,7 +52,64 @@ uint32_t __flash_invoke_inram_function(inram_function_t stored_inram_function, u
 	return prepared_inram_function(arg0, arg1, arg2, arg3);
 }
 
-volatile uint32_t* __flash_get_base_address(flash_image_type image_type)
+void __flash_resolve_identity(flash_image_type image_type)
+{
+	flash_context.base_address = flash_base_address_from_type(image_type);
+	flash_context.bank = flash_bank_from_address(flash_context.base_address);
+	flash_context.identity.id_data = __flash_invoke_inram_function(
+		flash_get_device_id,
+		(uint32_t)flash_context.base_address,
+		0,
+		0,
+		0
+	);
+
+	uint32_t sysconfig = get_sysconfig();
+
+	switch(flash_context.identity.device_id)
+	{
+		case AM29F400AB: // or MBM29F400B
+		case AM29F400AT: // or MBM29F400T
+		case AM29F800BB: // or MBM29F800B
+		case AM29F800BT: // or MBM29F800T
+		case MX29F1610:
+			flash_context.flash_enabled = true;
+			flash_context.identity.can_write = true;
+			flash_context.identity.page_mode = true;
+			flash_context.identity.sector_size = SECTOR_SIZE_128K;
+
+			flash_context.identity.timings.page_access = 5;
+			flash_context.identity.timings.initial_access = 9;
+			flash_context.identity.timings.to_next_chip_enable = 0;
+			flash_context.identity.timings.chip_enable_to_write_enable = 0;
+			flash_context.identity.timings.write_enable = 6;
+			flash_context.identity.timings.post_page_programming_wait = TICKS_FROM_US(202);
+
+			flash_context.erase_function = flash_mx_erase_sector;
+			flash_context.program_function = flash_mx_program;
+			break;
+		default:
+			flash_context.flash_enabled = false;
+			flash_context.identity.can_write = false;
+			flash_context.identity.page_mode = true;
+			flash_context.identity.sector_size = DEFAULT_SECTOR_SIZE;
+
+			flash_context.identity.timings.page_access = 0;
+			flash_context.identity.timings.initial_access = 0;
+			flash_context.identity.timings.to_next_chip_enable = 0;
+			flash_context.identity.timings.chip_enable_to_write_enable = 0;
+			flash_context.identity.timings.write_enable = 0;
+			flash_context.identity.timings.post_page_programming_wait = 0;
+
+			flash_context.erase_function = NULL;
+			flash_context.program_function = NULL;
+			break;
+	}
+
+	flash_set_timing(flash_context.bank, &flash_context.identity.timings);
+}
+
+volatile uint32_t* flash_base_address_from_type(flash_image_type image_type)
 {
 	switch(image_type)
 	{
@@ -66,39 +124,22 @@ volatile uint32_t* __flash_get_base_address(flash_image_type image_type)
 	}
 }
 
-void __flash_resolve_identity(flash_image_type image_type)
-{
-	flash_context.base_address = __flash_get_base_address(image_type);
-	flash_context.identity.id_data = __flash_invoke_inram_function(
-		flash_get_device_id,
-		(uint32_t)flash_context.base_address,
-		0,
-		0,
-		0
-	);
 
-	switch(flash_context.identity.device_id)
+int8_t flash_bank_from_address(volatile uint32_t* flash_base_address)
+{
+	uint32_t _flash_base_address = (uint32_t)flash_base_address;
+
+	if(_flash_base_address >= ROML_BASE_ADDRESS && _flash_base_address < (ROML_BASE_ADDRESS + ROML_DATA_SIZE))
 	{
-		case AM29F400AB: // or MBM29F400B
-		case AM29F400AT: // or MBM29F400T
-		case AM29F800BB: // or MBM29F800B
-		case AM29F800BT: // or MBM29F800T
-		case MX29F1610:
-			flash_context.erase_function = flash_mx_erase_sector;
-			flash_context.program_function = flash_mx_program;
-			flash_context.sector_size = SECTOR_SIZE_128K;
-			flash_context.page_programming_time = (36 * get_ticks_ms());
-			flash_context.identity.can_write = true;
-			flash_context.flash_enabled = true;
-			break;
-		default:
-			flash_context.erase_function = NULL;
-			flash_context.program_function = NULL;
-			flash_context.sector_size = DEFAULT_SECTOR_SIZE;
-			flash_context.page_programming_time = 0;
-			flash_context.identity.can_write = false;
-			flash_context.flash_enabled = false;
-			break;
+		return 0;
+	}
+	else if(_flash_base_address >= ROMU_BASE_ADDRESS && _flash_base_address < (ROMU_BASE_ADDRESS + ROMU_DATA_SIZE))
+	{
+		return 1;
+	}
+	else
+	{
+		return -1;
 	}
 }
 
@@ -198,14 +239,187 @@ const char* flash_get_device_name()
 	}
 }
 
-uint32_t flash_get_sector_size()
+volatile uint32_t* flash_get_base_address()
 {
-	return flash_context.sector_size;
+	return flash_context.base_address;
 }
 
-uint32_t flash_get_page_programming_time()
+int8_t flash_get_bank()
 {
-	return flash_context.page_programming_time;
+	return flash_context.bank;
+}
+
+uint32_t flash_get_sector_size()
+{
+	return flash_context.identity.sector_size;
+}
+
+uint32_t flash_get_post_page_programming_wait()
+{
+	return flash_context.identity.timings.post_page_programming_wait;
+}
+
+void flash_set_timing(int8_t bank, const flash_rom_timings_t* timings)
+{
+	uint32_t timing_data = (timings->timing_data & ROM_CNTL_TIMING);
+
+	if(bank == 0 || bank == -1)
+	{
+		REGISTER_WRITE(RIO_ROM_CNTL0, ((REGISTER_READ(RIO_ROM_CNTL0) & ~ROM_CNTL_TIMING) | timing_data));
+	}
+
+	if(bank == 1 || bank == -1)
+	{
+		REGISTER_WRITE(RIO_ROM_CNTL1, ((REGISTER_READ(RIO_ROM_CNTL0) & ~ROM_CNTL_TIMING) | timing_data));
+	}
+}
+
+flash_rom_timings_t flash_get_timing(int8_t bank)
+{
+	static flash_rom_timings_t timings;
+
+	if(bank == 0)
+	{
+		timings.timing_data = REGISTER_READ(RIO_ROM_CNTL0) & ROM_CNTL_TIMING;
+	}
+	else if(bank == 1)
+	{
+		timings.timing_data = REGISTER_READ(RIO_ROM_CNTL0) & ROM_CNTL_TIMING;
+	}
+
+	return timings;
+}
+
+bool flash_page_mode_enabled(int8_t bank)
+{
+	bool bank0_enabled = true;
+	bool bank1_enabled = true;
+
+	if(bank == 0 || bank == -1)
+	{
+		bank0_enabled = ((REGISTER_READ(RIO_ROM_CNTL0) & ROM_CNTL_PAGE_MODE) != 0);
+	}
+	
+	if(bank == 1 || bank == -1)
+	{
+		bank1_enabled = ((REGISTER_READ(RIO_ROM_CNTL1) & ROM_CNTL_PAGE_MODE) != 0);
+	}
+
+	return bank0_enabled && bank1_enabled;
+}
+
+void flash_page_mode_enable(int8_t bank)
+{
+	if(bank == 0 || bank == -1)
+	{
+		REGISTER_WRITE(RIO_ROM_CNTL0, (REGISTER_READ(RIO_ROM_CNTL0) | ROM_CNTL_PAGE_MODE));
+	}
+
+	if(bank == 1 || bank == -1)
+	{
+		REGISTER_WRITE(RIO_ROM_CNTL1, (REGISTER_READ(RIO_ROM_CNTL1) | ROM_CNTL_PAGE_MODE));
+	}
+}
+
+void flash_page_mode_disable(int8_t bank)
+{
+	if(bank == 0 || bank == -1)
+	{
+		REGISTER_WRITE(RIO_ROM_CNTL0, (REGISTER_READ(RIO_ROM_CNTL0) ^ ROM_CNTL_PAGE_MODE));
+	}
+
+	if(bank == 1 || bank == -1)
+	{
+		REGISTER_WRITE(RIO_ROM_CNTL1, (REGISTER_READ(RIO_ROM_CNTL1) ^ ROM_CNTL_PAGE_MODE));
+	}
+}
+
+bool flash_write_enabled(int8_t bank)
+{
+	bool bank0_enabled = true;
+	bool bank1_enabled = true;
+
+	if(bank == 0 || bank == -1)
+	{
+		bank0_enabled = ((REGISTER_READ(RIO_ROM_CNTL0) & ROM_CNTL_WRITE_PROTECT) != 0);
+	}
+	
+	if(bank == 1 || bank == -1)
+	{
+		bank1_enabled = ((REGISTER_READ(RIO_ROM_CNTL1) & ROM_CNTL_WRITE_PROTECT) != 0);
+	}
+
+	return bank0_enabled && bank1_enabled;
+}
+
+void flash_write_enable(int8_t bank)
+{
+	if(bank == 0 || bank == -1)
+	{
+		REGISTER_WRITE(RIO_ROM_CNTL0, (REGISTER_READ(RIO_ROM_CNTL0) | ROM_CNTL_WRITE_PROTECT));
+	}
+	
+	if(bank == 1 || bank == -1)
+	{
+		REGISTER_WRITE(RIO_ROM_CNTL1, (REGISTER_READ(RIO_ROM_CNTL1) | ROM_CNTL_WRITE_PROTECT));
+	}
+}
+
+void flash_write_disable(int8_t bank)
+{
+	if(bank == 0 || bank == -1)
+	{
+		REGISTER_WRITE(RIO_ROM_CNTL0, (REGISTER_READ(RIO_ROM_CNTL0) ^ ROM_CNTL_WRITE_PROTECT));
+	}
+
+	if(bank == 1 || bank == -1)
+	{
+		REGISTER_WRITE(RIO_ROM_CNTL1, (REGISTER_READ(RIO_ROM_CNTL1) ^ ROM_CNTL_WRITE_PROTECT));
+	}
+}
+
+bool flash_ce_delay_enabled(int8_t bank)
+{
+	bool bank0_enabled = true;
+	bool bank1_enabled = true;
+
+	if(bank == 0 || bank == -1)
+	{
+		bank0_enabled = ((REGISTER_READ(RIO_ROM_CNTL0) & ROM_CNTL_CE_DELAY) != 0);
+	}
+	
+	if(bank == 1 || bank == -1)
+	{
+		bank1_enabled = ((REGISTER_READ(RIO_ROM_CNTL1) & ROM_CNTL_CE_DELAY) != 0);
+	}
+
+	return bank0_enabled && bank1_enabled;
+}
+
+void flash_ce_delay_enable(int8_t bank)
+{
+	if(bank == 0 || bank == -1)
+	{
+		REGISTER_WRITE(RIO_ROM_CNTL0, (REGISTER_READ(RIO_ROM_CNTL0) | ROM_CNTL_CE_DELAY));
+	}
+
+	if(bank == 1 || bank == -1)
+	{
+		REGISTER_WRITE(RIO_ROM_CNTL1, (REGISTER_READ(RIO_ROM_CNTL1) | ROM_CNTL_CE_DELAY));
+	}
+}
+
+void flash_ce_delay_disable(int8_t bank)
+{
+	if(bank == 0 || bank == -1)
+	{
+		REGISTER_WRITE(RIO_ROM_CNTL0, (REGISTER_READ(RIO_ROM_CNTL0) ^ ROM_CNTL_CE_DELAY));
+	}
+
+	if(bank == 1 || bank == -1)
+	{
+		REGISTER_WRITE(RIO_ROM_CNTL1, (REGISTER_READ(RIO_ROM_CNTL1) ^ ROM_CNTL_CE_DELAY));
+	}
 }
 
 bool flash_read_data(uint64_t data_offset, void* data, uint32_t data_length)
@@ -215,8 +429,35 @@ bool flash_read_data(uint64_t data_offset, void* data, uint32_t data_length)
 	return (memcpy(data, flash_data, data_length) != NULL);
 }
 
+void __flash_start_write()
+{
+	flash_set_timing(flash_context.bank, &flash_context.identity.timings);
+
+	flash_write_enable(flash_context.bank);
+	flash_ce_delay_enable(flash_context.bank);
+
+	watchdog_was_enabled = watchdog_enabled();
+	
+	watchdog_disable();
+}
+
+void __flash_finish_write()
+{
+	if(watchdog_was_enabled)
+	{
+		watchdog_enable();
+	}
+
+	flash_ce_delay_disable(flash_context.bank);
+	flash_write_disable(flash_context.bank);
+}
+
 bool flash_write_data(uint64_t data_offset, void* data, uint32_t data_length)
 {
+	uint32_t result = false;
+
+	__flash_start_write();
+
 	if(flash_can_write())
 	{
 		uint32_t data_offset_adjusted = data_offset;
@@ -284,7 +525,8 @@ bool flash_write_data(uint64_t data_offset, void* data, uint32_t data_length)
 
 				if(result != INRAM_FUNCTION_SUCCEEDED)
 				{
-					return false;
+					result = false;
+					goto END_WRITE;
 				}
 
 				erased_size += sector_size;
@@ -300,7 +542,8 @@ bool flash_write_data(uint64_t data_offset, void* data, uint32_t data_length)
 
 			if(result != INRAM_FUNCTION_SUCCEEDED)
 			{
-				return false;
+				result = false;
+				goto END_WRITE;
 			}
 
 			programmed_size += erased_size;
@@ -312,11 +555,12 @@ bool flash_write_data(uint64_t data_offset, void* data, uint32_t data_length)
 			free(data_adjusted);
 		}
 
-		return true;
+		result = true;
 	}
-	else
-	{
-		return false;
-	}
+
+END_WRITE:
+	__flash_finish_write();
+
+	return result;
 }
 
