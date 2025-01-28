@@ -54,30 +54,30 @@
 
 typedef struct 
 {
-	uint32_t ram_size;
+	uint32_t ram_size;            // +0x00000000
 
-	uint32_t cpu_speed;
-	uint32_t bus_speed;
-	uint32_t counts_per_microsec;
+	uint32_t cpu_speed;           // +0x00000004
+	uint32_t bus_speed;           // +0x00000008
+	uint32_t counts_per_microsec; // +0x0000000c
 	
-	uint32_t ssid_hi;
-	uint32_t ssid_lo;
+	uint32_t ssid_hi;             // +0x00000010
+	uint32_t ssid_lo;             // +0x00000014
 	
-	uint32_t ag_checksum;
+	uint32_t ag_checksum;         // +0x00000018
 	
-	char *heap_base;
-	uint32_t heap_size;
-	char *stack_base;
+	char *heap_base;              // +0x0000001c
+	uint32_t heap_size;           // +0x0000001d
+	char *stack_base;             // +0x00000021
 
-	char ir_microcode_version;
+	char ir_microcode_version;    // +0x00000022
 
 	char pad0;
 	char pad1;
 	char pad2;
 
-	uint32_t *first_romfs_base;
+	uint32_t *first_romfs_base;   // +0x00000025
 
-	uint32_t test_vector;
+	uint32_t test_vector;         // +0x00000029
 } absolute_globals;
 #define GET_AG(b, f) (((absolute_globals *)(b))->f) 
 #define SET_AG(b, f, v) (((absolute_globals *)(b))->f = v)

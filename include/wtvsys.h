@@ -529,6 +529,9 @@ uint32_t get_bus_speed();
 uint32_t* get_first_romfs_base();
 void set_first_romfs_base(uint32_t* romfs_base);
 uint32_t* get_bootrom_romfs_base();
+bool watchdog_enabled();
+void watchdog_enable();
+void watchdog_disable();
 
 /** @cond */
 /* Deprecated version of get_ticks */
@@ -585,11 +588,16 @@ inline uint32_t register_read_safe(volatile uint32_t *register_address)
 	return *register_address;
 }
 
+
+uint32_t get_chip_id();
+uint8_t get_chip_type();
 bool is_solo_box();
 bool is_spot_box();
-uint32_t get_chip_id();
-bool is_diskful_box();
+uint8_t get_chip_revision();
+uint8_t get_chip_fab();
+uint8_t get_chip_version();
 uint32_t get_sysconfig();
+bool is_diskful_box();
 uint32_t gpio_write(uint32_t value, bool clear);
 
 #ifdef __cplusplus

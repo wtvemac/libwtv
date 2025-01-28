@@ -98,8 +98,36 @@
 
 ////
 
-#define CHIP_ID_SOLO               0x03000000
-#define CHIP_ID_SPOT               0x01000000
+#define CHIP_TYPE                  0xff000000
+#define CHIP_TYPE_BSHIFT           __builtin_clz(CHIP_TYPE)
+#define CHIP_REV                   0x00f00000
+#define CHIP_REV_BSHIFT            __builtin_clz(CHIP_REV)
+#define CHIP_FAB                   0x000f0000
+#define CHIP_FAB_BSHIFT            __builtin_clz(CHIP_FAB)
+
+#define CHIP_TYPE_SPOT0            0x00000000
+#define CHIP_TYPE_SPOT1            0x00000001 // Also FIDO
+#define CHIP_TYPE_SOLO1            0x00000002
+#define CHIP_TYPE_SOLO2            0x00000003
+#define CHIP_TYPE_SOLO2p1          0x00000004
+#define CHIP_TYPE_DINKY            0x00000005
+
+#define CHIP_VERSION_UNKNOWN       0x00000000
+#define CHIP_VERSION1              0x00000001 // 0.1 SPOT 1
+#define CHIP_VERSION2              0x00000002 // 0.2 SPOT 2 this was skipped
+#define CHIP_VERSION3              0x00000003 // 0.3 SPOT 3 or pre-alpha stage chip
+#define CHIP_VERSION4              0x00000004 // 0.4 SPOT 4 or FIDO
+#define CHIP_VERSION5              0x00000005 // 1.0 SOLO 1
+#define CHIP_VERSION6              0x00000006 // 1.2 SOLO 2
+#define CHIP_VERSION7              0x00000007 // 1.3 SOLO 2.1
+#define CHIP_VERSION8              0x00000008 // 1.4 SOLO 3 or DINKY
+
+#define CHIP_FAB_CHIP_EXPRESS      0x00000000
+#define CHIP_FAB_NEC               0x00000001
+#define CHIP_FAB_TOSHIBA           0x00000002
+
+#define CHIP_CNTL_WATCHDOG         0xc0000000
+#define CHIP_CNTL_WATCHDOG_BSHIFT  __builtin_popcount(~CHIP_CNTL_WATCHDOG)
 
 #define BUS_INT_SPOT_VIDEO         0x00000080
 #define BUS_INT_SPOT_PS2           0x00000040

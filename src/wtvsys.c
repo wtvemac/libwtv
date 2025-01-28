@@ -6,30 +6,109 @@
 static uint32_t ticks64_base_tick;
 static uint32_t ticks64_base;
 
-bool is_solo_box()
-{
-    
-	return ((REGISTER_READ(BUS_CHIP_ID) & CHIP_ID_SOLO) == CHIP_ID_SOLO);
-}
-
-bool is_spot_box()
-{
-	return ((REGISTER_READ(BUS_CHIP_ID) & CHIP_ID_SOLO) == CHIP_ID_SPOT);
-}
-
 uint32_t get_chip_id()
 {
 	return REGISTER_READ(BUS_CHIP_ID);
 }
 
-bool is_diskful_box()
+uint8_t get_chip_type()
 {
-	return ((REGISTER_READ(RIO_SYSCONFIG) & SYSCONFIG_NO_HD) != SYSCONFIG_NO_HD);
+	return (get_chip_id() >> CHIP_TYPE_BSHIFT);
+}
+
+bool is_solo_box()
+{
+	return (get_chip_type() > CHIP_TYPE_SPOT1);
+}
+
+bool is_spot_box()
+{
+	return (get_chip_type() <= CHIP_TYPE_SPOT1);
+}
+
+uint8_t get_chip_revision()
+{
+	return (get_chip_id() >> CHIP_REV_BSHIFT);
+}
+
+uint8_t get_chip_fab()
+{
+	return (get_chip_id() >> CHIP_FAB_BSHIFT);
+}
+
+uint8_t get_chip_version()
+{
+    uint8_t revision = get_chip_revision();
+
+    switch(get_chip_type())
+    {
+        case CHIP_TYPE_SPOT0:
+            if(revision == 0)
+            {
+                return CHIP_VERSION1;
+            }
+            else if(revision == 3)
+            {
+                return CHIP_VERSION3;
+            }
+            break;
+        case CHIP_TYPE_SPOT1:
+            if(revision == 0)
+            {
+                return CHIP_VERSION4;
+            }
+            break;
+        case CHIP_TYPE_SOLO1:
+            if(revision == 0)
+            {
+                return CHIP_VERSION5;
+            }
+            break;
+        case CHIP_TYPE_SOLO2:
+            if(revision < 4)
+            {
+                return CHIP_VERSION6;
+            }
+            break;
+        case CHIP_TYPE_SOLO2p1:
+            if(revision == 0)
+            {
+                return CHIP_VERSION7;
+            }
+            else if(revision == 1)
+            {
+                return CHIP_VERSION1; // ?
+            }
+            break;
+        case CHIP_TYPE_DINKY:
+            if(revision == 0)
+            {
+                return CHIP_VERSION8;
+            }
+            break;
+    }
+
+    return CHIP_VERSION_UNKNOWN;
 }
 
 uint32_t get_sysconfig()
 {
 	return REGISTER_READ(RIO_SYSCONFIG);
+}
+
+bool get_board_type()
+{
+	return (get_sysconfig() >> SYSCONFIG_BOARD_TYPE_BSHIFT);
+}
+
+bool get_board_revision()
+{
+	return (get_sysconfig() >> SYSCONFIG_BOARD_REV_BSHIFT);
+}
+
+bool is_diskful_box()
+{
+	return ((get_sysconfig() & SYSCONFIG_NO_HD) != SYSCONFIG_NO_HD);
 }
 
 /**
@@ -216,6 +295,31 @@ uint32_t* get_bootrom_romfs_base()
             return NULL;
         }
     }
+}
+
+bool watchdog_enabled()
+{
+    return ((REGISTER_READ(BUS_CHIP_CNTL) & CHIP_CNTL_WATCHDOG) != 0);
+}
+
+void watchdog_enable()
+{
+    uint32_t chip_cntl_other = REGISTER_READ(BUS_CHIP_CNTL) & ~CHIP_CNTL_WATCHDOG;
+
+    REGISTER_WRITE(BUS_CHIP_CNTL, (chip_cntl_other | (0 << CHIP_CNTL_WATCHDOG_BSHIFT)));
+    REGISTER_WRITE(BUS_CHIP_CNTL, (chip_cntl_other | (1 << CHIP_CNTL_WATCHDOG_BSHIFT)));
+    REGISTER_WRITE(BUS_CHIP_CNTL, (chip_cntl_other | (2 << CHIP_CNTL_WATCHDOG_BSHIFT)));
+    REGISTER_WRITE(BUS_CHIP_CNTL, (chip_cntl_other | (3 << CHIP_CNTL_WATCHDOG_BSHIFT)));
+}
+
+void watchdog_disable()
+{
+    uint32_t chip_cntl_other = REGISTER_READ(BUS_CHIP_CNTL) & ~CHIP_CNTL_WATCHDOG;
+
+    REGISTER_WRITE(BUS_CHIP_CNTL, (chip_cntl_other | (3 << CHIP_CNTL_WATCHDOG_BSHIFT)));
+    REGISTER_WRITE(BUS_CHIP_CNTL, (chip_cntl_other | (2 << CHIP_CNTL_WATCHDOG_BSHIFT)));
+    REGISTER_WRITE(BUS_CHIP_CNTL, (chip_cntl_other | (1 << CHIP_CNTL_WATCHDOG_BSHIFT)));
+    REGISTER_WRITE(BUS_CHIP_CNTL, (chip_cntl_other | (0 << CHIP_CNTL_WATCHDOG_BSHIFT)));
 }
 
 uint64_t get_ticks(void)
