@@ -333,10 +333,10 @@ void ide_flash_tests()
 				}
 
 				printf("\tWrite test:\x0a\x0d");
-				uint32_t write_offset = 0x3c0000;
+				uint32_t write_offset = 0x58100;//;0x1c0000;//0x3c0000;
 				uint32_t write_length = 0x200;
 				uint32_t left_offset = 0x00;//0x10;
-				uint32_t right_offset = 0x10;
+				uint32_t right_offset = 0x00;//0x10;
 
 				void* out_data = malloc(write_length + right_offset);
 				memset(out_data, 0, write_length + right_offset);
@@ -465,8 +465,6 @@ int main()
 	printf("Enabling keyboard (IR and/or PS2)... Press any key to get its key map.\x0a\x0d");
 	controller_init();
 
-	uint32_t chipval = REGISTER_READ(0xa4000004) & 0x3fffffff;
-
 	while(1)
 	{
 		controller_scan();
@@ -492,10 +490,7 @@ int main()
 						if(is_spot_box())
 						{
 							printf("Watchdog reset...\x0a\x0d");
-							REGISTER_WRITE(0xa4000004, (chipval | 0x00000000));
-							REGISTER_WRITE(0xa4000004, (chipval | 0x40000000));
-							REGISTER_WRITE(0xa4000004, (chipval | 0x80000000));
-							REGISTER_WRITE(0xa4000004, (chipval | 0xc0000000));
+							watchdog_enable();
 							printf("Idling around like an idiot. The watchdog is going to get us soon!\x0a\x0d");
 						}
 						else
@@ -536,10 +531,7 @@ int main()
 						set_leds(7);
 						
 						printf("Enabling watchdog timer.\x0a\x0d");
-						REGISTER_WRITE(0xa4000004, (chipval | 0x00000000));
-						REGISTER_WRITE(0xa4000004, (chipval | 0x40000000));
-						REGISTER_WRITE(0xa4000004, (chipval | 0x80000000));
-						REGISTER_WRITE(0xa4000004, (chipval | 0xc0000000));
+						watchdog_enable()
 						
 						printf("Idling around like an idiot. The watchdog is going to get us soon!\x0a\x0d");
 						while(1) { }
