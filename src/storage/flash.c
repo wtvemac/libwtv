@@ -30,7 +30,7 @@ typedef struct {
 	flash_image_type image_type;
 	volatile uint32_t* base_address;
 	int8_t bank;
-	flash_identity_t identity;
+	flash_identity_t flash_identity;
 	inram_function_t erase_function;
 	inram_function_t program_function;
 } flash_context_t;
@@ -60,7 +60,7 @@ void __flash_resolve_identity(flash_image_type image_type)
 {
 	flash_context.base_address = flash_base_address_from_type(image_type);
 	flash_context.bank = flash_bank_from_address(flash_context.base_address);
-	flash_context.identity.id_data = __flash_invoke_inram_function(
+	flash_context.flash_identity.id_data = __flash_invoke_inram_function(
 		flash_get_device_id,
 		(uint32_t)flash_context.base_address,
 		0,
@@ -70,22 +70,22 @@ void __flash_resolve_identity(flash_image_type image_type)
 
 	uint32_t sysconfig = get_sysconfig();
 
-	switch(flash_context.identity.device_id)
+	switch(flash_context.flash_identity.device_id)
 	{
 		case AM29F400AB: // or MBM29F400B
 		case AM29F400AT: // or MBM29F400T
 			flash_context.flash_enabled = true;
-			flash_context.identity.can_write = true;
-			flash_context.identity.page_mode = true;
-			flash_context.identity.sector_size = SECTOR_SIZE_128K;
-			flash_context.identity.total_size = FLASH_SIZE_1MB;
+			flash_context.flash_identity.can_write = true;
+			flash_context.flash_identity.page_mode = true;
+			flash_context.flash_identity.sector_size = SECTOR_SIZE_128K;
+			flash_context.flash_identity.total_size = FLASH_SIZE_1MB;
 
-			flash_context.identity.timings.page_access = 5;
-			flash_context.identity.timings.initial_access = 9;
-			flash_context.identity.timings.to_next_chip_enable = 0;
-			flash_context.identity.timings.chip_enable_to_write_enable = 0;
-			flash_context.identity.timings.write_enable = 6;
-			flash_context.identity.timings.post_page_programming_wait = TICKS_FROM_US(202);
+			flash_context.flash_identity.timings.page_access = 5;
+			flash_context.flash_identity.timings.initial_access = 9;
+			flash_context.flash_identity.timings.to_next_chip_enable = 0;
+			flash_context.flash_identity.timings.chip_enable_to_write_enable = 0;
+			flash_context.flash_identity.timings.write_enable = 6;
+			flash_context.flash_identity.timings.post_page_programming_wait = TICKS_FROM_US(202);
 
 			flash_context.erase_function = flash_mx_erase_sector;
 			flash_context.program_function = flash_mx_program;
@@ -94,17 +94,17 @@ void __flash_resolve_identity(flash_image_type image_type)
 		case AM29F800BB: // or MBM29F800B
 		case AM29F800BT: // or MBM29F800T
 			flash_context.flash_enabled = true;
-			flash_context.identity.can_write = true;
-			flash_context.identity.page_mode = true;
-			flash_context.identity.sector_size = SECTOR_SIZE_128K;
-			flash_context.identity.total_size = FLASH_SIZE_2MB;
+			flash_context.flash_identity.can_write = true;
+			flash_context.flash_identity.page_mode = true;
+			flash_context.flash_identity.sector_size = SECTOR_SIZE_128K;
+			flash_context.flash_identity.total_size = FLASH_SIZE_2MB;
 
-			flash_context.identity.timings.page_access = 5;
-			flash_context.identity.timings.initial_access = 9;
-			flash_context.identity.timings.to_next_chip_enable = 0;
-			flash_context.identity.timings.chip_enable_to_write_enable = 0;
-			flash_context.identity.timings.write_enable = 6;
-			flash_context.identity.timings.post_page_programming_wait = TICKS_FROM_US(202);
+			flash_context.flash_identity.timings.page_access = 5;
+			flash_context.flash_identity.timings.initial_access = 9;
+			flash_context.flash_identity.timings.to_next_chip_enable = 0;
+			flash_context.flash_identity.timings.chip_enable_to_write_enable = 0;
+			flash_context.flash_identity.timings.write_enable = 6;
+			flash_context.flash_identity.timings.post_page_programming_wait = TICKS_FROM_US(202);
 
 			flash_context.erase_function = flash_mx_erase_sector;
 			flash_context.program_function = flash_mx_program;
@@ -112,17 +112,17 @@ void __flash_resolve_identity(flash_image_type image_type)
 
 		case MX29F1610:
 			flash_context.flash_enabled = true;
-			flash_context.identity.can_write = true;
-			flash_context.identity.page_mode = true;
-			flash_context.identity.sector_size = SECTOR_SIZE_128K;
-			flash_context.identity.total_size = FLASH_SIZE_4MB;
+			flash_context.flash_identity.can_write = true;
+			flash_context.flash_identity.page_mode = true;
+			flash_context.flash_identity.sector_size = SECTOR_SIZE_128K;
+			flash_context.flash_identity.total_size = FLASH_SIZE_4MB;
 
-			flash_context.identity.timings.page_access = 5;
-			flash_context.identity.timings.initial_access = 9;
-			flash_context.identity.timings.to_next_chip_enable = 0;
-			flash_context.identity.timings.chip_enable_to_write_enable = 0;
-			flash_context.identity.timings.write_enable = 6;
-			flash_context.identity.timings.post_page_programming_wait = TICKS_FROM_US(202);
+			flash_context.flash_identity.timings.page_access = 5;
+			flash_context.flash_identity.timings.initial_access = 9;
+			flash_context.flash_identity.timings.to_next_chip_enable = 0;
+			flash_context.flash_identity.timings.chip_enable_to_write_enable = 0;
+			flash_context.flash_identity.timings.write_enable = 6;
+			flash_context.flash_identity.timings.post_page_programming_wait = TICKS_FROM_US(202);
 
 			flash_context.erase_function = flash_mx_erase_sector;
 			flash_context.program_function = flash_mx_program;
@@ -130,24 +130,24 @@ void __flash_resolve_identity(flash_image_type image_type)
 
 		default:
 			flash_context.flash_enabled = false;
-			flash_context.identity.can_write = false;
-			flash_context.identity.page_mode = true;
-			flash_context.identity.sector_size = DEFAULT_SECTOR_SIZE;
-			flash_context.identity.total_size = 0;
+			flash_context.flash_identity.can_write = false;
+			flash_context.flash_identity.page_mode = true;
+			flash_context.flash_identity.sector_size = DEFAULT_SECTOR_SIZE;
+			flash_context.flash_identity.total_size = 0;
 
-			flash_context.identity.timings.page_access = 0;
-			flash_context.identity.timings.initial_access = 0;
-			flash_context.identity.timings.to_next_chip_enable = 0;
-			flash_context.identity.timings.chip_enable_to_write_enable = 0;
-			flash_context.identity.timings.write_enable = 0;
-			flash_context.identity.timings.post_page_programming_wait = 0;
+			flash_context.flash_identity.timings.page_access = 0;
+			flash_context.flash_identity.timings.initial_access = 0;
+			flash_context.flash_identity.timings.to_next_chip_enable = 0;
+			flash_context.flash_identity.timings.chip_enable_to_write_enable = 0;
+			flash_context.flash_identity.timings.write_enable = 0;
+			flash_context.flash_identity.timings.post_page_programming_wait = 0;
 
 			flash_context.erase_function = NULL;
 			flash_context.program_function = NULL;
 			break;
 	}
 
-	flash_set_timing(flash_context.bank, &flash_context.identity.timings);
+	flash_set_timing(flash_context.bank, &flash_context.flash_identity.timings);
 }
 
 volatile uint32_t* flash_base_address_from_type(flash_image_type image_type)
@@ -190,7 +190,7 @@ void flash_init(flash_image_type image_type)
 
 	if(flash_enabled())
 	{
-		flash_context.writable = flash_context.identity.can_write;
+		flash_context.writable = flash_context.flash_identity.can_write;
 		flash_context.image_type = image_type;
 	}
 }
@@ -207,17 +207,17 @@ bool flash_enabled()
 
 bool flash_can_write()
 {
-	return flash_context.identity.can_write;
+	return flash_context.flash_identity.can_write;
 }
 
 flash_identity_t flash_get_identity()
 {
-	return flash_context.identity;
+	return flash_context.flash_identity;
 }
 
 const char* flash_get_manufacture_name()
 {
-	switch(flash_context.identity.manufacture_id)
+	switch(flash_context.flash_identity.manufacture_id)
 	{
 		case FLASH_MFG_AMD:
 			return "AMD";
@@ -263,7 +263,7 @@ const char* flash_get_manufacture_name()
 
 const char* flash_get_device_name()
 {
-	switch(flash_context.identity.device_id)
+	switch(flash_context.flash_identity.device_id)
 	{
 		case AM29F400AB: // or MBM29F400B
 			return "AM29F400AB or compatble 16-bit 5v 4Mbit boot bottom sector (512kB per IC, 2x for 1MB per box)";
@@ -292,17 +292,17 @@ int8_t flash_get_bank()
 
 uint32_t flash_get_sector_size()
 {
-	return flash_context.identity.sector_size;
+	return flash_context.flash_identity.sector_size;
 }
 
 uint64_t flash_get_size()
 {
-	return flash_context.identity.total_size;
+	return flash_context.flash_identity.total_size;
 }
 
 uint32_t flash_get_post_page_programming_wait()
 {
-	return flash_context.identity.timings.post_page_programming_wait;
+	return flash_context.flash_identity.timings.post_page_programming_wait;
 }
 
 void flash_set_timing(int8_t bank, const flash_rom_timings_t* timings)
@@ -477,7 +477,7 @@ bool flash_read_data(uint64_t data_offset, void* data, uint32_t data_length)
 
 void __flash_start_write()
 {
-	flash_set_timing(flash_context.bank, &flash_context.identity.timings);
+	flash_set_timing(flash_context.bank, &flash_context.flash_identity.timings);
 
 	flash_write_enable(flash_context.bank);
 	flash_ce_delay_enable(flash_context.bank);
