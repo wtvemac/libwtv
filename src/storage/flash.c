@@ -41,8 +41,9 @@ static bool watchdog_was_enabled = false;
 
 // flash_inram.S
 uint32_t flash_get_device_id(uint32_t flash_base_address, uint32_t flash_sector_address, uint32_t arg2, uint32_t arg3);
-uint32_t flash_mx_erase_sector(uint32_t flash_base_address, uint32_t flash_sector_address, uint32_t arg2, uint32_t arg3);
-uint32_t flash_mx_program(uint32_t flash_base_address, uint32_t flash_sector_address, uint32_t data_address, uint32_t data_length);
+uint32_t flash_jedec_erase_sector(uint32_t flash_base_address, uint32_t flash_sector_address, uint32_t arg2, uint32_t arg3);
+uint32_t flash_jedec_page_program(uint32_t flash_base_address, uint32_t flash_sector_address, uint32_t data_address, uint32_t data_length);
+uint32_t flash_jedec_byte_program(uint32_t flash_base_address, uint32_t flash_sector_address, uint32_t data_address, uint32_t data_length);
 
 uint32_t __flash_invoke_inram_function(inram_function_t stored_inram_function, uint32_t arg0, uint32_t arg1, uint32_t arg2, uint32_t arg3)
 {
@@ -87,8 +88,8 @@ void __flash_resolve_identity(flash_image_type image_type)
 			flash_context.flash_identity.timings.write_enable = 6;
 			flash_context.flash_identity.timings.post_page_programming_wait = TICKS_FROM_US(202);
 
-			flash_context.erase_function = flash_mx_erase_sector;
-			flash_context.program_function = flash_mx_program;
+			flash_context.erase_function = flash_jedec_erase_sector;
+			flash_context.program_function = flash_jedec_byte_program;
 			break;
 
 		case AM29F800BB: // or MBM29F800B
@@ -106,8 +107,8 @@ void __flash_resolve_identity(flash_image_type image_type)
 			flash_context.flash_identity.timings.write_enable = 6;
 			flash_context.flash_identity.timings.post_page_programming_wait = TICKS_FROM_US(202);
 
-			flash_context.erase_function = flash_mx_erase_sector;
-			flash_context.program_function = flash_mx_program;
+			flash_context.erase_function = flash_jedec_erase_sector;
+			flash_context.program_function = flash_jedec_byte_program;
 			break;
 
 		case MX29F1610:
@@ -124,8 +125,8 @@ void __flash_resolve_identity(flash_image_type image_type)
 			flash_context.flash_identity.timings.write_enable = 6;
 			flash_context.flash_identity.timings.post_page_programming_wait = TICKS_FROM_US(202);
 
-			flash_context.erase_function = flash_mx_erase_sector;
-			flash_context.program_function = flash_mx_program;
+			flash_context.erase_function = flash_jedec_erase_sector;
+			flash_context.program_function = flash_jedec_page_program;
 			break;
 
 		default:
