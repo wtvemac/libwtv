@@ -21,6 +21,7 @@ void nvram_secondary_read(uint32_t offset, uint8_t* data, uint32_t length);
 void nvram_secondary_write(uint32_t offset, uint8_t* data, uint32_t length);
 
 void set_box_flag(uint16_t flag_mask, bool enable);
+void set_box_flag(uint16_t flag_mask, bool enable);
 
 #ifdef __cplusplus
 }
