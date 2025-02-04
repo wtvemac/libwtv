@@ -192,7 +192,6 @@ void ide_flash_tests()
 {
 	printf("\x0a\x0d\x0a\x0d");
 
-
 	if(is_diskful_box())
 	{
 		printf("IDE Test:\x0a\x0d");
@@ -372,7 +371,7 @@ void ide_flash_tests()
 				}
 			}
 
-			printf("DONE!\x0a\x0d");
+			printf("\tDONE!\x0a\x0d");
 		}
 		else
 		{
@@ -380,6 +379,40 @@ void ide_flash_tests()
 		}
 	}
 
+	printf("\x0a\x0d");
+}
+
+void nvram_tests()
+{
+	printf("\x0a\x0d\x0a\x0d");
+
+	printf("NVRAM Test:\x0a\x0d");
+
+	nvram_primary_init();
+
+	printf("\tRead:\x0a\x0d");
+	
+	nvram_primary_test_print();
+
+	uint32_t test_length = 10;
+
+	printf("\tWrite:\x0a\x0d");
+
+	void* out_data = malloc(test_length);
+	memset(out_data, 0, test_length);
+	*((uint8_t*)out_data + 0) = 0x03;
+	*((uint8_t*)out_data + 1) = 0x02;
+	*((uint8_t*)out_data + 2) = 0x01;
+	*((uint8_t*)out_data + 3) = 0x00;
+	*((uint8_t*)out_data + 4) = 0xff;
+	printf("\t\tresult=%08x\x0a\x0d", nvram_primary_write(NVPRI_EMAC, out_data, test_length, true));
+	free(out_data);
+
+	printf("\tReadback:\x0a\x0d");
+
+	nvram_primary_test_print();
+
+	printf("\tDONE!\x0a\x0d\x0a\x0d");
 }
 
 int main()
@@ -390,9 +423,7 @@ int main()
 
 	if(is_solo_box())
 	{
-		uint8_t reset_cause = 0x00;
-		nvram_secondary_read(0x22, &reset_cause, 1);
-		if(reset_cause & 0x0c)
+		if(get_box_flag(NVFLAG_BOOT_TO_BOOTROM))
 		{
 			printf("Unplug and re-plug to end up in the bootrom...\x0a\x0d");
 			return 0;
@@ -463,8 +494,11 @@ int main()
 
 	ide_flash_tests();
 
+	nvram_tests();
+
 	printf("Enabling keyboard (IR and/or PS2)... Press any key to get its key map.\x0a\x0d");
 	controller_init();
+
 
 	while(1)
 	{
@@ -504,7 +538,7 @@ int main()
 						while(1) { }
 						break;
 
-					/*case KY_F2:
+					case KY_F2:
 						if(is_solo_box())
 						{
 							printf("Boot to bootrom hit...\x0a\x0d");
@@ -512,7 +546,8 @@ int main()
 							set_leds(7);
 
 							printf("Writing to IIC NVRAM (secondary NVRAM) to indicate a skip to the bootrom.\x0a\x0d");
-							set_box_flag(BOX_FLAG_BOOTROM_BOOT, true);
+							set_box_flag(NVFLAG_BOOT_TO_BOOTROM, true);
+							set_box_flag(NVFLAG_USR_REQUEST_UPGRADE, true);
 							
 							printf("Setting BUS_RESET_CAUSE_SET to reset.\x0a\x0d");
 							REGISTER_WRITE(0xa4005010, 0xd0000000);
@@ -522,7 +557,13 @@ int main()
 						}
 						else
 						{
-							printf("Boot to bootrom not available for this box (yet)...\x0a\x0d");
+							set_box_flag(NVFLAG_USR_REQUEST_UPGRADE, true);
+
+							printf("Enabling watchdog timer.\x0a\x0d");
+							watchdog_enable();
+							
+							printf("Idling around like an idiot. The watchdog is going to get us soon!\x0a\x0d");
+							while(1) { }
 						}
 						break;
 
@@ -532,11 +573,11 @@ int main()
 						set_leds(7);
 						
 						printf("Enabling watchdog timer.\x0a\x0d");
-						watchdog_enable()
+						watchdog_enable();
 						
 						printf("Idling around like an idiot. The watchdog is going to get us soon!\x0a\x0d");
 						while(1) { }
-						break;*/
+						break;
 
 					case KY_F5:
 						printf("Disable screen hit...\x0a\x0d");
