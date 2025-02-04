@@ -253,7 +253,7 @@ ata_pwd_random_t ata_get_userpwd_random()
 {
 	static ata_pwd_random_t pwd_random;
 
-	nvram_secondary_read(SECONDARY_NVRAM_ATAPWD_RANDOM_OFFSET, (uint8_t*)&pwd_random, sizeof(pwd_random));
+	nvram_secondary_read(NVSEC_ATA_PWD_RAND, (uint8_t*)&pwd_random, sizeof(pwd_random));
 
 	return pwd_random;
 }
