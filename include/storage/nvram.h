@@ -140,9 +140,13 @@ typedef enum : uint32_t
 	NVSEC_ATA_PWD_RAND = 0x36,
 } sec_nvram_offset;
 
-typedef enum : uint16_t
+typedef enum : uint32_t
 {
-	NVFLAG_BOOT_TO_BOOTROM = 0x000c,
+	NVFLAG_USR_REQUEST_UPGRADE = 0x00010000,
+	NVFLAG_SVR_REQUEST_UPGRADE = 0x00020000,
+	NVFLAG_UPGRADE_FAILED      = 0x00080000,
+	NVFLAG_POWER_ON_REBOOT     = 0x00080000,
+	NVFLAG_BOOT_TO_BOOTROM     = 0x0000000c
 } nv_box_flag_mask;
 
 void nvram_primary_test_print();
@@ -151,15 +155,19 @@ void nvram_primary_init();
 void nvram_primary_close();
 bool nvram_primary_enabled();
 void nvram_primary_trans_start();
+void nvram_primary_trans_clone();
 void nvram_primary_trans_restart();
 bool nvram_primary_trans_insert(pri_nvram_setting_key setting_key, void* data, uint32_t length);
 bool nvram_primary_trans_commit();
 void* nvram_primary_read(pri_nvram_setting_key setting_key, uint32_t* length, bool use_persistant_settings);
 bool nvram_primary_write(pri_nvram_setting_key setting_key, void* data, uint32_t length, bool use_persistant_settings);
-
 void nvram_secondary_read(sec_nvram_offset offset, void* data, uint32_t length);
 void nvram_secondary_write(sec_nvram_offset offset, void* data, uint32_t length);
+bool get_nvram_primary_flags(nv_box_flag_mask flag_mask, bool use_persistant_settings);
+bool get_nvram_secondary_flags(nv_box_flag_mask flag_mask);
 bool get_box_flag(nv_box_flag_mask flag_mask);
+void set_nvram_primary_flags(nv_box_flag_mask flag_mask, bool enable, bool use_persistant_settings);
+void set_nvram_secondary_flags(nv_box_flag_mask flag_mask, bool enable);
 void set_box_flag(nv_box_flag_mask flag_mask, bool enable);
 
 #ifdef __cplusplus

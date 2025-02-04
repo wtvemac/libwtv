@@ -20,7 +20,7 @@ typedef struct __attribute__((packed))
 typedef struct __attribute__((packed))
 {
 	uint32_t checksum;
-	uint32_t unknown0;
+	uint32_t flags;
 	uint32_t unknown1;
 	uint32_t unknown2;
 	nv_pri_setting_t first_setting;
@@ -74,6 +74,18 @@ bool __load_persistant_settings()
 	return false;
 }
 
+void __find_trans_next_setting()
+{
+	nv_pri_setting_t* setting = &nv_pri_context.cur_transaction.settings->first_setting;
+
+	while(setting->key != NVPRI_NULL)
+	{
+		setting = (nv_pri_setting_t*)(&setting->value + ((setting->length + NVRAM_PRIMARY_ALIGN_MASK) & ~NVRAM_PRIMARY_ALIGN_MASK));
+	}
+
+	nv_pri_context.cur_transaction.next_setting = setting;
+}
+
 void nvram_primary_test_print()
 {
 	for(nv_pri_setting_t* neat = &nv_pri_context.persistant_settings->first_setting; neat->key != NVPRI_NULL;)
@@ -117,7 +129,13 @@ void nvram_primary_trans_start()
 	}
 
 	nv_pri_context.cur_transaction.next_setting = &nv_pri_context.cur_transaction.settings->first_setting;
-	nv_pri_context.cur_transaction.in_progress = true;
+	nv_pri_context.cur_transaction.in_progress = (nv_pri_context.cur_transaction.settings != NULL);
+}
+
+void nvram_primary_trans_clone()
+{
+	memcpy(nv_pri_context.cur_transaction.settings, nv_pri_context.persistant_settings, NVRAM_PRIMARY_SIZE);
+	__find_trans_next_setting();
 }
 
 void nvram_primary_trans_restart()
@@ -160,11 +178,11 @@ bool nvram_primary_trans_commit()
 	{
 		bool result = false;
 
-		uint8_t* data = ((uint8_t*)nv_pri_context.cur_transaction.settings + 4);
+		uint32_t* data = ((uint32_t*)nv_pri_context.cur_transaction.settings + 1);
 		nv_pri_context.cur_transaction.settings->checksum = 0x00000000;
-		for(uint32_t i = 0; i < NVRAM_PRIMARY_SIZE; i += 4)
+		for(uint32_t i = 0; i < ((NVRAM_PRIMARY_SIZE >> 2) - 1); i++)
 		{
-			nv_pri_context.cur_transaction.settings->checksum += *((uint32_t*)(data + i));
+			nv_pri_context.cur_transaction.settings->checksum += *(data + i);
 		}
 
 		if(is_diskful_box())
@@ -180,6 +198,7 @@ bool nvram_primary_trans_commit()
 		}
 
 		free(nv_pri_context.cur_transaction.settings);
+		nv_pri_context.cur_transaction.settings = NULL;
 		nv_pri_context.cur_transaction.in_progress = false;
 
 		return result && __load_persistant_settings();
@@ -296,7 +315,31 @@ void nvram_secondary_write(sec_nvram_offset offset, void* data, uint32_t length)
 	}
 }
 
-bool get_box_flag(nv_box_flag_mask flag_mask)
+bool get_nvram_primary_flags(nv_box_flag_mask flag_mask, bool use_persistant_settings)
+{
+	uint32_t flags = 0x00000000;
+
+	if(!nvram_primary_enabled())
+	{
+		nvram_primary_init();
+	}
+
+	if(nvram_primary_enabled())
+	{
+		if(use_persistant_settings)
+		{
+			flags = nv_pri_context.persistant_settings->flags;
+		}
+		else
+		{
+			flags = nv_pri_context.cur_transaction.settings->flags;
+		}
+	}
+
+	return (flags & (flag_mask >> 0x10));
+}
+
+bool get_nvram_secondary_flags(nv_box_flag_mask flag_mask)
 {
 	uint8_t nvram_flags_offset = 0x00;
 	uint8_t flags = 0x00;
@@ -313,9 +356,74 @@ bool get_box_flag(nv_box_flag_mask flag_mask)
 	nvram_secondary_read(nvram_flags_offset, &flags, 1);
 
 	return (flags & flag_mask);
+	
 }
 
-void set_box_flag(nv_box_flag_mask flag_mask, bool enable)
+bool get_box_flag(nv_box_flag_mask flag_mask)
+{
+	if(flag_mask & 0xffff)
+	{
+		return get_nvram_secondary_flags(flag_mask);
+	}
+	else
+	{
+		return get_nvram_primary_flags(flag_mask, true);
+	}
+}
+
+void set_nvram_primary_flags(nv_box_flag_mask flag_mask, bool enable, bool use_persistant_settings)
+{
+	if(!nvram_primary_enabled())
+	{
+		nvram_primary_init();
+	}
+
+	if(nvram_primary_enabled())
+	{
+		if(use_persistant_settings)
+		{
+			uint32_t new_flags = 0x00000000;
+			uint8_t current_flags = nv_pri_context.persistant_settings->flags;
+
+			if(enable)
+			{
+				new_flags = current_flags | (flag_mask >> 0x10);
+			}
+			else
+			{
+				new_flags = current_flags & ~(flag_mask >> 0x10);
+			}
+
+			nvram_primary_trans_start();
+
+			if(nv_pri_context.cur_transaction.in_progress)
+			{
+				nvram_primary_trans_clone();
+
+				nv_pri_context.cur_transaction.settings->flags = new_flags;
+
+				nvram_primary_trans_commit();
+			
+			}
+		}
+		else if(nv_pri_context.cur_transaction.in_progress)
+		{
+			uint32_t new_flags = 0x00000000;
+			uint8_t current_flags = nv_pri_context.cur_transaction.settings->flags;
+
+			if(enable)
+			{
+				nv_pri_context.cur_transaction.settings->flags = current_flags | (flag_mask >> 0x10);
+			}
+			else
+			{
+				nv_pri_context.cur_transaction.settings->flags = current_flags & ~(flag_mask >> 0x10);
+			}
+		}
+	}
+}
+
+void set_nvram_secondary_flags(nv_box_flag_mask flag_mask, bool enable)
 {
 	uint8_t nvram_flags_offset = 0x00;
 	uint8_t current_flags = 0x00;
@@ -329,7 +437,7 @@ void set_box_flag(nv_box_flag_mask flag_mask, bool enable)
 	{
 		nvram_flags_offset = NVSEC_FLAGS_LO;
 	}
-	
+
 	nvram_secondary_read(nvram_flags_offset, &current_flags, 1);
 
 	if(enable)
@@ -342,5 +450,17 @@ void set_box_flag(nv_box_flag_mask flag_mask, bool enable)
 	}
 
 	nvram_secondary_write(nvram_flags_offset, &new_flags, 1);
+}
+
+void set_box_flag(nv_box_flag_mask flag_mask, bool enable)
+{
+	if(flag_mask & 0xffff)
+	{
+		set_nvram_secondary_flags(flag_mask, enable);
+	}
+	else
+	{
+		set_nvram_primary_flags(flag_mask, enable, true);
+	}
 }
 
