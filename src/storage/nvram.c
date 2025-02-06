@@ -90,7 +90,7 @@ void nvram_primary_test_print()
 {
 	for(nv_pri_setting_t* neat = &nv_pri_context.persistant_settings->first_setting; neat->key != NVPRI_NULL;)
 	{
-		printf("\t\tkey=0x%08x [%.4s], length=0x%08x: %08x...\n", neat->key, (char*)&neat->key, neat->length, *((uint32_t*)&neat->value)); // (minimum value size is 4 bytes)
+		printf("\t\tkey=0x%08x [%.4s], length=0x%08x: %08x...\x0a\x0d", neat->key, (char*)&neat->key, neat->length, *((uint32_t*)&neat->value)); // (minimum value size is 4 bytes)
 		
 		neat = (nv_pri_setting_t*)(&neat->value + ((neat->length + NVRAM_PRIMARY_ALIGN_MASK) & ~NVRAM_PRIMARY_ALIGN_MASK));
 	}

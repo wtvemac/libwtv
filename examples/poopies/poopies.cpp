@@ -158,10 +158,10 @@ void romfs_tests()
 
 	ROMFSHeader* romfs_header = (ROMFSHeader*)((uint32_t)romfs_base - sizeof(ROMFSHeader));
 
-	printf("---------------------------\n");
-	printf("HEADER CHECKSUM=0x%08x\n", romfs_header->checksum);
-	printf("HEADER SIZE=0x%08x\n", romfs_header->uint32_count);
-	printf("---------------------------\n");
+	printf("---------------------------\x0a\x0d");
+	printf("HEADER CHECKSUM=0x%08x\x0a\x0d", romfs_header->checksum);
+	printf("HEADER SIZE=0x%08x\x0a\x0d", romfs_header->uint32_count);
+	printf("---------------------------\x0a\x0d");
 
 	uint32_t* checksum_base = (uint32_t*)((uint32_t)romfs_base - sizeof(ROMFSHeader) - (sizeof(uint32_t) * romfs_header->uint32_count));
 	uint32_t checksum = 0x00000000;
@@ -170,8 +170,8 @@ void romfs_tests()
 		checksum += *checksum_base;
 		checksum_base++;
 	}
-	printf("CALCULATED CHECKSUM=0x%08x\n", checksum);
-	printf("---------------------------\n");
+	printf("CALCULATED CHECKSUM=0x%08x\x0a\x0d", checksum);
+	printf("---------------------------\x0a\x0d");
 
 	FSNode* root_node = (FSNode*)((uint32_t)romfs_base - sizeof(ROMFSHeader) - sizeof(FSNode));
 	
@@ -179,13 +179,13 @@ void romfs_tests()
 	FSNode* found_node = walk_romfs(root_node, "ROM/Sounds/Message.mid");
 	if(found_node != NULL)
 	{
-		printf("found_node->name=%s, found_node->data=%p .. 0x%08x\n", found_node->name, found_node->data, found_node->dataLength);
+		printf("found_node->name=%s, found_node->data=%p .. 0x%08x\x0a\x0d", found_node->name, found_node->data, found_node->dataLength);
 	}
 	else
 	{
 		printf("FILE NOT FOUND!");
 	}
-	printf("---------------------------\n");
+	printf("---------------------------\x0a\x0d");
 }
 
 void ide_flash_tests()
