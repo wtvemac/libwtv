@@ -99,11 +99,11 @@
 ////
 
 #define CHIP_TYPE                  0xff000000
-#define CHIP_TYPE_BSHIFT           __builtin_clz(CHIP_TYPE)
+#define CHIP_TYPE_BSHIFT           __builtin_ctz(CHIP_TYPE)
 #define CHIP_REV                   0x00f00000
-#define CHIP_REV_BSHIFT            __builtin_clz(CHIP_REV)
+#define CHIP_REV_BSHIFT            __builtin_ctz(CHIP_REV)
 #define CHIP_FAB                   0x000f0000
-#define CHIP_FAB_BSHIFT            __builtin_clz(CHIP_FAB)
+#define CHIP_FAB_BSHIFT            __builtin_ctz(CHIP_FAB)
 
 #define CHIP_TYPE_SPOT0            0x00000000
 #define CHIP_TYPE_SPOT1            0x00000001 // Also FIDO
